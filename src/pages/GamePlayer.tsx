@@ -39,6 +39,8 @@ export const GamePlayer: React.FC = () => {
     }
 
     try {
+      console.log('🎮 Loading game:', slug);
+      
       // First, check if it's a local React game
       if (gameMetadata[slug as keyof typeof gameMetadata]) {
         const metadata = gameMetadata[slug as keyof typeof gameMetadata];
@@ -54,12 +56,14 @@ export const GamePlayer: React.FC = () => {
             name: metadata.category.charAt(0).toUpperCase() + metadata.category.slice(1)
           }
         };
+        
+        console.log('✅ Local game found:', gameData);
         setGame(gameData as unknown as GameData);
         setLoading(false);
         return;
       }
 
-      // If not a local game, try to load from database (but don't fail if it doesn't work)
+      // If not a local game, try to load from database
       try {
         const { data, error } = await supabase
           .from('games')
@@ -79,8 +83,7 @@ export const GamePlayer: React.FC = () => {
           .single();
 
         if (error) {
-          console.warn('Database game not found, checking if it\'s a local game:', error);
-          // Don't navigate away, just show game not found
+          console.warn('❌ Database game not found:', error);
           setGame(null);
           setLoading(false);
           return;
@@ -91,16 +94,16 @@ export const GamePlayer: React.FC = () => {
           category: data.categories
         };
 
+        console.log('✅ Database game found:', gameData);
         setGame(gameData as unknown as GameData);
       } catch (dbError) {
-        console.warn('Database connection failed, checking local games:', dbError);
-        // Don't navigate away, just show game not found
+        console.warn('❌ Database connection failed:', dbError);
         setGame(null);
         setLoading(false);
         return;
       }
     } catch (error) {
-      console.error('Error loading game:', error);
+      console.error('❌ Error loading game:', error);
       setGame(null);
     } finally {
       setLoading(false);
@@ -149,8 +152,16 @@ export const GamePlayer: React.FC = () => {
     );
   }
 
+  console.log('🎮 Game loaded:', {
+    title: game.title,
+    is_premium: game.is_premium,
+    price: game.price,
+    slug
+  });
+
   // If it's a premium game, wrap with PremiumGameGate
   if (game.is_premium) {
+    console.log('🔒 Premium game detected, showing gate');
     return (
       <PremiumGameGate
         gameTitle={game.title}
@@ -162,6 +173,7 @@ export const GamePlayer: React.FC = () => {
     );
   }
 
+  console.log('🆓 Free game, showing directly');
   // For free games, show directly
   return <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />;
 };

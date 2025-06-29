@@ -27,6 +27,16 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
   const loading = subscriptionLoading || purchaseLoading;
 
+  console.log('🎮 PremiumGameGate Debug:', {
+    gameSlug,
+    gameTitle,
+    user: !!user,
+    hasActiveSubscription: hasActiveSubscription(),
+    hasPurchased,
+    loading,
+    subscription
+  });
+
   const handlePurchaseGame = async () => {
     if (!user) {
       toast.error('Please sign in to purchase');
@@ -35,14 +45,14 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
     const gameProduct = stripeProducts.find(p => p.gameSlug === gameSlug);
     if (!gameProduct) {
-      console.error('Game product not found for slug:', gameSlug);
+      console.error('❌ Game product not found for slug:', gameSlug);
       console.log('Available products:', stripeProducts);
       toast.error('Game product not found. Please check console for details.');
       return;
     }
 
     try {
-      console.log('Starting purchase for game:', gameSlug, 'with product:', gameProduct);
+      console.log('💳 Starting purchase for game:', gameSlug, 'with product:', gameProduct);
       await createCheckoutSession({
         priceId: gameProduct.priceId,
         mode: gameProduct.mode,
@@ -54,7 +64,7 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
         },
       });
     } catch (error) {
-      console.error('Game purchase checkout error:', error);
+      console.error('❌ Game purchase checkout error:', error);
       toast.error('Failed to start game purchase checkout');
     }
   };
@@ -69,7 +79,7 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
       await addTestPurchase(gameSlug);
       toast.success('Test purchase added! Check console for details.');
     } catch (error) {
-      console.error('Test purchase error:', error);
+      console.error('❌ Test purchase error:', error);
       toast.error('Failed to add test purchase');
     }
   };
@@ -89,8 +99,11 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
   // If user has active subscription or has purchased this specific game, show the game
   if (hasActiveSubscription() || hasPurchased) {
+    console.log('✅ Access granted - showing game');
     return <>{children}</>;
   }
+
+  console.log('❌ Access denied - showing payment gate');
 
   // If no user, show login prompt
   if (!user) {

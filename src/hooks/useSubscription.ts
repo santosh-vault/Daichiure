@@ -87,46 +87,58 @@ export const useGamePurchase = (gameSlug: string) => {
   }, [user, gameSlug]);
 
   const checkGamePurchase = async () => {
-    if (!user || !gameSlug) return;
+    if (!user || !gameSlug) {
+      setHasPurchased(false);
+      setLoading(false);
+      return;
+    }
 
     try {
+      console.log('🔍 Checking purchase for game:', gameSlug, 'user:', user.id);
+      
+      // First, check if the game exists in the database
       const { data: gameData, error: gameError } = await supabase
         .from('games')
-        .select('id, title')
+        .select('id, title, is_premium')
         .eq('slug', gameSlug)
         .single();
 
       if (gameError) {
-        console.error('Game not found in database:', gameSlug, gameError);
+        console.error('❌ Game not found in database:', gameSlug, gameError);
         setHasPurchased(false);
         setLoading(false);
         return;
       }
 
-      const { data, error } = await supabase
-        .from('purchases')
-        .select(`
-          id,
-          games!inner(
-            slug
-          )
-        `)
-        .eq('user_id', user.id)
-        .eq('games.slug', gameSlug)
-        .single();
+      console.log('✅ Game found:', gameData);
 
-      if (error) {
-        if (error.code === 'PGRST116') {
-          setHasPurchased(false);
-        } else {
-          console.error('Error checking game purchase:', error);
-          setHasPurchased(false);
-        }
-      } else {
+      // If it's not a premium game, allow access
+      if (!gameData.is_premium) {
+        console.log('🆓 Game is free, allowing access');
         setHasPurchased(true);
+        setLoading(false);
+        return;
+      }
+
+      // For premium games, check if user has purchased it
+      const { data: purchaseData, error: purchaseError } = await supabase
+        .from('purchases')
+        .select('id, amount_paid, purchase_date')
+        .eq('user_id', user.id)
+        .eq('game_id', gameData.id);
+
+      if (purchaseError) {
+        console.error('❌ Error checking purchases:', purchaseError);
+        setHasPurchased(false);
+      } else if (purchaseData && purchaseData.length > 0) {
+        console.log('✅ Purchase found:', purchaseData);
+        setHasPurchased(true);
+      } else {
+        console.log('❌ No purchase found for premium game');
+        setHasPurchased(false);
       }
     } catch (error) {
-      console.error('Error checking game purchase:', error);
+      console.error('❌ Error in checkGamePurchase:', error);
       setHasPurchased(false);
     } finally {
       setLoading(false);
@@ -134,17 +146,22 @@ export const useGamePurchase = (gameSlug: string) => {
   };
 
   const addTestPurchase = async (gameSlug: string) => {
-    if (!user) return;
+    if (!user) {
+      console.error('❌ No user for test purchase');
+      return;
+    }
 
     try {
+      console.log('🧪 Adding test purchase for:', gameSlug);
+      
       const { data: gameData, error: gameError } = await supabase
         .from('games')
-        .select('id')
+        .select('id, title')
         .eq('slug', gameSlug)
         .single();
 
       if (gameError) {
-        console.error('Game not found:', gameError);
+        console.error('❌ Game not found for test purchase:', gameError);
         return;
       }
 
@@ -153,18 +170,19 @@ export const useGamePurchase = (gameSlug: string) => {
         .insert({
           user_id: user.id,
           game_id: gameData.id,
-          amount_paid: 4.99
+          amount_paid: 1.00
         })
         .select();
 
       if (error) {
-        console.error('Error adding test purchase:', error);
+        console.error('❌ Error adding test purchase:', error);
       } else {
-        console.log('Test purchase added successfully:', data);
+        console.log('✅ Test purchase added successfully:', data);
+        // Refresh the purchase check
         checkGamePurchase();
       }
     } catch (error) {
-      console.error('Error adding test purchase:', error);
+      console.error('❌ Error in addTestPurchase:', error);
     }
   };
 
