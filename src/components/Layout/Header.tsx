@@ -1,12 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Gamepad2, User, LogOut, Menu, X, Settings } from 'lucide-react';
+import { Gamepad2, User, LogOut, Menu, X, Settings, Shield } from 'lucide-react';
+
+// Admin user emails - should match AdminPanel.tsx
+const ADMIN_EMAILS = ['admin@playhub.com', 'developer@playhub.com'];
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Check if user is admin
+  const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
 
   const handleSignOut = async () => {
     await signOut();
@@ -55,6 +61,15 @@ export const Header: React.FC = () => {
                 <User className="h-5 w-5" />
                 <span>Dashboard</span>
               </a>
+              {isAdmin && (
+                <a
+                  href="/admin"
+                  className="flex items-center space-x-2 text-gray-300 hover:text-red-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
+                >
+                  <Shield className="h-5 w-5" />
+                  <span>Admin</span>
+                </a>
+              )}
               <a
                 href="/stripe-setup"
                 className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
@@ -125,6 +140,16 @@ export const Header: React.FC = () => {
                   <User className="h-5 w-5" />
                   <span>Dashboard</span>
                 </a>
+                {isAdmin && (
+                  <a
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center space-x-2 text-gray-300 hover:text-red-400 font-medium text-md transition-colors duration-300 py-2 border-b border-gray-800"
+                  >
+                    <Shield className="h-5 w-5" />
+                    <span>Admin Panel</span>
+                  </a>
+                )}
                 <a
                   href="/stripe-setup"
                   onClick={() => setIsMobileMenuOpen(false)}

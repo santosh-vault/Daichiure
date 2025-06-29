@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, Play, Lock, Database, Bug, CheckCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { Search, Filter, Play, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { gameMetadata } from '../games';
-import { addGamesToDatabase, checkGamesInDatabase, testPurchaseSystem } from '../utils/addGamesToDatabase';
 
 interface Game {
   id: number;
@@ -33,13 +30,10 @@ export const Games: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchParams] = useSearchParams();
-  const [dbStatus, setDbStatus] = useState<'unknown' | 'checking' | 'empty' | 'populated'>('unknown');
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
     loadGames();
-    checkDatabaseStatus();
   }, []);
 
   const loadGames = () => {
@@ -146,100 +140,12 @@ export const Games: React.FC = () => {
     setLoading(false);
   };
 
-  const checkDatabaseStatus = async () => {
-    setDbStatus('checking');
-    const hasGames = await checkGamesInDatabase();
-    setDbStatus(hasGames ? 'populated' : 'empty');
-  };
-
-  const handleAddGamesToDatabase = async () => {
-    if (!user) {
-      alert('Please sign in first to add games to the database.');
-      return;
-    }
-
-    setActionLoading('adding');
-    console.log('🎮 Adding games to database...');
-    
-    try {
-      const success = await addGamesToDatabase();
-      if (success) {
-        alert('✅ Games added to database successfully! Check console for details.');
-        await checkDatabaseStatus();
-      } else {
-        alert('❌ Failed to add some games to database. Check console for errors.');
-      }
-    } catch (error) {
-      console.error('💥 Error in handleAddGamesToDatabase:', error);
-      alert('❌ Error adding games to database. Check console for details.');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const handleCheckDatabase = async () => {
-    setActionLoading('checking');
-    console.log('🔍 Checking database for games...');
-    await checkDatabaseStatus();
-    setActionLoading(null);
-  };
-
-  const handleTestPurchaseSystem = async () => {
-    if (!user) {
-      alert('Please sign in first to test the purchase system.');
-      return;
-    }
-
-    setActionLoading('testing');
-    console.log('🧪 Testing purchase system...');
-    
-    try {
-      const success = await testPurchaseSystem('rpg');
-      if (success) {
-        alert('✅ Purchase system test completed! Check console for details.');
-      } else {
-        alert('❌ Purchase system test failed. Check console for errors.');
-      }
-    } catch (error) {
-      console.error('💥 Error testing purchase system:', error);
-      alert('❌ Error testing purchase system. Check console for details.');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
   const filteredGames = games.filter(game => {
     const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          game.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = !selectedCategory || game.category.slug === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-
-  const getStatusIcon = () => {
-    switch (dbStatus) {
-      case 'checking':
-        return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-500"></div>;
-      case 'populated':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'empty':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Database className="h-4 w-4 text-gray-500" />;
-    }
-  };
-
-  const getStatusText = () => {
-    switch (dbStatus) {
-      case 'checking':
-        return 'Checking...';
-      case 'populated':
-        return 'DB Ready';
-      case 'empty':
-        return 'DB Empty';
-      default:
-        return 'Unknown';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased py-8">
@@ -253,12 +159,6 @@ export const Games: React.FC = () => {
             Discover and play amazing HTML5 games right in your browser
           </p>
           
-          {/* Database Status */}
-          <div className="flex justify-center items-center space-x-2 mb-6">
-            {getStatusIcon()}
-            <span className="text-sm text-gray-400">Database Status: {getStatusText()}</span>
-          </div>
-
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               to="/categories"
@@ -266,66 +166,7 @@ export const Games: React.FC = () => {
             >
               <span>Browse by Category</span>
             </Link>
-            
-            {/* Action buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddGamesToDatabase}
-                disabled={actionLoading === 'adding' || !user}
-                className="inline-flex items-center space-x-2 bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {actionLoading === 'adding' ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Database className="h-4 w-4" />
-                )}
-                <span>{actionLoading === 'adding' ? 'Adding...' : 'Add Games to DB'}</span>
-              </button>
-              
-              <button
-                onClick={handleCheckDatabase}
-                disabled={actionLoading === 'checking'}
-                className="inline-flex items-center space-x-2 bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {actionLoading === 'checking' ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Database className="h-4 w-4" />
-                )}
-                <span>{actionLoading === 'checking' ? 'Checking...' : 'Check DB'}</span>
-              </button>
-              
-              <button
-                onClick={handleTestPurchaseSystem}
-                disabled={actionLoading === 'testing' || !user}
-                className="inline-flex items-center space-x-2 bg-purple-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {actionLoading === 'testing' ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Bug className="h-4 w-4" />
-                )}
-                <span>{actionLoading === 'testing' ? 'Testing...' : 'Test Purchase'}</span>
-              </button>
-              
-              <Link
-                to="/debug"
-                className="inline-flex items-center space-x-2 bg-red-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-red-700 transition-colors"
-              >
-                <Bug className="h-4 w-4" />
-                <span>Debug Panel</span>
-              </Link>
-            </div>
           </div>
-
-          {!user && (
-            <div className="mt-4 p-3 bg-amber-900/20 border border-amber-700 rounded-lg">
-              <p className="text-amber-400 text-sm">
-                <AlertCircle className="h-4 w-4 inline mr-2" />
-                Sign in to add games to database and test purchases
-              </p>
-            </div>
-          )}
         </div>
 
         {/* Filters */}

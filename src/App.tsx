@@ -14,6 +14,7 @@ import { Dashboard } from './pages/Dashboard/Dashboard';
 import { Success } from './pages/Success';
 import { Debug } from './pages/Debug';
 import { StripeSetupPage } from './pages/StripeSetup';
+import { AdminPanel } from './pages/Admin/AdminPanel';
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               <Route path="/success" element={<Success />} />
               <Route path="/debug" element={<Debug />} />
               <Route path="/stripe-setup" element={<StripeSetupPage />} />
+              <Route path="/admin" element={<AdminPanel />} />
             </Routes>
           </Layout>
           <Toaster 
