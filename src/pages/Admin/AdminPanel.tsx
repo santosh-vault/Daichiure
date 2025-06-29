@@ -72,6 +72,12 @@ export const AdminPanel: React.FC = () => {
   // Check if user is admin
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
 
+  console.log('🔐 Admin Panel Access Check:', {
+    user: user?.email,
+    isAdmin,
+    adminEmails: ADMIN_EMAILS
+  });
+
   useEffect(() => {
     if (isAdmin) {
       loadDashboardData();
@@ -80,20 +86,34 @@ export const AdminPanel: React.FC = () => {
   }, [isAdmin]);
 
   if (!user) {
+    console.log('❌ No user found, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
   if (!isAdmin) {
+    console.log('❌ User is not admin:', user.email);
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800 text-center">
+        <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800 text-center max-w-md">
           <Shield className="h-16 w-16 text-red-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-red-400 mb-2">Access Denied</h2>
-          <p className="text-gray-400">You don't have permission to access the admin panel.</p>
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Access Denied</h2>
+          <p className="text-gray-400 mb-4">You don't have permission to access the admin panel.</p>
+          <div className="bg-gray-800 rounded-lg p-4 mb-4">
+            <p className="text-sm text-gray-300 mb-2">Current user:</p>
+            <p className="text-xs font-mono text-amber-400">{user.email}</p>
+          </div>
+          <div className="bg-gray-800 rounded-lg p-4">
+            <p className="text-sm text-gray-300 mb-2">Admin emails:</p>
+            {ADMIN_EMAILS.map((email, index) => (
+              <p key={index} className="text-xs font-mono text-green-400">{email}</p>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
+
+  console.log('✅ Admin access granted for:', user.email);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -249,10 +269,21 @@ export const AdminPanel: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-2">
-            Admin Panel
-          </h1>
-          <p className="text-gray-400">Manage your PlayHub gaming platform</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-2">
+                Admin Panel
+              </h1>
+              <p className="text-gray-400">Manage your PlayHub gaming platform</p>
+            </div>
+            <div className="bg-green-900/20 border border-green-700 rounded-lg px-4 py-2">
+              <div className="flex items-center space-x-2">
+                <Shield className="h-4 w-4 text-green-400" />
+                <span className="text-green-400 text-sm font-medium">Admin Access</span>
+              </div>
+              <p className="text-xs text-gray-400">{user.email}</p>
+            </div>
+          </div>
         </div>
 
         {/* Navigation */}
