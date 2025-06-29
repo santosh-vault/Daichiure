@@ -19,7 +19,17 @@ import {
   Eye,
   Edit,
   Plus,
-  Home
+  Home,
+  Calendar,
+  DollarSign,
+  TrendingUp,
+  Activity,
+  Mail,
+  Clock,
+  Star,
+  Crown,
+  Search,
+  Filter
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { addGamesToDatabase, checkGamesInDatabase, testPurchaseSystem } from '../../utils/addGamesToDatabase';
@@ -34,6 +44,11 @@ interface AdminStats {
   totalPurchases: number;
   totalRevenue: number;
   activeSubscriptions: number;
+  freeGames: number;
+  premiumGames: number;
+  recentUsers: number;
+  monthlyRevenue: number;
+  averageOrderValue: number;
 }
 
 interface User {
@@ -42,6 +57,9 @@ interface User {
   full_name: string;
   created_at: string;
   last_sign_in_at: string;
+  avatar_url?: string;
+  total_purchases?: number;
+  total_spent?: number;
 }
 
 interface Purchase {
@@ -52,6 +70,18 @@ interface Purchase {
   amount_paid: number;
   user_email: string;
   game_title: string;
+  user_name: string;
+}
+
+interface Game {
+  id: number;
+  title: string;
+  slug: string;
+  is_premium: boolean;
+  price: number;
+  category_name: string;
+  created_at: string;
+  purchase_count: number;
 }
 
 export const AdminPanel: React.FC = () => {
@@ -64,12 +94,20 @@ export const AdminPanel: React.FC = () => {
     totalGames: 0,
     totalPurchases: 0,
     totalRevenue: 0,
-    activeSubscriptions: 0
+    activeSubscriptions: 0,
+    freeGames: 0,
+    premiumGames: 0,
+    recentUsers: 0,
+    monthlyRevenue: 0,
+    averageOrderValue: 0
   });
   const [users, setUsers] = useState<User[]>([]);
   const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [games, setGames] = useState<Game[]>([]);
   const [dbStatus, setDbStatus] = useState<'unknown' | 'checking' | 'empty' | 'populated'>('unknown');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('all');
 
   // Check if user is admin
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
@@ -159,60 +197,105 @@ export const AdminPanel: React.FC = () => {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      // Load stats
+      console.log('📊 Loading admin dashboard data...');
+
+      // Load basic stats
       const [usersResult, gamesResult, purchasesResult] = await Promise.all([
-        supabase.from('users').select('id', { count: 'exact' }),
-        supabase.from('games').select('id', { count: 'exact' }),
-        supabase.from('purchases').select('amount_paid', { count: 'exact' })
-      ]);
-
-      const totalRevenue = purchasesResult.data?.reduce((sum, purchase) => sum + purchase.amount_paid, 0) || 0;
-
-      setStats({
-        totalUsers: usersResult.count || 0,
-        totalGames: gamesResult.count || 0,
-        totalPurchases: purchasesResult.count || 0,
-        totalRevenue,
-        activeSubscriptions: 0 // TODO: Implement subscription counting
-      });
-
-      // Load recent users
-      const { data: usersData } = await supabase
-        .from('users')
-        .select('id, email, full_name, created_at')
-        .order('created_at', { ascending: false })
-        .limit(10);
-
-      setUsers(usersData || []);
-
-      // Load recent purchases
-      const { data: purchasesData } = await supabase
-        .from('purchases')
-        .select(`
-          id,
-          user_id,
-          game_id,
-          purchase_date,
-          amount_paid,
-          users!inner(email),
+        supabase.from('users').select('*'),
+        supabase.from('games').select('*'),
+        supabase.from('purchases').select(`
+          *,
+          users!inner(email, full_name),
           games!inner(title)
         `)
-        .order('purchase_date', { ascending: false })
-        .limit(10);
+      ]);
 
-      const formattedPurchases = purchasesData?.map((purchase: any) => ({
+      console.log('📈 Raw data loaded:', {
+        users: usersResult.data?.length,
+        games: gamesResult.data?.length,
+        purchases: purchasesResult.data?.length
+      });
+
+      const usersData = usersResult.data || [];
+      const gamesData = gamesResult.data || [];
+      const purchasesData = purchasesResult.data || [];
+
+      // Calculate stats
+      const totalRevenue = purchasesData.reduce((sum, purchase) => sum + purchase.amount_paid, 0);
+      const freeGames = gamesData.filter(game => !game.is_premium).length;
+      const premiumGames = gamesData.filter(game => game.is_premium).length;
+      
+      // Recent users (last 30 days)
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const recentUsers = usersData.filter(user => 
+        new Date(user.created_at) > thirtyDaysAgo
+      ).length;
+
+      // Monthly revenue (last 30 days)
+      const monthlyRevenue = purchasesData
+        .filter(purchase => new Date(purchase.purchase_date) > thirtyDaysAgo)
+        .reduce((sum, purchase) => sum + purchase.amount_paid, 0);
+
+      // Average order value
+      const averageOrderValue = purchasesData.length > 0 ? totalRevenue / purchasesData.length : 0;
+
+      setStats({
+        totalUsers: usersData.length,
+        totalGames: gamesData.length,
+        totalPurchases: purchasesData.length,
+        totalRevenue,
+        activeSubscriptions: 0, // TODO: Implement subscription counting
+        freeGames,
+        premiumGames,
+        recentUsers,
+        monthlyRevenue,
+        averageOrderValue
+      });
+
+      // Process users with purchase data
+      const processedUsers = usersData.map(user => {
+        const userPurchases = purchasesData.filter(p => p.user_id === user.id);
+        const totalSpent = userPurchases.reduce((sum, p) => sum + p.amount_paid, 0);
+        
+        return {
+          ...user,
+          total_purchases: userPurchases.length,
+          total_spent: totalSpent
+        };
+      }).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setUsers(processedUsers);
+
+      // Process purchases
+      const formattedPurchases = purchasesData.map((purchase: any) => ({
         id: purchase.id,
         user_id: purchase.user_id,
         game_id: purchase.game_id,
         purchase_date: purchase.purchase_date,
         amount_paid: purchase.amount_paid,
         user_email: purchase.users.email,
+        user_name: purchase.users.full_name || 'Anonymous',
         game_title: purchase.games.title
-      })) || [];
+      })).sort((a, b) => new Date(b.purchase_date).getTime() - new Date(a.purchase_date).getTime());
 
       setPurchases(formattedPurchases);
+
+      // Process games with purchase counts
+      const processedGames = gamesData.map(game => {
+        const gamePurchases = purchasesData.filter(p => p.game_id === game.id);
+        return {
+          ...game,
+          category_name: 'Unknown', // TODO: Join with categories
+          purchase_count: gamePurchases.length
+        };
+      }).sort((a, b) => b.purchase_count - a.purchase_count);
+
+      setGames(processedGames);
+
+      console.log('✅ Dashboard data loaded successfully');
     } catch (error) {
-      console.error('Error loading dashboard data:', error);
+      console.error('❌ Error loading dashboard data:', error);
     } finally {
       setLoading(false);
     }
@@ -296,11 +379,33 @@ export const AdminPanel: React.FC = () => {
     }
   };
 
+  // Filter functions
+  const filteredUsers = users.filter(user => {
+    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (user.full_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filterType === 'recent') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return matchesSearch && new Date(user.created_at) > sevenDaysAgo;
+    }
+    if (filterType === 'premium') {
+      return matchesSearch && (user.total_purchases || 0) > 0;
+    }
+    return matchesSearch;
+  });
+
+  const filteredPurchases = purchases.filter(purchase => {
+    return purchase.user_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           purchase.game_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+           purchase.user_name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   const tabs = [
     { id: 'dashboard', name: 'Dashboard', icon: BarChart3 },
-    { id: 'database', name: 'Database', icon: Database },
     { id: 'users', name: 'Users', icon: Users },
     { id: 'purchases', name: 'Purchases', icon: CreditCard },
+    { id: 'games', name: 'Games', icon: Database },
     { id: 'stripe', name: 'Stripe Config', icon: Settings },
     { id: 'debug', name: 'Debug Tools', icon: Bug },
   ];
@@ -361,11 +466,21 @@ export const AdminPanel: React.FC = () => {
             {/* Dashboard Tab */}
             {activeTab === 'dashboard' && (
               <div>
-                <h2 className="text-xl font-bold text-amber-400 mb-6">Dashboard Overview</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-amber-400">Dashboard Overview</h2>
+                  <button
+                    onClick={loadDashboardData}
+                    disabled={loading}
+                    className="flex items-center space-x-2 bg-amber-500 text-gray-900 px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                    <span>Refresh</span>
+                  </button>
+                </div>
                 
                 {loading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                    {[...Array(5)].map((_, i) => (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {[...Array(8)].map((_, i) => (
                       <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
                         <div className="h-4 bg-gray-700 rounded mb-2"></div>
                         <div className="h-8 bg-gray-700 rounded"></div>
@@ -374,74 +489,85 @@ export const AdminPanel: React.FC = () => {
                   </div>
                 ) : (
                   <>
-                    {/* Stats Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                    {/* Enhanced Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                      <div className="bg-gradient-to-br from-blue-900 to-blue-800 rounded-xl p-6 border border-blue-700">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-gray-400 text-sm">Total Users</p>
-                            <p className="text-2xl font-bold text-blue-400">{stats.totalUsers}</p>
+                            <p className="text-blue-200 text-sm font-medium">Total Users</p>
+                            <p className="text-3xl font-bold text-white">{stats.totalUsers}</p>
+                            <p className="text-blue-300 text-xs mt-1">+{stats.recentUsers} this month</p>
                           </div>
-                          <Users className="h-8 w-8 text-blue-400" />
+                          <Users className="h-10 w-10 text-blue-300" />
                         </div>
                       </div>
                       
-                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                      <div className="bg-gradient-to-br from-green-900 to-green-800 rounded-xl p-6 border border-green-700">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-gray-400 text-sm">Total Games</p>
-                            <p className="text-2xl font-bold text-green-400">{stats.totalGames}</p>
+                            <p className="text-green-200 text-sm font-medium">Total Games</p>
+                            <p className="text-3xl font-bold text-white">{stats.totalGames}</p>
+                            <p className="text-green-300 text-xs mt-1">{stats.freeGames} free, {stats.premiumGames} premium</p>
                           </div>
-                          <Database className="h-8 w-8 text-green-400" />
+                          <Database className="h-10 w-10 text-green-300" />
                         </div>
                       </div>
                       
-                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                      <div className="bg-gradient-to-br from-purple-900 to-purple-800 rounded-xl p-6 border border-purple-700">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-gray-400 text-sm">Total Purchases</p>
-                            <p className="text-2xl font-bold text-purple-400">{stats.totalPurchases}</p>
+                            <p className="text-purple-200 text-sm font-medium">Total Purchases</p>
+                            <p className="text-3xl font-bold text-white">{stats.totalPurchases}</p>
+                            <p className="text-purple-300 text-xs mt-1">Avg: ${stats.averageOrderValue.toFixed(2)}</p>
                           </div>
-                          <CreditCard className="h-8 w-8 text-purple-400" />
+                          <CreditCard className="h-10 w-10 text-purple-300" />
                         </div>
                       </div>
                       
-                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                      <div className="bg-gradient-to-br from-amber-900 to-amber-800 rounded-xl p-6 border border-amber-700">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-gray-400 text-sm">Total Revenue</p>
-                            <p className="text-2xl font-bold text-amber-400">${stats.totalRevenue.toFixed(2)}</p>
+                            <p className="text-amber-200 text-sm font-medium">Total Revenue</p>
+                            <p className="text-3xl font-bold text-white">${stats.totalRevenue.toFixed(2)}</p>
+                            <p className="text-amber-300 text-xs mt-1">${stats.monthlyRevenue.toFixed(2)} this month</p>
                           </div>
-                          <BarChart3 className="h-8 w-8 text-amber-400" />
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-gray-400 text-sm">Active Subs</p>
-                            <p className="text-2xl font-bold text-red-400">{stats.activeSubscriptions}</p>
-                          </div>
-                          <RefreshCw className="h-8 w-8 text-red-400" />
+                          <DollarSign className="h-10 w-10 text-amber-300" />
                         </div>
                       </div>
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                       {/* Recent Users */}
                       <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                        <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Users</h3>
+                        <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center space-x-2">
+                          <Users className="h-5 w-5" />
+                          <span>Recent Users</span>
+                        </h3>
                         <div className="space-y-3">
                           {users.slice(0, 5).map((user) => (
-                            <div key={user.id} className="flex items-center justify-between py-2">
-                              <div>
-                                <p className="text-white font-medium">{user.full_name || 'Anonymous'}</p>
-                                <p className="text-gray-400 text-sm">{user.email}</p>
+                            <div key={user.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white text-sm font-bold">
+                                    {(user.full_name || user.email).charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="text-white font-medium">{user.full_name || 'Anonymous'}</p>
+                                  <p className="text-gray-400 text-sm">{user.email}</p>
+                                </div>
                               </div>
-                              <p className="text-gray-500 text-xs">
-                                {new Date(user.created_at).toLocaleDateString()}
-                              </p>
+                              <div className="text-right">
+                                <p className="text-gray-500 text-xs">
+                                  {new Date(user.created_at).toLocaleDateString()}
+                                </p>
+                                {user.total_purchases && user.total_purchases > 0 && (
+                                  <p className="text-green-400 text-xs">
+                                    {user.total_purchases} purchases
+                                  </p>
+                                )}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -449,13 +575,16 @@ export const AdminPanel: React.FC = () => {
 
                       {/* Recent Purchases */}
                       <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                        <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Purchases</h3>
+                        <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center space-x-2">
+                          <CreditCard className="h-5 w-5" />
+                          <span>Recent Purchases</span>
+                        </h3>
                         <div className="space-y-3">
                           {purchases.slice(0, 5).map((purchase) => (
-                            <div key={purchase.id} className="flex items-center justify-between py-2">
+                            <div key={purchase.id} className="flex items-center justify-between py-2 border-b border-gray-700 last:border-b-0">
                               <div>
                                 <p className="text-white font-medium">{purchase.game_title}</p>
-                                <p className="text-gray-400 text-sm">{purchase.user_email}</p>
+                                <p className="text-gray-400 text-sm">{purchase.user_name || purchase.user_email}</p>
                               </div>
                               <div className="text-right">
                                 <p className="text-green-400 font-bold">${purchase.amount_paid.toFixed(2)}</p>
@@ -468,148 +597,114 @@ export const AdminPanel: React.FC = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Top Games */}
+                    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                      <h3 className="text-lg font-bold text-amber-400 mb-4 flex items-center space-x-2">
+                        <Star className="h-5 w-5" />
+                        <span>Top Selling Games</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {games.slice(0, 6).map((game) => (
+                          <div key={game.id} className="bg-gray-700 rounded-lg p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-white truncate">{game.title}</h4>
+                              {game.is_premium && <Crown className="h-4 w-4 text-amber-400" />}
+                            </div>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-400">
+                                {game.purchase_count} purchases
+                              </span>
+                              {game.is_premium && (
+                                <span className="text-green-400 font-bold">
+                                  ${game.price?.toFixed(2)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </>
                 )}
-              </div>
-            )}
-
-            {/* Database Tab */}
-            {activeTab === 'database' && (
-              <div>
-                <h2 className="text-xl font-bold text-amber-400 mb-6">Database Management</h2>
-                
-                {/* Database Status */}
-                <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white">Database Status</h3>
-                    <div className="flex items-center space-x-2">
-                      {getStatusIcon()}
-                      <span className="text-sm text-gray-400">
-                        {dbStatus === 'checking' ? 'Checking...' : 
-                         dbStatus === 'populated' ? 'Database Ready' : 
-                         dbStatus === 'empty' ? 'Database Empty' : 'Unknown'}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <button
-                      onClick={handleAddGamesToDatabase}
-                      disabled={actionLoading === 'adding'}
-                      className="bg-green-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                      {actionLoading === 'adding' ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                      <span>{actionLoading === 'adding' ? 'Adding...' : 'Add Games to DB'}</span>
-                    </button>
-                    
-                    <button
-                      onClick={checkDatabaseStatus}
-                      disabled={dbStatus === 'checking'}
-                      className="bg-blue-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                      {dbStatus === 'checking' ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                      <span>Check Status</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => exportData('games')}
-                      disabled={actionLoading === 'export-games'}
-                      className="bg-purple-600 text-white px-4 py-3 rounded-lg font-medium hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                      {actionLoading === 'export-games' ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      ) : (
-                        <Download className="h-4 w-4" />
-                      )}
-                      <span>Export Games</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-bold text-white mb-4">Export Data</h3>
-                    <div className="space-y-3">
-                      <button
-                        onClick={() => exportData('users')}
-                        disabled={actionLoading === 'export-users'}
-                        className="w-full bg-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Export Users</span>
-                      </button>
-                      <button
-                        onClick={() => exportData('purchases')}
-                        disabled={actionLoading === 'export-purchases'}
-                        className="w-full bg-gray-700 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center justify-center space-x-2"
-                      >
-                        <Download className="h-4 w-4" />
-                        <span>Export Purchases</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-bold text-white mb-4">Database Info</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Total Games:</span>
-                        <span className="text-white">{stats.totalGames}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Total Users:</span>
-                        <span className="text-white">{stats.totalUsers}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">Total Purchases:</span>
-                        <span className="text-white">{stats.totalPurchases}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
             {/* Users Tab */}
             {activeTab === 'users' && (
               <div>
-                <h2 className="text-xl font-bold text-amber-400 mb-6">User Management</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-amber-400">User Management</h2>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                      <input
+                        type="text"
+                        placeholder="Search users..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                    <select
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value)}
+                      className="px-4 py-2 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    >
+                      <option value="all">All Users</option>
+                      <option value="recent">Recent (7 days)</option>
+                      <option value="premium">Premium Users</option>
+                    </select>
+                  </div>
+                </div>
                 
                 <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
                   <div className="p-4 border-b border-gray-700">
-                    <h3 className="text-lg font-bold text-white">All Users</h3>
+                    <h3 className="text-lg font-bold text-white">
+                      Users ({filteredUsers.length})
+                    </h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Joined</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Joined</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Purchases</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Spent</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700">
-                        {users.map((user) => (
+                        {filteredUsers.map((user) => (
                           <tr key={user.id} className="hover:bg-gray-700">
-                            <td className="px-4 py-4 whitespace-nowrap">
-                              <div className="text-sm font-medium text-white">{user.full_name || 'Anonymous'}</div>
-                              <div className="text-sm text-gray-400">{user.id}</div>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-bold">
+                                    {(user.full_name || user.email).charAt(0).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div>
+                                  <div className="text-sm font-medium text-white">{user.full_name || 'Anonymous'}</div>
+                                  <div className="text-sm text-gray-400">{user.id.slice(0, 8)}...</div>
+                                </div>
+                              </div>
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{user.email}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                               {new Date(user.created_at).toLocaleDateString()}
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                              <span className="bg-blue-900 text-blue-200 px-2 py-1 rounded-full text-xs">
+                                {user.total_purchases || 0}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-400">
+                              ${(user.total_spent || 0).toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                               <button className="text-amber-400 hover:text-amber-300 mr-3">
                                 <Eye className="h-4 w-4" />
                               </button>
@@ -629,42 +724,142 @@ export const AdminPanel: React.FC = () => {
             {/* Purchases Tab */}
             {activeTab === 'purchases' && (
               <div>
-                <h2 className="text-xl font-bold text-amber-400 mb-6">Purchase Management</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-amber-400">Purchase Management</h2>
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                      <input
+                        type="text"
+                        placeholder="Search purchases..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      />
+                    </div>
+                    <button
+                      onClick={() => exportData('purchases')}
+                      className="flex items-center space-x-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                    >
+                      <Download className="h-4 w-4" />
+                      <span>Export</span>
+                    </button>
+                  </div>
+                </div>
                 
                 <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
                   <div className="p-4 border-b border-gray-700">
-                    <h3 className="text-lg font-bold text-white">All Purchases</h3>
+                    <h3 className="text-lg font-bold text-white">
+                      All Purchases ({filteredPurchases.length})
+                    </h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead className="bg-gray-700">
                         <tr>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Game</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
-                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Game</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">User</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Amount</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-700">
-                        {purchases.map((purchase) => (
+                        {filteredPurchases.map((purchase) => (
                           <tr key={purchase.id} className="hover:bg-gray-700">
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-white">
-                              {purchase.game_title}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-white">{purchase.game_title}</div>
+                              <div className="text-sm text-gray-400">ID: {purchase.game_id}</div>
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                              {purchase.user_email}
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-white">{purchase.user_name}</div>
+                              <div className="text-sm text-gray-400">{purchase.user_email}</div>
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-green-400">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-400">
                               ${purchase.amount_paid.toFixed(2)}
                             </td>
-                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
-                              {new Date(purchase.purchase_date).toLocaleDateString()}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                              <div>{new Date(purchase.purchase_date).toLocaleDateString()}</div>
+                              <div className="text-xs text-gray-500">
+                                {new Date(purchase.purchase_date).toLocaleTimeString()}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="bg-green-900 text-green-200 px-2 py-1 rounded-full text-xs">
+                                Completed
+                              </span>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Games Tab */}
+            {activeTab === 'games' && (
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-amber-400">Game Management</h2>
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={handleAddGamesToDatabase}
+                      disabled={actionLoading === 'adding'}
+                      className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                    >
+                      {actionLoading === 'adding' ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      <span>Add Games</span>
+                    </button>
+                    <div className="flex items-center space-x-2">
+                      {getStatusIcon()}
+                      <span className="text-sm text-gray-400">
+                        {dbStatus === 'checking' ? 'Checking...' : 
+                         dbStatus === 'populated' ? 'Database Ready' : 
+                         dbStatus === 'empty' ? 'Database Empty' : 'Unknown'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {games.map((game) => (
+                    <div key={game.id} className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-white truncate">{game.title}</h3>
+                        {game.is_premium && <Crown className="h-5 w-5 text-amber-400" />}
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Type:</span>
+                          <span className={`${game.is_premium ? 'text-amber-400' : 'text-green-400'}`}>
+                            {game.is_premium ? 'Premium' : 'Free'}
+                          </span>
+                        </div>
+                        {game.is_premium && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-400">Price:</span>
+                            <span className="text-green-400">${game.price?.toFixed(2)}</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Purchases:</span>
+                          <span className="text-white">{game.purchase_count}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Revenue:</span>
+                          <span className="text-green-400">
+                            ${((game.price || 0) * game.purchase_count).toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -755,6 +950,10 @@ export const AdminPanel: React.FC = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-400">Products:</span>
                         <span className="text-green-400">{stripeProducts.length} items</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">Admin Access:</span>
+                        <span className="text-green-400">Active</span>
                       </div>
                     </div>
                   </div>
