@@ -27,31 +27,6 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
   const loading = subscriptionLoading || purchaseLoading;
 
-  const handleSubscribe = async () => {
-    if (!user) {
-      toast.error('Please sign in to subscribe');
-      return;
-    }
-
-    const gameProduct = stripeProducts.find(p => p.name === 'Premium Gaming Subscription');
-    if (!gameProduct) {
-      toast.error('Product not found');
-      return;
-    }
-
-    try {
-      await createCheckoutSession({
-        priceId: gameProduct.priceId,
-        mode: gameProduct.mode,
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: window.location.href,
-      });
-    } catch (error) {
-      console.error('Subscription checkout error:', error);
-      toast.error('Failed to start subscription checkout');
-    }
-  };
-
   const handlePurchaseGame = async () => {
     if (!user) {
       toast.error('Please sign in to purchase');
@@ -148,9 +123,6 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
     );
   }
 
-  // Get subscription product info
-  const subscriptionProduct = stripeProducts.find(p => p.name === 'Premium Gaming Subscription');
-
   // If user is logged in but no subscription or purchase, show payment options
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
@@ -161,7 +133,7 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
           <div className="bg-gray-800 rounded-xl p-4 mb-6">
             <h3 className="text-lg font-bold text-white mb-2">{gameTitle}</h3>
             <p className="text-gray-300 text-sm mb-3">
-              Choose how you want to access this premium game.
+              Purchase this premium game to unlock and play.
             </p>
             <div className="flex items-center justify-center space-x-2 text-amber-400">
               <CreditCard className="h-5 w-5" />
@@ -177,24 +149,6 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
             >
               <ShoppingCart className="h-5 w-5" />
               <span>{checkoutLoading ? 'Redirecting to Stripe...' : `Buy ${gameTitle} - $${gamePrice.toFixed(2)}`}</span>
-            </button>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900 text-gray-400">OR</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleSubscribe}
-              disabled={checkoutLoading}
-              className="w-full bg-gray-700 text-gray-100 px-6 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              <CreditCard className="h-5 w-5" />
-              <span>{checkoutLoading ? 'Redirecting to Stripe...' : `Subscribe - $${subscriptionProduct?.price || 9.99}/month`}</span>
             </button>
             
             {/* Debug section */}
@@ -225,16 +179,15 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
           </div>
           
           <div className="mt-6 text-xs text-gray-500">
-            <p>Subscription includes:</p>
+            <p>One-time purchase includes:</p>
             <ul className="mt-2 space-y-1">
-              <li>• Access to all premium games</li>
-              <li>• No ads or interruptions</li>
-              <li>• Priority support</li>
-              <li>• Early access to new games</li>
+              <li>• Lifetime access to this game</li>
+              <li>• No subscription required</li>
+              <li>• Play anytime, anywhere</li>
             </ul>
           </div>
         </div>
       </div>
     </div>
   );
-}; 
+};

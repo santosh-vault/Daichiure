@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle, ArrowRight, Home } from 'lucide-react';
+import { CheckCircle, ArrowRight, Home, Play } from 'lucide-react';
 import { useSubscription } from '../hooks/useSubscription';
 
 export const Success: React.FC = () => {
@@ -28,7 +28,7 @@ export const Success: React.FC = () => {
               Payment Successful!
             </h1>
             <p className="text-gray-400">
-              Thank you for your purchase. Your subscription is now active.
+              Thank you for your purchase. You can now access your game.
             </p>
           </div>
 
@@ -43,16 +43,24 @@ export const Success: React.FC = () => {
 
           <div className="space-y-4">
             <Link
-              to="/games"
+              to="/games/rpg"
               className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 py-3 px-6 rounded-lg font-bold hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center space-x-2"
             >
-              <span>Start Playing Games</span>
+              <Play className="h-4 w-4" />
+              <span>Play Pixel Adventure</span>
+            </Link>
+
+            <Link
+              to="/games"
+              className="w-full border border-gray-700 text-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2"
+            >
+              <span>Browse All Games</span>
               <ArrowRight className="h-4 w-4" />
             </Link>
 
             <Link
               to="/dashboard"
-              className="w-full border border-gray-700 text-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-800 transition-colors duration-200 flex items-center justify-center space-x-2"
+              className="w-full text-gray-400 hover:text-amber-400 transition-colors duration-200 flex items-center justify-center space-x-2"
             >
               <span>View Dashboard</span>
             </Link>

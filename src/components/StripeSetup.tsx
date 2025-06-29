@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { CreditCard, Check, AlertCircle, ExternalLink } from 'lucide-react';
+import { CreditCard, Check, AlertCircle, ExternalLink, Copy } from 'lucide-react';
+import { stripeProducts } from '../stripe-config';
+import toast from 'react-hot-toast';
 
 export const StripeSetup: React.FC = () => {
   const [step, setStep] = useState(1);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
 
   const steps = [
     {
@@ -19,7 +26,7 @@ export const StripeSetup: React.FC = () => {
     },
     {
       title: 'Create Products',
-      description: 'Set up your subscription and individual game products',
+      description: 'Set up your products in Stripe dashboard',
       action: 'Create Products',
       link: 'https://dashboard.stripe.com/products',
     },
@@ -84,6 +91,42 @@ export const StripeSetup: React.FC = () => {
           ))}
         </div>
 
+        {/* Current Products Configuration */}
+        <div className="mt-8 p-6 bg-green-900/20 border border-green-700 rounded-xl">
+          <div className="flex items-start space-x-3">
+            <Check className="h-5 w-5 text-green-400 mt-0.5" />
+            <div className="flex-1">
+              <h4 className="text-green-400 font-semibold mb-2">Current Product Configuration</h4>
+              <p className="text-gray-300 text-sm mb-3">
+                Your application is configured with the following products:
+              </p>
+              <div className="space-y-2">
+                {stripeProducts.map((product, index) => (
+                  <div key={index} className="bg-gray-800 rounded-lg p-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-white">{product.name}</div>
+                        <div className="text-sm text-gray-400">{product.description}</div>
+                        <div className="text-xs text-gray-500">Mode: {product.mode}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-green-400 font-bold">${product.price?.toFixed(2)}</div>
+                        <button
+                          onClick={() => copyToClipboard(product.priceId)}
+                          className="text-xs text-gray-400 hover:text-amber-400 flex items-center space-x-1 mt-1"
+                        >
+                          <Copy className="h-3 w-3" />
+                          <span>{product.priceId}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-8 p-6 bg-blue-900/20 border border-blue-700 rounded-xl">
           <div className="flex items-start space-x-3">
             <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
@@ -108,8 +151,14 @@ export const StripeSetup: React.FC = () => {
               <p className="text-gray-300 text-sm mb-3">
                 Configure your webhook endpoint URL in Stripe dashboard:
               </p>
-              <div className="bg-gray-800 rounded-lg p-3 font-mono text-sm text-gray-300">
-                https://your-project-ref.supabase.co/functions/v1/stripe-webhook
+              <div className="bg-gray-800 rounded-lg p-3 font-mono text-sm text-gray-300 flex items-center justify-between">
+                <span>https://your-project-ref.supabase.co/functions/v1/stripe-webhook</span>
+                <button
+                  onClick={() => copyToClipboard('https://your-project-ref.supabase.co/functions/v1/stripe-webhook')}
+                  className="text-amber-400 hover:text-amber-300"
+                >
+                  <Copy className="h-4 w-4" />
+                </button>
               </div>
               <p className="text-gray-400 text-xs mt-2">
                 Select these events: checkout.session.completed, customer.subscription.created, 
