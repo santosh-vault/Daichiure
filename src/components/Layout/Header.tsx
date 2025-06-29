@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Gamepad2, User, LogOut, Menu, X } from 'lucide-react';
+import { Gamepad2, User, LogOut, Menu, X, Settings } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -21,11 +21,11 @@ export const Header: React.FC = () => {
   return (
     <header className="bg-gray-900 shadow-md border-b border-gray-800 sticky top-0 z-50 font-inter">
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-20"> {/* Increased height for better spacing */}
+      <div className="flex justify-between items-center h-20">
         {/* Logo */}
         <a href="/" className="flex items-center space-x-3 group">
           <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-3 rounded-xl shadow-lg group-hover:shadow-2xl transition-shadow duration-300 ease-in-out transform group-hover:scale-105">
-            <Gamepad2 className="h-7 w-7 text-gray-950" /> {/* Icon color adjusted */}
+            <Gamepad2 className="h-7 w-7 text-gray-950" />
           </div>
           <span className="text-3xl font-bold font-bruno-ace bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent drop-shadow-md">
             PlayHub
@@ -54,6 +54,13 @@ export const Header: React.FC = () => {
               >
                 <User className="h-5 w-5" />
                 <span>Dashboard</span>
+              </a>
+              <a
+                href="/stripe-setup"
+                className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
+              >
+                <Settings className="h-5 w-5" />
+                <span>Stripe Setup</span>
               </a>
               <button
                 onClick={handleSignOut}
@@ -117,6 +124,14 @@ export const Header: React.FC = () => {
                 >
                   <User className="h-5 w-5" />
                   <span>Dashboard</span>
+                </a>
+                <a
+                  href="/stripe-setup"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 py-2 border-b border-gray-800"
+                >
+                  <Settings className="h-5 w-5" />
+                  <span>Stripe Setup</span>
                 </a>
                 <button
                   onClick={handleSignOut}

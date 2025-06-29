@@ -3,8 +3,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
 interface Subscription {
+  customer_id: string;
+  subscription_id: string | null;
   subscription_status: string;
-  current_period_end?: number;
+  price_id: string | null;
+  current_period_start: number | null;
+  current_period_end: number | null;
+  cancel_at_period_end: boolean | null;
+  payment_method_brand: string | null;
+  payment_method_last4: string | null;
 }
 
 export const useSubscription = () => {
@@ -25,15 +32,6 @@ export const useSubscription = () => {
     if (!user) return;
 
     try {
-      // Temporarily disable subscription queries to fix immediate issues
-      // TODO: Re-enable when database is properly set up
-      console.log('Loading subscription for user:', user.id);
-      setSubscription(null);
-      setLoading(false);
-      return;
-
-      // Original database query (commented out for now)
-      /*
       const { data, error } = await supabase
         .from('stripe_user_subscriptions')
         .select('*')
@@ -44,7 +42,6 @@ export const useSubscription = () => {
       }
 
       setSubscription(data);
-      */
     } catch (error) {
       console.error('Error loading subscription:', error);
     } finally {
@@ -57,14 +54,24 @@ export const useSubscription = () => {
            subscription?.subscription_status === 'trialing';
   };
 
+  const isSubscriptionCanceled = () => {
+    return subscription?.cancel_at_period_end === true;
+  };
+
+  const refetch = () => {
+    loadSubscription();
+  };
+
   return {
     subscription,
     loading,
     hasActiveSubscription,
+    isSubscriptionCanceled,
+    refetch,
   };
 };
 
-// New hook to check if user has purchased a specific game
+// Hook to check if user has purchased a specific game
 export const useGamePurchase = (gameSlug: string) => {
   const [hasPurchased, setHasPurchased] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -83,9 +90,6 @@ export const useGamePurchase = (gameSlug: string) => {
     if (!user || !gameSlug) return;
 
     try {
-      console.log('Checking game purchase for:', gameSlug, 'user:', user.id);
-      
-      // First, let's check if the game exists in the database
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id, title')
@@ -99,9 +103,6 @@ export const useGamePurchase = (gameSlug: string) => {
         return;
       }
 
-      console.log('Game found in database:', gameData);
-
-      // Now check if user has purchased this game
       const { data, error } = await supabase
         .from('purchases')
         .select(`
@@ -116,15 +117,12 @@ export const useGamePurchase = (gameSlug: string) => {
 
       if (error) {
         if (error.code === 'PGRST116') {
-          // No rows returned - user hasn't purchased this game
-          console.log('User has not purchased this game:', gameSlug);
           setHasPurchased(false);
         } else {
           console.error('Error checking game purchase:', error);
           setHasPurchased(false);
         }
       } else {
-        console.log('User has purchased this game:', gameSlug, data);
         setHasPurchased(true);
       }
     } catch (error) {
@@ -135,14 +133,10 @@ export const useGamePurchase = (gameSlug: string) => {
     }
   };
 
-  // Temporary function to manually add a test purchase (for debugging)
   const addTestPurchase = async (gameSlug: string) => {
     if (!user) return;
 
     try {
-      console.log('Adding test purchase for:', gameSlug);
-      
-      // First get the game ID
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id')
@@ -154,7 +148,6 @@ export const useGamePurchase = (gameSlug: string) => {
         return;
       }
 
-      // Add the purchase
       const { data, error } = await supabase
         .from('purchases')
         .insert({
@@ -168,7 +161,6 @@ export const useGamePurchase = (gameSlug: string) => {
         console.error('Error adding test purchase:', error);
       } else {
         console.log('Test purchase added successfully:', data);
-        // Refresh the purchase check
         checkGamePurchase();
       }
     } catch (error) {
@@ -179,6 +171,6 @@ export const useGamePurchase = (gameSlug: string) => {
   return {
     hasPurchased,
     loading,
-    addTestPurchase, // Expose this for debugging
+    addTestPurchase,
   };
 };

@@ -7,25 +7,19 @@ export interface StripeProduct {
   gameSlug?: string;
 }
 
+// You'll need to replace these price IDs with your actual Stripe price IDs
+// Create these products in your Stripe dashboard first
 export const stripeProducts: StripeProduct[] = [
   {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO',
+    priceId: 'price_1QdqOGBpnJxoCN03BPLXYnO', // Replace with your actual subscription price ID
     name: 'Premium Gaming Subscription',
     description: 'Access to all premium games and features',
     mode: 'subscription',
     price: 9.99,
   },
+  // Individual game products - create these in your Stripe dashboard
   {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO',
-    name: 'Monthly Premium Plan',
-    description: 'Monthly subscription for premium gaming access',
-    mode: 'subscription',
-    price: 9.99,
-  },
-  // Individual game products - these need to be created in your Stripe dashboard
-  // For now, using the same price ID as subscription (you'll need to replace these)
-  {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO', // Replace with actual price ID for RPG game
+    priceId: 'price_1QdqOGBpnJxoCN03BPLXYnP', // Replace with actual price ID for RPG game
     name: 'Pixel Adventure',
     description: 'A simple RPG adventure game',
     mode: 'payment',
@@ -33,7 +27,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'rpg',
   },
   {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO', // Replace with actual price ID for Everest game
+    priceId: 'price_1QdqOGBpnJxoCN03BPLXYnQ', // Replace with actual price ID for Everest game
     name: 'Everest Climb',
     description: 'Climb Mount Everest!',
     mode: 'payment',
@@ -41,7 +35,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'everest',
   },
   {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO', // Replace with actual price ID for Kathmandu game
+    priceId: 'price_1QdqOGBpnJxoCN03BPLXYnR', // Replace with actual price ID for Kathmandu game
     name: 'Kathmandu Maze',
     description: 'Navigate through ancient Kathmandu streets',
     mode: 'payment',
@@ -49,7 +43,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'kathmandu',
   },
   {
-    priceId: 'price_1RetqOGBpnJxoCN03BPLXYnO', // Replace with actual price ID for Temple game
+    priceId: 'price_1QdqOGBpnJxoCN03BPLXYnS', // Replace with actual price ID for Temple game
     name: 'Nepali Temple Puzzle',
     description: 'Solve ancient puzzles in Nepali temples',
     mode: 'payment',
