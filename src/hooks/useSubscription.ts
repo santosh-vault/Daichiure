@@ -100,20 +100,36 @@ export const useGamePurchase = (gameSlug: string) => {
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id, title, is_premium')
-        .eq('slug', gameSlug)
-        .single();
+        .eq('slug', gameSlug);
 
       if (gameError) {
-        console.error('❌ Game not found in database:', gameSlug, gameError);
+        console.error('❌ Error querying games table:', gameError);
         setHasPurchased(false);
         setLoading(false);
         return;
       }
 
-      console.log('✅ Game found:', gameData);
+      // Check if we found exactly one game
+      if (!gameData || gameData.length === 0) {
+        console.warn('⚠️ Game not found in database:', gameSlug);
+        console.log('💡 You may need to add games to the database first. Visit /games or /debug page and click "Add Games to DB"');
+        setHasPurchased(false);
+        setLoading(false);
+        return;
+      }
+
+      if (gameData.length > 1) {
+        console.error('❌ Multiple games found with same slug:', gameSlug);
+        setHasPurchased(false);
+        setLoading(false);
+        return;
+      }
+
+      const game = gameData[0];
+      console.log('✅ Game found:', game);
 
       // If it's not a premium game, allow access
-      if (!gameData.is_premium) {
+      if (!game.is_premium) {
         console.log('🆓 Game is free, allowing access');
         setHasPurchased(true);
         setLoading(false);
@@ -125,7 +141,7 @@ export const useGamePurchase = (gameSlug: string) => {
         .from('purchases')
         .select('id, amount_paid, purchase_date')
         .eq('user_id', user.id)
-        .eq('game_id', gameData.id);
+        .eq('game_id', game.id);
 
       if (purchaseError) {
         console.error('❌ Error checking purchases:', purchaseError);
@@ -157,19 +173,20 @@ export const useGamePurchase = (gameSlug: string) => {
       const { data: gameData, error: gameError } = await supabase
         .from('games')
         .select('id, title')
-        .eq('slug', gameSlug)
-        .single();
+        .eq('slug', gameSlug);
 
-      if (gameError) {
-        console.error('❌ Game not found for test purchase:', gameError);
+      if (gameError || !gameData || gameData.length === 0) {
+        console.error('❌ Game not found for test purchase:', gameError || 'No game data');
         return;
       }
+
+      const game = gameData[0];
 
       const { data, error } = await supabase
         .from('purchases')
         .insert({
           user_id: user.id,
-          game_id: gameData.id,
+          game_id: game.id,
           amount_paid: 1.00
         })
         .select();
