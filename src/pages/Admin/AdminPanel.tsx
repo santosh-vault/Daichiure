@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { 
   Database, 
   Users, 
@@ -18,7 +18,8 @@ import {
   Trash2,
   Eye,
   Edit,
-  Plus
+  Plus,
+  Home
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { addGamesToDatabase, checkGamesInDatabase, testPurchaseSystem } from '../../utils/addGamesToDatabase';
@@ -56,7 +57,8 @@ interface Purchase {
 export const AdminPanel: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authChecking, setAuthChecking] = useState(true);
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalGames: 0,
@@ -75,38 +77,77 @@ export const AdminPanel: React.FC = () => {
   console.log('🔐 Admin Panel Access Check:', {
     user: user?.email,
     isAdmin,
-    adminEmails: ADMIN_EMAILS
+    adminEmails: ADMIN_EMAILS,
+    authChecking
   });
 
   useEffect(() => {
-    if (isAdmin) {
-      loadDashboardData();
-      checkDatabaseStatus();
-    }
+    // Wait a moment for auth to settle
+    const timer = setTimeout(() => {
+      setAuthChecking(false);
+      if (isAdmin) {
+        loadDashboardData();
+        checkDatabaseStatus();
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, [isAdmin]);
 
+  // Show loading while checking authentication
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mx-auto mb-4"></div>
+          <h2 className="text-xl font-bold text-amber-400 mb-2">Checking Admin Access...</h2>
+          <p className="text-gray-400">Please wait while we verify your permissions</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to login if no user
   if (!user) {
     console.log('❌ No user found, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
+  // Show access denied if not admin
   if (!isAdmin) {
     console.log('❌ User is not admin:', user.email);
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800 text-center max-w-md">
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+        <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-800 text-center max-w-md w-full">
           <Shield className="h-16 w-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-red-400 mb-4">Access Denied</h2>
-          <p className="text-gray-400 mb-4">You don't have permission to access the admin panel.</p>
+          <p className="text-gray-400 mb-6">You don't have permission to access the admin panel.</p>
+          
           <div className="bg-gray-800 rounded-lg p-4 mb-4">
             <p className="text-sm text-gray-300 mb-2">Current user:</p>
-            <p className="text-xs font-mono text-amber-400">{user.email}</p>
+            <p className="text-xs font-mono text-amber-400 break-all">{user.email}</p>
           </div>
-          <div className="bg-gray-800 rounded-lg p-4">
+          
+          <div className="bg-gray-800 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-300 mb-2">Admin emails:</p>
             {ADMIN_EMAILS.map((email, index) => (
-              <p key={index} className="text-xs font-mono text-green-400">{email}</p>
+              <p key={index} className="text-xs font-mono text-green-400 break-all">{email}</p>
             ))}
+          </div>
+
+          <div className="space-y-3">
+            <Link
+              to="/dashboard"
+              className="block w-full bg-amber-500 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-600 transition-colors"
+            >
+              Go to Dashboard
+            </Link>
+            <Link
+              to="/"
+              className="block w-full border border-gray-600 text-gray-300 px-6 py-3 rounded-lg font-bold hover:bg-gray-800 transition-colors"
+            >
+              Back to Home
+            </Link>
           </div>
         </div>
       </div>
@@ -276,12 +317,21 @@ export const AdminPanel: React.FC = () => {
               </h1>
               <p className="text-gray-400">Manage your PlayHub gaming platform</p>
             </div>
-            <div className="bg-green-900/20 border border-green-700 rounded-lg px-4 py-2">
-              <div className="flex items-center space-x-2">
-                <Shield className="h-4 w-4 text-green-400" />
-                <span className="text-green-400 text-sm font-medium">Admin Access</span>
+            <div className="flex items-center space-x-4">
+              <Link
+                to="/"
+                className="flex items-center space-x-2 bg-gray-800 text-gray-300 px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <Home className="h-4 w-4" />
+                <span>Back to Site</span>
+              </Link>
+              <div className="bg-green-900/20 border border-green-700 rounded-lg px-4 py-2">
+                <div className="flex items-center space-x-2">
+                  <Shield className="h-4 w-4 text-green-400" />
+                  <span className="text-green-400 text-sm font-medium">Admin Access</span>
+                </div>
+                <p className="text-xs text-gray-400">{user.email}</p>
               </div>
-              <p className="text-xs text-gray-400">{user.email}</p>
             </div>
           </div>
         </div>
@@ -313,100 +363,113 @@ export const AdminPanel: React.FC = () => {
               <div>
                 <h2 className="text-xl font-bold text-amber-400 mb-6">Dashboard Overview</h2>
                 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Users</p>
-                        <p className="text-2xl font-bold text-blue-400">{stats.totalUsers}</p>
+                {loading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="bg-gray-800 rounded-xl p-6 border border-gray-700 animate-pulse">
+                        <div className="h-4 bg-gray-700 rounded mb-2"></div>
+                        <div className="h-8 bg-gray-700 rounded"></div>
                       </div>
-                      <Users className="h-8 w-8 text-blue-400" />
-                    </div>
+                    ))}
                   </div>
-                  
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Games</p>
-                        <p className="text-2xl font-bold text-green-400">{stats.totalGames}</p>
-                      </div>
-                      <Database className="h-8 w-8 text-green-400" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Purchases</p>
-                        <p className="text-2xl font-bold text-purple-400">{stats.totalPurchases}</p>
-                      </div>
-                      <CreditCard className="h-8 w-8 text-purple-400" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Total Revenue</p>
-                        <p className="text-2xl font-bold text-amber-400">${stats.totalRevenue.toFixed(2)}</p>
-                      </div>
-                      <BarChart3 className="h-8 w-8 text-amber-400" />
-                    </div>
-                  </div>
-                  
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-gray-400 text-sm">Active Subs</p>
-                        <p className="text-2xl font-bold text-red-400">{stats.activeSubscriptions}</p>
-                      </div>
-                      <RefreshCw className="h-8 w-8 text-red-400" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recent Activity */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Recent Users */}
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Users</h3>
-                    <div className="space-y-3">
-                      {users.slice(0, 5).map((user) => (
-                        <div key={user.id} className="flex items-center justify-between py-2">
+                ) : (
+                  <>
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-white font-medium">{user.full_name || 'Anonymous'}</p>
-                            <p className="text-gray-400 text-sm">{user.email}</p>
+                            <p className="text-gray-400 text-sm">Total Users</p>
+                            <p className="text-2xl font-bold text-blue-400">{stats.totalUsers}</p>
                           </div>
-                          <p className="text-gray-500 text-xs">
-                            {new Date(user.created_at).toLocaleDateString()}
-                          </p>
+                          <Users className="h-8 w-8 text-blue-400" />
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Recent Purchases */}
-                  <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
-                    <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Purchases</h3>
-                    <div className="space-y-3">
-                      {purchases.slice(0, 5).map((purchase) => (
-                        <div key={purchase.id} className="flex items-center justify-between py-2">
+                      </div>
+                      
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-white font-medium">{purchase.game_title}</p>
-                            <p className="text-gray-400 text-sm">{purchase.user_email}</p>
+                            <p className="text-gray-400 text-sm">Total Games</p>
+                            <p className="text-2xl font-bold text-green-400">{stats.totalGames}</p>
                           </div>
-                          <div className="text-right">
-                            <p className="text-green-400 font-bold">${purchase.amount_paid.toFixed(2)}</p>
-                            <p className="text-gray-500 text-xs">
-                              {new Date(purchase.purchase_date).toLocaleDateString()}
-                            </p>
-                          </div>
+                          <Database className="h-8 w-8 text-green-400" />
                         </div>
-                      ))}
+                      </div>
+                      
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-sm">Total Purchases</p>
+                            <p className="text-2xl font-bold text-purple-400">{stats.totalPurchases}</p>
+                          </div>
+                          <CreditCard className="h-8 w-8 text-purple-400" />
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-sm">Total Revenue</p>
+                            <p className="text-2xl font-bold text-amber-400">${stats.totalRevenue.toFixed(2)}</p>
+                          </div>
+                          <BarChart3 className="h-8 w-8 text-amber-400" />
+                        </div>
+                      </div>
+                      
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-gray-400 text-sm">Active Subs</p>
+                            <p className="text-2xl font-bold text-red-400">{stats.activeSubscriptions}</p>
+                          </div>
+                          <RefreshCw className="h-8 w-8 text-red-400" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+
+                    {/* Recent Activity */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Recent Users */}
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Users</h3>
+                        <div className="space-y-3">
+                          {users.slice(0, 5).map((user) => (
+                            <div key={user.id} className="flex items-center justify-between py-2">
+                              <div>
+                                <p className="text-white font-medium">{user.full_name || 'Anonymous'}</p>
+                                <p className="text-gray-400 text-sm">{user.email}</p>
+                              </div>
+                              <p className="text-gray-500 text-xs">
+                                {new Date(user.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Recent Purchases */}
+                      <div className="bg-gray-800 rounded-xl p-6 border border-gray-700">
+                        <h3 className="text-lg font-bold text-amber-400 mb-4">Recent Purchases</h3>
+                        <div className="space-y-3">
+                          {purchases.slice(0, 5).map((purchase) => (
+                            <div key={purchase.id} className="flex items-center justify-between py-2">
+                              <div>
+                                <p className="text-white font-medium">{purchase.game_title}</p>
+                                <p className="text-gray-400 text-sm">{purchase.user_email}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-green-400 font-bold">${purchase.amount_paid.toFixed(2)}</p>
+                                <p className="text-gray-500 text-xs">
+                                  {new Date(purchase.purchase_date).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
 
