@@ -85,3 +85,63 @@ BEGIN
       USING (true);
   END IF;
 END $$;
+
+-- Add admin policies for admin panel access
+-- This allows admin users to view all users and manage the system
+
+-- Create admin role function
+CREATE OR REPLACE FUNCTION is_admin()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM auth.users 
+    WHERE auth.users.id = auth.uid() 
+    AND auth.users.email IN ('admin@playhub.com', 'developer@playhub.com')
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Admin policy for viewing all users (for admin panel)
+CREATE POLICY "Admins can view all users"
+  ON auth.users
+  FOR SELECT
+  TO authenticated
+  USING (is_admin());
+
+-- Admin policy for viewing all purchases
+CREATE POLICY "Admins can view all purchases"
+  ON purchases
+  FOR SELECT
+  TO authenticated
+  USING (is_admin());
+
+-- Admin policy for viewing all games
+CREATE POLICY "Admins can view all games"
+  ON games
+  FOR SELECT
+  TO authenticated
+  USING (is_admin());
+
+-- Admin policy for managing games
+CREATE POLICY "Admins can manage games"
+  ON games
+  FOR ALL
+  TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+-- Admin policy for managing categories
+CREATE POLICY "Admins can manage categories"
+  ON categories
+  FOR ALL
+  TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());
+
+-- Admin policy for managing purchases
+CREATE POLICY "Admins can manage purchases"
+  ON purchases
+  FOR ALL
+  TO authenticated
+  USING (is_admin())
+  WITH CHECK (is_admin());

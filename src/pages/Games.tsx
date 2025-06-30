@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter, Play, Lock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import AdSense from '../components/AdSense';
 
 interface Game {
   id: number;
@@ -283,65 +284,81 @@ export const Games: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredGames.map((game) => (
-              <Link
-                key={game.id}
-                to={`/games/${game.slug}`}
-                className="block"
-              >
-                <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] transition-all duration-300 ease-in-out transform hover:scale-105 border border-gray-700 group cursor-pointer">
-                  <div className="relative">
-                    <img
-                      src={game.thumbnail_url}
-                      alt={game.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {game.is_premium && (
-                      <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-amber-600 text-gray-950 px-2 py-1 rounded-full text-xs font-bold shadow-md">
-                        Premium
+          <>
+            {/* AdSense Banner - Top of Games Grid */}
+            <AdSense 
+              adSlot="5566778899" 
+              className="mb-8"
+              style={{ minHeight: '250px' }}
+            />
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredGames.map((game) => (
+                <Link
+                  key={game.id}
+                  to={`/games/${game.slug}`}
+                  className="block"
+                >
+                  <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden hover:shadow-[0_0_25px_rgba(255,215,0,0.3)] transition-all duration-300 ease-in-out transform hover:scale-105 border border-gray-700 group cursor-pointer">
+                    <div className="relative">
+                      <img
+                        src={game.thumbnail_url}
+                        alt={game.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {game.is_premium && (
+                        <div className="absolute top-2 right-2 bg-gradient-to-r from-amber-400 to-amber-600 text-gray-950 px-2 py-1 rounded-full text-xs font-bold shadow-md">
+                          Premium
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          {game.is_premium && !user ? (
+                            <div className="bg-gray-800/90 text-gray-100 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 border border-gray-600">
+                              <Lock className="h-4 w-4" />
+                              <span>Sign in to play</span>
+                            </div>
+                          ) : (
+                            <div className="bg-gray-800/90 text-gray-100 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 border border-gray-600">
+                              <Play className="h-4 w-4" />
+                              <span>Play Now</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        {game.is_premium && !user ? (
-                          <div className="bg-gray-800/90 text-gray-100 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 border border-gray-600">
-                            <Lock className="h-4 w-4" />
-                            <span>Sign in to play</span>
-                          </div>
-                        ) : (
-                          <div className="bg-gray-800/90 text-gray-100 px-4 py-2 rounded-lg font-medium flex items-center space-x-2 border border-gray-600">
-                            <Play className="h-4 w-4" />
-                            <span>Play Now</span>
-                          </div>
+                    </div>
+                    <div className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold font-bruno-ace text-amber-400 truncate">{game.title}</h3>
+                        <span className="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded-full">
+                          {game.category.name}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-400 mb-4 line-clamp-2">{game.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-3 py-2 rounded-lg text-sm font-bold hover:shadow-[0_0_15px_rgba(255,215,0,0.5)] transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-1">
+                          <Play className="h-3 w-3" />
+                          <span>Play</span>
+                        </div>
+                        {game.is_premium && game.price && (
+                          <span className="text-sm font-bold text-green-400">
+                            ${game.price.toFixed(2)}
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold font-bruno-ace text-amber-400 truncate">{game.title}</h3>
-                      <span className="text-xs text-gray-400 bg-gray-700 px-2 py-1 rounded-full">
-                        {game.category.name}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">{game.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-3 py-2 rounded-lg text-sm font-bold hover:shadow-[0_0_15px_rgba(255,215,0,0.5)] transition-all duration-300 ease-in-out transform hover:scale-105 flex items-center space-x-1">
-                        <Play className="h-3 w-3" />
-                        <span>Play</span>
-                      </div>
-                      {game.is_premium && game.price && (
-                        <span className="text-sm font-bold text-green-400">
-                          ${game.price.toFixed(2)}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+            
+            {/* AdSense Banner - Bottom of Games Grid */}
+            <AdSense 
+              adSlot="9988776655" 
+              className="mt-8"
+              style={{ minHeight: '250px' }}
+            />
+          </>
         )}
       </div>
     </div>

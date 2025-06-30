@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Play, Star, Users, Trophy, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import "../App.css";
+import AdSense from '../components/AdSense';
 
 interface FeaturedGame {
   id: number;
@@ -193,6 +194,13 @@ export const Home: React.FC = () => {
           </p>
         </div>
 
+        {/* AdSense Banner - Top of Games Section */}
+        <AdSense 
+          adSlot="1234567890" 
+          className="mb-8"
+          style={{ minHeight: '250px' }}
+        />
+
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {[...Array(6)].map((_, i) => (
@@ -255,6 +263,13 @@ export const Home: React.FC = () => {
           </div>
         )}
 
+        {/* AdSense Banner - Middle of Games Section */}
+        <AdSense 
+          adSlot="0987654321" 
+          className="my-8"
+          style={{ minHeight: '250px' }}
+        />
+
         <div className="text-center mt-16">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -285,6 +300,14 @@ export const Home: React.FC = () => {
         <p className="text-xl text-gray-300 mb-10 font-inter">
           Join thousands of players and unlock access to premium games and exclusive content.
         </p>
+        
+        {/* AdSense Banner - Before CTA Button */}
+        <AdSense 
+          adSlot="1122334455" 
+          className="mb-8"
+          style={{ minHeight: '200px' }}
+        />
+        
         <Link
           to="/register"
           className="bg-amber-400 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out border-2 border-transparent hover:border-amber-700"
