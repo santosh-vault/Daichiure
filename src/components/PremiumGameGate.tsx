@@ -27,30 +27,15 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
   const loading = subscriptionLoading || purchaseLoading;
 
-  const handleSubscribe = async () => {
-    if (!user) {
-      toast.error('Please sign in to subscribe');
-      return;
-    }
-
-    const gameProduct = stripeProducts.find(p => p.name === 'Premium Gaming Subscription');
-    if (!gameProduct) {
-      toast.error('Product not found');
-      return;
-    }
-
-    try {
-      await createCheckoutSession({
-        priceId: gameProduct.priceId,
-        mode: gameProduct.mode,
-        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: window.location.href,
-      });
-    } catch (error) {
-      console.error('Subscription checkout error:', error);
-      toast.error('Failed to start subscription checkout');
-    }
-  };
+  console.log('🎮 PremiumGameGate Debug:', {
+    gameSlug,
+    gameTitle,
+    user: !!user,
+    hasActiveSubscription: hasActiveSubscription(),
+    hasPurchased,
+    loading,
+    subscription
+  });
 
   const handlePurchaseGame = async () => {
     if (!user) {
@@ -60,14 +45,14 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
     const gameProduct = stripeProducts.find(p => p.gameSlug === gameSlug);
     if (!gameProduct) {
-      console.error('Game product not found for slug:', gameSlug);
+      console.error('❌ Game product not found for slug:', gameSlug);
       console.log('Available products:', stripeProducts);
       toast.error('Game product not found. Please check console for details.');
       return;
     }
 
     try {
-      console.log('Starting purchase for game:', gameSlug, 'with product:', gameProduct);
+      console.log('💳 Starting purchase for game:', gameSlug, 'with product:', gameProduct);
       await createCheckoutSession({
         priceId: gameProduct.priceId,
         mode: gameProduct.mode,
@@ -79,8 +64,38 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
         },
       });
     } catch (error) {
-      console.error('Game purchase checkout error:', error);
+      console.error('❌ Game purchase checkout error:', error);
       toast.error('Failed to start game purchase checkout');
+    }
+  };
+
+  const handleSubscriptionPurchase = async () => {
+    if (!user) {
+      toast.error('Please sign in to subscribe');
+      return;
+    }
+
+    const subscriptionProduct = stripeProducts.find(p => p.mode === 'subscription');
+    if (!subscriptionProduct) {
+      console.error('❌ Subscription product not found');
+      toast.error('Subscription product not found');
+      return;
+    }
+
+    try {
+      console.log('💳 Starting subscription purchase:', subscriptionProduct);
+      await createCheckoutSession({
+        priceId: subscriptionProduct.priceId,
+        mode: subscriptionProduct.mode,
+        successUrl: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: window.location.href,
+        metadata: {
+          subscription_type: 'premium',
+        },
+      });
+    } catch (error) {
+      console.error('❌ Subscription checkout error:', error);
+      toast.error('Failed to start subscription checkout');
     }
   };
 
@@ -94,7 +109,7 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
       await addTestPurchase(gameSlug);
       toast.success('Test purchase added! Check console for details.');
     } catch (error) {
-      console.error('Test purchase error:', error);
+      console.error('❌ Test purchase error:', error);
       toast.error('Failed to add test purchase');
     }
   };
@@ -114,8 +129,11 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
 
   // If user has active subscription or has purchased this specific game, show the game
   if (hasActiveSubscription() || hasPurchased) {
+    console.log('✅ Access granted - showing game');
     return <>{children}</>;
   }
+
+  console.log('❌ Access denied - showing payment gate');
 
   // If no user, show login prompt
   if (!user) {
@@ -148,9 +166,6 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
     );
   }
 
-  // Get subscription product info
-  const subscriptionProduct = stripeProducts.find(p => p.name === 'Premium Gaming Subscription');
-
   // If user is logged in but no subscription or purchase, show payment options
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
@@ -161,41 +176,46 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
           <div className="bg-gray-800 rounded-xl p-4 mb-6">
             <h3 className="text-lg font-bold text-white mb-2">{gameTitle}</h3>
             <p className="text-gray-300 text-sm mb-3">
-              Choose how you want to access this premium game.
+              Choose how you'd like to access this premium game.
             </p>
-            <div className="flex items-center justify-center space-x-2 text-amber-400">
-              <CreditCard className="h-5 w-5" />
-              <span className="font-bold">${gamePrice.toFixed(2)}</span>
-            </div>
           </div>
           
           <div className="space-y-3">
-            <button
-              onClick={handlePurchaseGame}
-              disabled={checkoutLoading}
-              className="w-full bg-amber-500 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span>{checkoutLoading ? 'Redirecting to Stripe...' : `Buy ${gameTitle} - $${gamePrice.toFixed(2)}`}</span>
-            </button>
-            
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
+            {/* Individual Game Purchase */}
+            <div className="bg-gray-800 rounded-xl p-4 mb-4">
+              <h4 className="text-amber-400 font-bold mb-2">Buy This Game</h4>
+              <div className="flex items-center justify-center space-x-2 text-amber-400 mb-3">
+                <CreditCard className="h-5 w-5" />
+                <span className="font-bold">${gamePrice.toFixed(2)}</span>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-900 text-gray-400">OR</span>
-              </div>
+              <button
+                onClick={handlePurchaseGame}
+                disabled={checkoutLoading}
+                className="w-full bg-amber-500 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                <ShoppingCart className="h-5 w-5" />
+                <span>{checkoutLoading ? 'Redirecting to Stripe...' : `Buy ${gameTitle}`}</span>
+              </button>
+              <p className="text-xs text-gray-400 mt-2">One-time purchase • Lifetime access</p>
             </div>
 
-            <button
-              onClick={handleSubscribe}
-              disabled={checkoutLoading}
-              className="w-full bg-gray-700 text-gray-100 px-6 py-3 rounded-lg font-bold hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              <CreditCard className="h-5 w-5" />
-              <span>{checkoutLoading ? 'Redirecting to Stripe...' : `Subscribe - $${subscriptionProduct?.price || 9.99}/month`}</span>
-            </button>
+            {/* Subscription Option */}
+            <div className="bg-gray-800 rounded-xl p-4 mb-4">
+              <h4 className="text-purple-400 font-bold mb-2">Premium Subscription</h4>
+              <div className="flex items-center justify-center space-x-2 text-purple-400 mb-3">
+                <Crown className="h-5 w-5" />
+                <span className="font-bold">$9.99/month</span>
+              </div>
+              <button
+                onClick={handleSubscriptionPurchase}
+                disabled={checkoutLoading}
+                className="w-full bg-purple-500 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+              >
+                <Crown className="h-5 w-5" />
+                <span>{checkoutLoading ? 'Redirecting to Stripe...' : 'Subscribe for All Games'}</span>
+              </button>
+              <p className="text-xs text-gray-400 mt-2">Access all premium games • Cancel anytime</p>
+            </div>
             
             {/* Debug section */}
             <div className="mt-6 p-4 bg-red-900/20 border border-red-700 rounded-lg">
@@ -223,18 +243,8 @@ export const PremiumGameGate: React.FC<PremiumGameGateProps> = ({
               Browse Free Games
             </Link>
           </div>
-          
-          <div className="mt-6 text-xs text-gray-500">
-            <p>Subscription includes:</p>
-            <ul className="mt-2 space-y-1">
-              <li>• Access to all premium games</li>
-              <li>• No ads or interruptions</li>
-              <li>• Priority support</li>
-              <li>• Early access to new games</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
   );
-}; 
+};

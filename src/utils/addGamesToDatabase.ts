@@ -120,42 +120,77 @@ const categoriesToAdd = [
 
 export const addGamesToDatabase = async () => {
   try {
-    console.log('Starting to add games to database...');
+    console.log('🎮 Starting to add games to database...');
+
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ User must be authenticated to add games to database');
+      throw new Error('Authentication required. Please sign in first.');
+    }
+
+    console.log('✅ User authenticated:', user.email);
 
     // First, add categories
-    console.log('Adding categories...');
+    console.log('📁 Adding categories...');
     for (const category of categoriesToAdd) {
-      const { data, error } = await supabase
-        .from('categories')
-        .upsert(category, { onConflict: 'slug' })
-        .select();
+      try {
+        const { data, error } = await supabase
+          .from('categories')
+          .upsert(category, { onConflict: 'slug' })
+          .select();
 
-      if (error) {
-        console.error('Error adding category:', category.name, error);
-      } else {
-        console.log('Added category:', category.name);
+        if (error) {
+          console.error('❌ Error adding category:', category.name, error);
+          throw error;
+        } else {
+          console.log('✅ Added category:', category.name);
+        }
+      } catch (categoryError) {
+        console.error('❌ Failed to add category:', category.name, categoryError);
+        throw categoryError;
       }
     }
 
     // Then, add games
-    console.log('Adding games...');
-    for (const game of gamesToAdd) {
-      const { data, error } = await supabase
-        .from('games')
-        .upsert(game, { onConflict: 'slug' })
-        .select();
+    console.log('🎯 Adding games...');
+    let successCount = 0;
+    let errorCount = 0;
 
-      if (error) {
-        console.error('Error adding game:', game.title, error);
-      } else {
-        console.log('Added game:', game.title);
+    for (const game of gamesToAdd) {
+      try {
+        const { data, error } = await supabase
+          .from('games')
+          .upsert(game, { onConflict: 'slug' })
+          .select();
+
+        if (error) {
+          console.error('❌ Error adding game:', game.title, error);
+          errorCount++;
+          throw error;
+        } else {
+          console.log('✅ Added game:', game.title);
+          successCount++;
+        }
+      } catch (gameError) {
+        console.error('❌ Failed to add game:', game.title, gameError);
+        errorCount++;
+        throw gameError;
       }
     }
 
-    console.log('Finished adding games to database!');
-    return true;
+    console.log(`🎉 Finished adding games to database! Success: ${successCount}, Errors: ${errorCount}`);
+    
+    if (errorCount === 0) {
+      console.log('🎊 All games and categories added successfully!');
+      return true;
+    } else {
+      console.warn(`⚠️ Some games failed to add. Check the errors above.`);
+      return false;
+    }
   } catch (error) {
-    console.error('Error adding games to database:', error);
+    console.error('💥 Critical error adding games to database:', error);
     return false;
   }
 };
@@ -163,20 +198,78 @@ export const addGamesToDatabase = async () => {
 // Function to check if games exist
 export const checkGamesInDatabase = async () => {
   try {
+    console.log('🔍 Checking for games in database...');
+    
     const { data, error } = await supabase
       .from('games')
-      .select('title, slug')
-      .limit(5);
+      .select('title, slug, is_premium, price')
+      .limit(10);
 
     if (error) {
-      console.error('Error checking games:', error);
+      console.error('❌ Error checking games:', error);
       return false;
     }
 
-    console.log('Games in database:', data);
+    console.log('📊 Games in database:', data);
+    console.log(`📈 Total games found: ${data?.length || 0}`);
+    
+    if (data && data.length > 0) {
+      const freeGames = data.filter(game => !game.is_premium).length;
+      const premiumGames = data.filter(game => game.is_premium).length;
+      console.log(`🆓 Free games: ${freeGames}`);
+      console.log(`👑 Premium games: ${premiumGames}`);
+    }
+
     return data && data.length > 0;
   } catch (error) {
-    console.error('Error checking games:', error);
+    console.error('💥 Error checking games:', error);
     return false;
   }
-}; 
+};
+
+// Function to verify purchase system is working
+export const testPurchaseSystem = async (gameSlug: string) => {
+  try {
+    console.log('🧪 Testing purchase system for game:', gameSlug);
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ User must be authenticated to test purchase system');
+      return false;
+    }
+
+    // Check if game exists
+    const { data: gameData, error: gameError } = await supabase
+      .from('games')
+      .select('id, title, is_premium, price')
+      .eq('slug', gameSlug)
+      .single();
+
+    if (gameError || !gameData) {
+      console.error('❌ Game not found:', gameSlug);
+      return false;
+    }
+
+    console.log('✅ Game found:', gameData);
+
+    // Check existing purchases
+    const { data: purchaseData, error: purchaseError } = await supabase
+      .from('purchases')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('game_id', gameData.id);
+
+    if (purchaseError) {
+      console.error('❌ Error checking purchases:', purchaseError);
+      return false;
+    }
+
+    console.log('💰 Existing purchases:', purchaseData);
+    
+    return true;
+  } catch (error) {
+    console.error('💥 Error testing purchase system:', error);
+    return false;
+  }
+};
