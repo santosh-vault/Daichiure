@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 
 // Constants for game settings
 const GAME_WIDTH = 800;
@@ -491,6 +492,12 @@ const Runner: React.FC = () => {
     resizeCanvas(); // Initial resize
     return () => window.removeEventListener('resize', resizeCanvas);
   }, []);
+
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-300 to-indigo-500 font-inter p-4">

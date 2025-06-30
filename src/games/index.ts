@@ -9,6 +9,9 @@ import { KathmanduGame } from './Kathmandu';
 import { TempleGame } from './Temple';
 import Runner from './Runner';
 import Football from './Football';
+import Shooter from './Shooter';
+import Fighter from './Fighter';
+import HouseBuilder from './HouseBuilder';
 
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
@@ -23,6 +26,9 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'temple': TempleGame,
   'runner': Runner,
   'football': Football,
+  'shooter': Shooter,
+  'fighter': Fighter,
+  'housebuilder': HouseBuilder,
 };
 
 // Game metadata
@@ -115,6 +121,30 @@ export const gameMetadata = {
     is_premium: false,
     price: null,
   },
+  'shooter': {
+    title: 'Urban Shooter',
+    description: 'A realistic 2D top-down shooting game. Move, aim, shoot, and complete challenges in an urban environment!',
+    thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+    category: 'action',
+    is_premium: false,
+    price: null,
+  },
+  'fighter': {
+    title: 'Stickman Fighter',
+    description: 'Epic 2D fighting game with stickman characters! Fight against AI with punches, kicks, blocks, and special moves. Win 2 out of 3 rounds!',
+    thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+    category: 'action',
+    is_premium: false,
+    price: null,
+  },
+  'housebuilder': {
+    title: 'House Builder',
+    description: 'Build your dream house with blocks and materials. Use your creativity and skills to design and construct your home.',
+    thumbnail_url: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
+    category: 'building',
+    is_premium: false,
+    price: null,
+  },
 };
 
-export { Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, EverestGame, KathmanduGame, TempleGame }; 
+export { Fighter, Shooter, Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, EverestGame, KathmanduGame, TempleGame }; 

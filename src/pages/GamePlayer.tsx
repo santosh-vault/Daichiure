@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, Share2, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -186,6 +186,39 @@ interface GameContentProps {
 }
 
 const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
+  const gameAreaRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Fullscreen logic
+  const handleFullscreen = useCallback(() => {
+    const area = gameAreaRef.current;
+    if (!area) return;
+    if (!document.fullscreenElement) {
+      area.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }, []);
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', onFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+  }, []);
+
+  // Keyboard shortcut for fullscreen (F)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'KeyF') {
+        handleFullscreen();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [handleFullscreen]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 font-inter">
       {/* Header */}
@@ -225,7 +258,19 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Game Area */}
           <div className="lg:col-span-3">
-            <div className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800">
+            <div ref={gameAreaRef} className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800 relative">
+              {/* Fullscreen Button */}
+              <button
+                onClick={handleFullscreen}
+                className="absolute top-3 right-3 z-20 bg-gray-800 bg-opacity-80 hover:bg-opacity-100 text-white rounded-full p-2 shadow-lg focus:outline-none"
+                title={isFullscreen ? 'Exit Fullscreen (F)' : 'Go Fullscreen (F)'}
+              >
+                {isFullscreen ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13H5v6h6v-4m6-6h4V5h-6v4m0 6v4h6v-6h-4m-6-6V5H5v6h4" /></svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4h4M20 8V4h-4M4 16v4h4m12-4v4h-4" /></svg>
+                )}
+              </button>
               <div className="aspect-video">
                 {(() => {
                   const GameComponent = gameComponents[game.game_data as keyof typeof gameComponents];

@@ -15,11 +15,13 @@ import { Success } from './pages/Success';
 import { Debug } from './pages/Debug';
 import { StripeSetupPage } from './pages/StripeSetup';
 import { AdminPanel } from './pages/Admin/AdminPanel';
+import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <ScrollToTop />
         <div className="App">
           <Layout>
             <Routes>

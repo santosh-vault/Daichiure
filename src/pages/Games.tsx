@@ -149,6 +149,36 @@ export const Games: React.FC = () => {
         price: null,
         category: { name: 'Sports', slug: 'sports' },
       },
+      {
+        id: 12,
+        title: 'Urban Shooter',
+        description: 'A realistic 2D top-down shooting game. Move, aim, shoot, and complete challenges in an urban environment!',
+        thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+        slug: 'shooter',
+        is_premium: false,
+        price: null,
+        category: { name: 'Action', slug: 'action' },
+      },
+      {
+        id: 13,
+        title: 'Stickman Fighter',
+        description: 'Epic 2D fighting game with stickman characters! Fight against AI with punches, kicks, blocks, and special moves. Win 2 out of 3 rounds!',
+        thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+        slug: 'fighter',
+        is_premium: false,
+        price: null,
+        category: { name: 'Action', slug: 'action' },
+      },
+      {
+        id: 14,
+        title: 'House Builder',
+        description: 'Build your dream house with blocks and materials. Use your creativity and skills to design and construct your home.',
+        thumbnail_url: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
+        slug: 'housebuilder',
+        is_premium: false,
+        price: null,
+        category: { name: 'Building', slug: 'building' },
+      },
     ];
     setGames(localGames);
     setCategories([
