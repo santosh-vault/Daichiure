@@ -140,13 +140,13 @@ export const Home: React.FC = () => {
               <Play className="h-6 w-6" />
               <span>Play Now</span>
             </Link>
-            <a
-              href="/register" // Using <a> tag instead of <Link>
+            <Link
+              to="/register"
               className="border-2 border-amber-400 text-amber-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-amber-400 hover:text-gray-900 transition-all duration-300 ease-in-out flex items-center justify-center space-x-3 hover:shadow-[0_0_25px_rgba(255,215,0,0.5)]"
             >
               <span>Join Free</span>
               <ArrowRight className="h-6 w-6" />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -285,12 +285,12 @@ export const Home: React.FC = () => {
         <p className="text-xl text-gray-300 mb-10 font-inter">
           Join thousands of players and unlock access to premium games and exclusive content.
         </p>
-        <a
-          href="/register" // Using <a> tag instead of <Link>
+        <Link
+          to="/register"
           className="bg-amber-400 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out border-2 border-transparent hover:border-amber-700"
         >
           Create Free Account
-        </a>
+        </Link>
       </div>
     </section>
   </div>
