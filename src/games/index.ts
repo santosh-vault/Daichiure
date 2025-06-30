@@ -7,6 +7,8 @@ import { RPGGame } from './RPG';
 import { EverestGame } from './Everest';
 import { KathmanduGame } from './Kathmandu';
 import { TempleGame } from './Temple';
+import Runner from './Runner';
+import Football from './Football';
 
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
@@ -19,6 +21,8 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'everest': EverestGame,
   'kathmandu': KathmanduGame,
   'temple': TempleGame,
+  'runner': Runner,
+  'football': Football,
 };
 
 // Game metadata
@@ -95,6 +99,22 @@ export const gameMetadata = {
     is_premium: true,
     price: 6.99,
   },
+  'runner': {
+    title: 'Nepali Runner',
+    description: 'Run, jump, and dodge obstacles in a vibrant Nepali landscape! Use Space or Up Arrow to jump. Avoid obstacles and score high!',
+    thumbnail_url: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
+    category: 'arcade',
+    is_premium: false,
+    price: null,
+  },
+  'football': {
+    title: 'Football Frenzy',
+    description: 'A fast-paced 2D football game! Move, dribble, and score against the AI. Use Arrow keys/WASD to move, Space to kick.',
+    thumbnail_url: 'https://images.pexels.com/photos/399187/pexels-photo-399187.jpeg',
+    category: 'sports',
+    is_premium: false,
+    price: null,
+  },
 };
 
-export { SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, EverestGame, KathmanduGame, TempleGame }; 
+export { Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, EverestGame, KathmanduGame, TempleGame }; 

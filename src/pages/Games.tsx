@@ -134,6 +134,26 @@ export const Games: React.FC = () => {
         price: 6.99,
         category: { name: 'Puzzle', slug: 'puzzle' },
       },
+      {
+        id: 10,
+        title: 'Nepali Runner',
+        description: 'Run, jump, and dodge obstacles in a vibrant Nepali landscape! Use Space or Up Arrow to jump. Avoid obstacles and score high!',
+        thumbnail_url: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
+        slug: 'runner',
+        is_premium: false,
+        price: null,
+        category: { name: 'Arcade', slug: 'arcade' },
+      },
+      {
+        id: 11,
+        title: 'Football Frenzy',
+        description: 'A fast-paced 2D football game! Move, dribble, and score against the AI. Use Arrow keys/WASD to move, Space to kick.',
+        thumbnail_url: 'https://images.pexels.com/photos/399187/pexels-photo-399187.jpeg',
+        slug: 'football',
+        is_premium: false,
+        price: null,
+        category: { name: 'Sports', slug: 'sports' },
+      },
     ];
     setGames(localGames);
   };
