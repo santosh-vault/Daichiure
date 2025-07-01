@@ -180,6 +180,26 @@ export const Games: React.FC = () => {
         price: null,
         category: { name: 'Building', slug: 'building' },
       },
+      {
+        id: 15,
+        title: 'FreeFire 2D',
+        description: 'A beautiful 2D action shooter. Move, jump, and shoot enemies. Survive as long as you can! Controls: ←/→/A/D to move, Space/W/↑ to jump, Z to shoot.',
+        thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+        slug: 'freefire',
+        is_premium: false,
+        price: null,
+        category: { name: 'Action', slug: 'action' },
+      },
+      {
+        id: 16,
+        title: 'Imposter Hunt 2D',
+        description: 'Complete all your tasks before the imposter finds you! Move with arrow keys, finish tasks, and avoid the imposter.',
+        thumbnail_url: 'https://i.imgur.com/p1nHxNA.png',
+        slug: 'amongimposter',
+        is_premium: false,
+        price: null,
+        category: { name: 'Arcade', slug: 'arcade' },
+      },
     ];
     setGames(localGames);
     setCategories([

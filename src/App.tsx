@@ -1,4 +1,5 @@
 import React from 'react';
+import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
@@ -19,38 +20,40 @@ import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <ScrollToTop />
-        <div className="App">
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/games" element={<Games />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/games/:slug" element={<GamePlayer />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/success" element={<Success />} />
-              <Route path="/debug" element={<Debug />} />
-              <Route path="/stripe-setup" element={<StripeSetupPage />} />
-              <Route path="/admin" element={<AdminPanel />} />
-            </Routes>
-          </Layout>
-          <Toaster 
-            position="top-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-              },
-            }}
-          />
-        </div>
-      </Router>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <Router>
+          <ScrollToTop />
+          <div className="App">
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/games" element={<Games />} />
+                <Route path="/categories" element={<Categories />} />
+                <Route path="/games/:slug" element={<GamePlayer />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/success" element={<Success />} />
+                <Route path="/debug" element={<Debug />} />
+                <Route path="/stripe-setup" element={<StripeSetupPage />} />
+                <Route path="/admin" element={<AdminPanel />} />
+              </Routes>
+            </Layout>
+            <Toaster 
+              position="top-right"
+              toastOptions={{
+                duration: 4000,
+                style: {
+                  background: '#363636',
+                  color: '#fff',
+                },
+              }}
+            />
+          </div>
+        </Router>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

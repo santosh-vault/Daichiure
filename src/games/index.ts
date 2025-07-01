@@ -12,6 +12,8 @@ import Football from './Football';
 import Shooter from './Shooter';
 import Fighter from './Fighter';
 import HouseBuilder from './HouseBuilder';
+import FreeFireGame from './FreeFire';
+import AmongImposterGame from './AmongImposter';
 
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
@@ -29,6 +31,8 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'shooter': Shooter,
   'fighter': Fighter,
   'housebuilder': HouseBuilder,
+  'freefire': FreeFireGame,
+  'amongimposter': AmongImposterGame,
 };
 
 // Game metadata
@@ -41,6 +45,8 @@ export const gameMetadata = {
     is_premium: false,
     price: null,
   },
+
+  
   'pong': {
     title: 'Pong Retro',
     description: 'Classic Pong game. Play against the computer. Use arrow keys or W/S to control your paddle.',
@@ -142,6 +148,22 @@ export const gameMetadata = {
     description: 'Build your dream house with blocks and materials. Use your creativity and skills to design and construct your home.',
     thumbnail_url: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
     category: 'building',
+    is_premium: false,
+    price: null,
+  },
+  'freefire': {
+    title: 'FreeFire 2D',
+    description: 'A beautiful 2D action shooter. Move, jump, and shoot enemies. Survive as long as you can! Controls: ←/→/A/D to move, Space/W/↑ to jump, Z to shoot.',
+    thumbnail_url: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+    category: 'action',
+    is_premium: false,
+    price: null,
+  },
+  'amongimposter': {
+    title: 'Imposter Hunt 2D',
+    description: 'Complete all your tasks before the imposter finds you! Move with arrow keys, finish tasks, and avoid the imposter.',
+    thumbnail_url: 'https://i.imgur.com/p1nHxNA.png',
+    category: 'arcade',
     is_premium: false,
     price: null,
   },
