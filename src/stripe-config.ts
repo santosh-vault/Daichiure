@@ -17,7 +17,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'rpg',
   },
   {
-    priceId: 'price_everest_climb_test',
+    priceId: 'price_1Rg6qr4PJ3ItcT3GB4FojKpQ',
     name: 'Everest Climb',
     description: 'Climb Mount Everest! Navigate through treacherous terrain and reach the summit.',
     mode: 'payment',
@@ -25,7 +25,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'everest',
   },
   {
-    priceId: 'price_kathmandu_maze_test',
+    priceId: 'price_1Rg6uH4PJ3ItcT3GsFMzKEDC',
     name: 'Kathmandu Maze',
     description: 'Navigate through the ancient streets of Kathmandu in this cultural maze adventure.',
     mode: 'payment',
@@ -33,7 +33,7 @@ export const stripeProducts: StripeProduct[] = [
     gameSlug: 'kathmandu',
   },
   {
-    priceId: 'price_temple_puzzle_test',
+    priceId: 'price_1Rg6w44PJ3ItcT3GKDS7xt4v',
     name: 'Nepali Temple Puzzle',
     description: 'Solve ancient puzzles in beautiful Nepali temples and discover hidden treasures.',
     mode: 'payment',
