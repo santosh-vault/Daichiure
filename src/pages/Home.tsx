@@ -1,112 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Star, Users, Trophy, ArrowRight } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import "../App.css";
+import { Play, ArrowRight } from 'lucide-react';
 import AdSense from '../components/AdSense';
 import { Helmet } from 'react-helmet-async';
-
-interface FeaturedGame {
-  id: number;
-  title: string;
-  description: string;
-  thumbnail_url: string;
-  slug: string;
-  is_premium: boolean;
-  price: number | null;
-}
+import { games } from '../data/games';
+import { GameCard } from '../components/GameCard';
+import "../App.css";
 
 export const Home: React.FC = () => {
-  const [featuredGames, setFeaturedGames] = useState<FeaturedGame[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Show all local games including Snake, Pong, and new premium Nepali games
-    setFeaturedGames([
-      {
-        id: 1,
-        title: 'Snake Classic',
-        description: 'The classic snake game. Eat food, grow longer, and avoid walls and your own tail. Use arrow keys or WASD.',
-        thumbnail_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
-        slug: 'snake',
-        is_premium: false,
-        price: null,
-      },
-      {
-        id: 2,
-        title: 'Pong Retro',
-        description: 'Classic Pong game. Play against the computer. Use arrow keys or W/S to control your paddle.',
-        thumbnail_url: 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg',
-        slug: 'pong',
-        is_premium: false,
-        price: null,
-      },
-      {
-        id: 3,
-        title: 'Tetris Classic',
-        description: 'The legendary puzzle game. Arrange falling blocks to clear lines and score points. Use arrow keys to move and rotate.',
-        thumbnail_url: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
-        slug: 'tetris',
-        is_premium: false,
-        price: null,
-      },
-      {
-        id: 4,
-        title: 'Breakout Arcade',
-        description: 'Smash through colorful blocks with your paddle and ball. Don\'t let the ball fall! Use arrow keys to control.',
-        thumbnail_url: 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg',
-        slug: 'breakout',
-        is_premium: false,
-        price: null,
-      },
-      {
-        id: 5,
-        title: 'Memory Match',
-        description: 'Test your memory by matching pairs of cards. Find all matches to win! Click cards to flip them.',
-        thumbnail_url: 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
-        slug: 'memory',
-        is_premium: false,
-        price: null,
-      },
-      {
-        id: 6,
-        title: 'Pixel Adventure',
-        description: 'A simple RPG adventure game. Explore the world, collect items, and battle monsters. Use WASD to move.',
-        thumbnail_url: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
-        slug: 'rpg',
-        is_premium: true,
-        price: 4.99,
-      },
-      {
-        id: 7,
-        title: 'Everest Climb',
-        description: 'Climb Mount Everest! Navigate through treacherous terrain, manage oxygen levels, and reach the summit. Use arrow keys.',
-        thumbnail_url: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
-        slug: 'everest',
-        is_premium: true,
-        price: 7.99,
-      },
-      {
-        id: 8,
-        title: 'Kathmandu Maze',
-        description: 'Navigate through the ancient streets of Kathmandu. Find hidden temples and avoid obstacles in this cultural maze adventure.',
-        thumbnail_url: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
-        slug: 'kathmandu',
-        is_premium: true,
-        price: 5.99,
-      },
-      {
-        id: 9,
-        title: 'Nepali Temple Puzzle',
-        description: 'Solve ancient puzzles in beautiful Nepali temples. Match patterns, unlock secrets, and discover hidden treasures.',
-        thumbnail_url: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
-        slug: 'temple',
-        is_premium: true,
-        price: 6.99,
-      },
-    ]);
-    setLoading(false);
-  }, []);
+  // Pick the first 9 games as featured (customize as needed)
+  const featuredGames = games.slice(0, 9);
 
   return (
     <>
@@ -163,35 +66,6 @@ export const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Stats Section - Removed as per user request */}
-        {/* <section className="py-20 bg-gray-900 shadow-inner">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="text-center bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Trophy className="h-10 w-10 text-gray-900" />
-                </div>
-                <h3 className="text-4xl font-bold text-amber-400 mb-3 font-['Press_Start_2P']">50+</h3>
-                <p className="text-gray-400 text-lg">Premium Games</p>
-              </div>
-              <div className="text-center bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Users className="h-10 w-10 text-gray-900" />
-                </div>
-                <h3 className="text-4xl font-bold text-amber-400 mb-3 font-['Press_Start_2P']">10K+</h3>
-                <p className="text-gray-400 text-lg">Active Players</p>
-              </div>
-              <div className="text-center bg-gray-800 p-8 rounded-xl shadow-lg border border-gray-700 transform hover:scale-105 transition-transform duration-300 ease-in-out">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-700 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
-                  <Star className="h-10 w-10 text-gray-900" />
-                </div>
-                <h3 className="text-4xl font-bold text-amber-400 mb-3 font-['Press_Start_2P']">4.9</h3>
-                <p className="text-gray-400 text-lg">Average Rating</p>
-              </div>
-            </div>
-          </div>
-        </section> */}
-
         {/* Featured Games Section */}
         <section className="py-20 bg-gray-950">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -208,76 +82,26 @@ export const Home: React.FC = () => {
             <AdSense 
               adSlot="1234567890" 
               className="mb-8"
-              style={{ minHeight: '250px' }}
+              style={{ minHeight: '90px' }}
             />
 
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-gray-800 rounded-xl shadow-xl overflow-hidden animate-pulse border border-gray-700">
-                    <div className="bg-gray-700 h-56 rounded-t-xl"></div>
-                    <div className="p-7">
-                      <div className="h-7 bg-gray-700 rounded mb-3"></div>
-                      <div className="h-5 bg-gray-700 rounded mb-5 w-4/5"></div>
-                      <div className="h-12 bg-gray-700 rounded-lg"></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                {featuredGames.map((game) => (
-                  <div
-                    key={game.id}
-                    className="group relative bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700 cursor-pointer"
-                  >
-                    <img
-                      src={game.thumbnail_url}
-                      alt={game.title}
-                      className="w-full h-56 object-cover rounded-xl transition-all duration-300 group-hover:scale-105 group-hover:opacity-70"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = `https://placehold.co/400x200/5C4033/FFD700?text=${encodeURIComponent(game.title)}`;
-                      }}
-                    />
-
-                    {game.is_premium && (
-                      <div className="absolute top-4 right-4 bg-gradient-to-r from-amber-400 to-amber-600 text-gray-900 px-3 py-1.5 rounded-full text-sm font-bold shadow-md z-20">
-                        Premium
-                      </div>
-                    )}
-
-                    {/* Overlay for details on hover */}
-                    <div className="absolute inset-0 bg-black/70 rounded-xl flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out transform scale-95 group-hover:scale-100
-                                    group-hover:shadow-[0_0_40px_rgba(255,215,0,0.6)] border border-transparent group-hover:border-amber-500">
-                      <div className="text-center">
-                        <h3 className="text-2xl font-bold text-amber-300 mb-3 font-bruno-ace">{game.title}</h3>
-                        <p className="text-gray-300 mb-6 line-clamp-2 text-base font-inter">{game.description}</p>
-                        <div className="flex flex-col items-center justify-center gap-4">
-                          <Link
-                            to={`/games/${game.slug}`}
-                            className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-900 px-6 py-3 rounded-lg font-medium hover:shadow-[0_0_15px_rgba(255,215,0,0.5)] transition-shadow flex items-center space-x-2 text-base"
-                          >
-                            <Play className="h-5 w-5" />
-                            <span>Play Now</span>
-                          </Link>
-                          {game.is_premium && game.price && (
-                            <span className="text-xl font-bold text-amber-300">
-                              ${game.price.toFixed(2)}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+              {featuredGames.map((game) => (
+                <Link
+                  key={game.slug}
+                  to={`/games/${game.slug}`}
+                  className="block group"
+                >
+                  <GameCard game={game} />
+                </Link>
+              ))}
+            </div>
 
             {/* AdSense Banner - Middle of Games Section */}
             <AdSense 
               adSlot="0987654321" 
               className="my-8"
-              style={{ minHeight: '250px' }}
+              style={{ minHeight: '90px' }}
             />
 
             <div className="text-center mt-16">
@@ -315,7 +139,7 @@ export const Home: React.FC = () => {
             <AdSense 
               adSlot="1122334455" 
               className="mb-8"
-              style={{ minHeight: '200px' }}
+              style={{ minHeight: '90px' }}
             />
             
             <Link

@@ -4,14 +4,15 @@ import { ArrowLeft, Heart, Share2, Crown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { gameComponents, gameMetadata } from '../games';
+import { gameComponents } from '../games';
+import { games } from '../data/games';
 import { PremiumGameGate } from '../components/PremiumGameGate';
 
 interface GameData {
   id: number;
   title: string;
   description: string;
-  thumbnail_url: string;
+  thumbnail_url?: string;
   is_premium: boolean;
   price: number | null;
   game_data: string;
@@ -40,24 +41,20 @@ export const GamePlayer: React.FC = () => {
 
     try {
       console.log('🎮 Loading game:', slug);
-      
-      // First, check if it's a local React game
-      if (gameMetadata[slug as keyof typeof gameMetadata]) {
-        const metadata = gameMetadata[slug as keyof typeof gameMetadata];
+      // First, check if it's a local React game using the games array
+      const localGame = games.find(g => g.slug === slug);
+      if (localGame) {
         const gameData = {
           id: -1,
-          title: metadata.title,
-          description: metadata.description,
-          thumbnail_url: metadata.thumbnail_url,
-          is_premium: metadata.is_premium,
-          price: metadata.price,
+          title: localGame.title,
+          description: localGame.description,
+          is_premium: localGame.is_premium,
+          price: localGame.price,
           game_data: slug, // Use slug as game_data for React components
           category: {
-            name: metadata.category.charAt(0).toUpperCase() + metadata.category.slice(1)
+            name: localGame.category.charAt(0).toUpperCase() + localGame.category.slice(1)
           }
         };
-        
-        console.log('✅ Local game found:', gameData);
         setGame(gameData as unknown as GameData);
         setLoading(false);
         return;
@@ -94,7 +91,6 @@ export const GamePlayer: React.FC = () => {
           category: data.categories
         };
 
-        console.log('✅ Database game found:', gameData);
         setGame(gameData as unknown as GameData);
       } catch (dbError) {
         console.warn('❌ Database connection failed:', dbError);

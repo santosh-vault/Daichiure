@@ -1,0 +1,18 @@
+export const gameThumbnails: Record<string, string> = {
+  freefire: 'https://i.pinimg.com/736x/8d/bc/6e/8dbc6e3c498ccc0bd62a70a2a9d14704.jpg',
+  amongimposter: 'https://i.pinimg.com/736x/c2/4e/f5/c24ef5d2c3da14a76a59b6e8a418dde0.jpg',
+  shooter: 'https://i.pinimg.com/736x/01/46/eb/0146eb83291fe469d97cd64dac60a232.jpg',
+  snake: 'https://i.pinimg.com/736x/fe/52/04/fe52049819f6a4982a94c061b0c207b3.jpg',
+  pong: 'https://i.pinimg.com/736x/f8/e2/f7/f8e2f73f5f50ce7cf76510bb7524d811.jpg',
+  tetris: 'https://i.pinimg.com/736x/2c/92/a8/2c92a86d1b6e46b6f69ac19b7390cde6.jpg',
+  breakout: 'https://images.pexels.com/photos/442576/pexels-photo-442576.jpeg',
+  memory: 'https://i.pinimg.com/736x/9c/ac/de/9cacde6123f021198ed97f9356e12ff1.jpg',
+  rpg: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
+  everest: 'https://i.pinimg.com/736x/9d/18/53/9d1853f8b7a02569a6cc09f92257bf92.jpg',
+  kathmandu: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
+  temple: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
+  runner: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
+  football: 'https://i.pinimg.com/736x/87/4d/06/874d06261fc4ad205341e2d4cd9b8a88.jpg',
+  fighter: 'https://images.pexels.com/photos/301977/pexels-photo-301977.jpeg',
+  housebuilder: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
+}; 
