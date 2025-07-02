@@ -31,6 +31,7 @@ export const BreakoutGame: React.FC = () => {
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(3);
   const [level, setLevel] = useState(1);
+  const [started, setStarted] = useState(false);
 
   const CANVAS_WIDTH = 800;
   const CANVAS_HEIGHT = 600;
@@ -306,6 +307,20 @@ export const BreakoutGame: React.FC = () => {
     resetBall();
     resetPaddle();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Smash through colorful blocks with your paddle and ball. Don't let the ball fall! Use arrow keys to control.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

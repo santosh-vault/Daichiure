@@ -32,6 +32,7 @@ const Football: React.FC = () => {
   const goalTimeout = useRef<NodeJS.Timeout | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // Handle keyboard
   useEffect(() => {
@@ -108,7 +109,7 @@ const Football: React.FC = () => {
   // Game logic
   const updateGame = (dt: number) => {
     // Player movement
-    let nextPlayer = { ...player };
+    const nextPlayer = { ...player };
     if (keys.current['ArrowUp'] || keys.current['KeyW']) nextPlayer.y -= PLAYER_SPEED * dt;
     if (keys.current['ArrowDown'] || keys.current['KeyS']) nextPlayer.y += PLAYER_SPEED * dt;
     if (keys.current['ArrowLeft'] || keys.current['KeyA']) nextPlayer.x -= PLAYER_SPEED * dt;
@@ -119,7 +120,7 @@ const Football: React.FC = () => {
     setPlayer(nextPlayer);
 
     // AI movement (simple: chase ball, defend goal)
-    let nextAI = { ...ai };
+    const nextAI = { ...ai };
     const aiGoal = { x: GAME_WIDTH - FIELD_MARGIN - GOAL_WIDTH / 2, y: GAME_HEIGHT / 2 };
     const defend = ball.pos.x > GAME_WIDTH / 2;
     const target = defend ? { x: aiGoal.x - 40, y: ball.pos.y } : ball.pos;
@@ -134,7 +135,7 @@ const Football: React.FC = () => {
     setAI(nextAI);
 
     // Ball physics
-    let nextBall = { ...ball };
+    const nextBall = { ...ball };
     nextBall.pos.x += nextBall.vel.x * dt;
     nextBall.pos.y += nextBall.vel.y * dt;
     nextBall.vel.x *= BALL_FRICTION;
@@ -192,7 +193,7 @@ const Football: React.FC = () => {
     ) {
       setScore(s => ({ ...s, player: s.player + 1 }));
       setGameState('goal');
-      resetPositions('player');
+      resetPositions();
       return;
     }
     // AI goal (left)
@@ -203,7 +204,7 @@ const Football: React.FC = () => {
     ) {
       setScore(s => ({ ...s, ai: s.ai + 1 }));
       setGameState('goal');
-      resetPositions('ai');
+      resetPositions();
       return;
     }
 
@@ -211,7 +212,7 @@ const Football: React.FC = () => {
   };
 
   // Reset after goal
-  const resetPositions = (scorer: 'player' | 'ai') => {
+  const resetPositions = () => {
     if (goalTimeout.current) clearTimeout(goalTimeout.current);
     goalTimeout.current = setTimeout(() => {
       setPlayer({ x: GAME_WIDTH / 3, y: GAME_HEIGHT / 2 });
@@ -303,6 +304,20 @@ const Football: React.FC = () => {
   };
 
   // UI
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>A fast-paced 2D football game! Move, dribble, and score against the AI. Use Arrow keys/WASD to move, Space to kick.</div>
+      </div>
+    );
+  }
+
   return (
     <div ref={containerRef} className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-green-300 to-blue-400 font-inter p-4">
       <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">Football Frenzy</h1>

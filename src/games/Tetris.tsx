@@ -25,6 +25,7 @@ export const TetrisGame: React.FC = () => {
   const [lines, setLines] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [started, setStarted] = useState(false);
 
   const BOARD_WIDTH = 10;
   const BOARD_HEIGHT = 20;
@@ -232,6 +233,20 @@ export const TetrisGame: React.FC = () => {
     initializeBoard();
     spawnPiece();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>The legendary puzzle game. Arrange falling blocks to clear lines and score points. Use arrow keys to move and rotate.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

@@ -127,4 +127,12 @@ export const games = [
     price: null,
     category: 'building',
   },
+  {
+    slug: 'allofaredead',
+    title: 'All Of Us Are Dead',
+    description: 'Recruit allies and survive! Move with arrow keys or WASD. Convert neutrals to allies and reach the max team size to win.',
+    is_premium: false,
+    price: null,
+    category: 'action',
+  },
 ]; 

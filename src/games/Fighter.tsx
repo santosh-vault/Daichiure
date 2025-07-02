@@ -45,9 +45,9 @@ const Fighter: React.FC = () => {
   const [playerWins, setPlayerWins] = useState(0);
   const [aiWins, setAiWins] = useState(0);
   const [winner, setWinner] = useState<'player' | 'ai' | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
   const [specialCooldown, setSpecialCooldown] = useState(0);
   const [showMoveList, setShowMoveList] = useState(false);
+  const [started, setStarted] = useState(false);
   
   const [player, setPlayer] = useState<Fighter>({
     pos: { x: 150, y: GROUND_Y - PLAYER_HEIGHT },
@@ -121,7 +121,7 @@ const Fighter: React.FC = () => {
 
     // Update player
     setPlayer(p => {
-      let newPlayer = { ...p };
+      const newPlayer = { ...p };
       
       // Handle input
       if (p.state === 'idle' || p.state === 'walking') {
@@ -202,7 +202,7 @@ const Fighter: React.FC = () => {
 
     // Update AI
     setAi(a => {
-      let newAi = { ...a };
+      const newAi = { ...a };
       
       // Simple AI behavior
       const distance = Math.abs(player.pos.x - a.pos.x);
@@ -563,6 +563,20 @@ const Fighter: React.FC = () => {
       startRound();
     }
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Epic 2D fighting game with stickman characters! Fight against AI with punches, kicks, blocks, and special moves. Win 2 out of 3 rounds!</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-400 to-green-300 font-inter p-4">

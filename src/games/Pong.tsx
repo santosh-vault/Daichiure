@@ -5,6 +5,7 @@ export const PongGame: React.FC = () => {
   const [score, setScore] = useState({ player: 0, computer: 0 });
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -201,6 +202,20 @@ export const PongGame: React.FC = () => {
     setGameOver(false);
     setPaused(false);
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Classic Pong game. Play against the computer. Use arrow keys or W/S to control your paddle.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center p-4 bg-gray-900 min-h-full">

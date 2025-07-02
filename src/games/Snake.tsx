@@ -13,6 +13,7 @@ export const SnakeGame: React.FC = () => {
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [started, setStarted] = useState(false);
 
   // Game state variables managed by useRef to avoid re-renders on every game update
   const snakeRef = useRef([{ x: 10, y: 10 }]);
@@ -205,6 +206,20 @@ export const SnakeGame: React.FC = () => {
     // Immediately re-draw to reflect reset state
     draw();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>The classic snake game. Eat food, grow longer, and avoid walls and your own tail. Use arrow keys or WASD.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-inter">

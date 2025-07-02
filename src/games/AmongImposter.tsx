@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
@@ -36,6 +36,7 @@ interface Task {
 export const AmongImposterGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scoreRef = useRef<HTMLDivElement>(null);
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -84,9 +85,7 @@ export const AmongImposterGame: React.FC = () => {
     window.addEventListener('keyup', handleKeyUp);
 
     let gameOver = false;
-    let gameWon = false;
     let guessPhase = false;
-    let guessResult: string | null = null;
 
     // Mouse click for guess phase
     const handleCanvasClick = (e: MouseEvent) => {
@@ -100,12 +99,10 @@ export const AmongImposterGame: React.FC = () => {
         if (dist < crew.size + 8) {
           guessPhase = false;
           if (crew.isImposter) {
-            guessResult = 'win';
             if (scoreRef.current) {
               scoreRef.current.innerHTML = '<div style="color: #00ff00; font-size: 24px; text-align: center; margin-top: 20px;">You Win! You correctly identified the imposter!</div>';
             }
           } else {
-            guessResult = 'lose';
             if (scoreRef.current) {
               scoreRef.current.innerHTML = '<div style="color: #ff0000; font-size: 24px; text-align: center; margin-top: 20px;">Wrong! That was not the imposter.</div>';
             }
@@ -255,6 +252,20 @@ export const AmongImposterGame: React.FC = () => {
       canvas.removeEventListener('click', handleCanvasClick);
     };
   }, []);
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Complete all your tasks before the imposter finds you! Move with arrow keys, finish tasks, and avoid the imposter.</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ textAlign: 'center' }}>

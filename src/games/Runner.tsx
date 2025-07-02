@@ -63,6 +63,7 @@ const Runner: React.FC = () => {
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [backgroundElements, setBackgroundElements] = useState<BackgroundElement[]>([]);
   const [milestoneMessage, setMilestoneMessage] = useState<string | null>(null);
+  const [started, setStarted] = useState(false);
 
   // Function to draw rounded rectangles
   const roundRect = (
@@ -265,7 +266,7 @@ const Runner: React.FC = () => {
         let newVelocityY = prevPlayer.velocityY + PLAYER_GRAVITY * deltaTime;
         let newIsJumping = prevPlayer.isJumping;
         let newIsFalling = prevPlayer.isFalling;
-        let newFrame = (prevPlayer.frame + deltaTime * 0.1) % (Math.PI * 2); // For simple animation
+        const newFrame = (prevPlayer.frame + deltaTime * 0.1) % (Math.PI * 2); // For simple animation
 
         const groundY = GAME_HEIGHT - GROUND_HEIGHT - PLAYER_SIZE;
 
@@ -498,6 +499,20 @@ const Runner: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Run, jump, and dodge obstacles in a vibrant Nepali landscape! Use Space or Up Arrow to jump. Avoid obstacles and score high!</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-300 to-indigo-500 font-inter p-4">

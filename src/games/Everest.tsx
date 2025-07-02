@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Mountain, Thermometer, Heart, Flag } from 'lucide-react';
 
 interface Climber {
   x: number;
@@ -35,6 +34,7 @@ export const EverestGame: React.FC = () => {
   const [oxygen, setOxygen] = useState(100);
   const [health, setHealth] = useState(100);
   const [altitude, setAltitude] = useState(0);
+  const [started, setStarted] = useState(false);
 
   const [climber, setClimber] = useState<Climber>({
     x: CANVAS_WIDTH / 2,
@@ -46,7 +46,6 @@ export const EverestGame: React.FC = () => {
 
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [oxygenTanks, setOxygenTanks] = useState<OxygenTank[]>([]);
-  const [baseCamp, setBaseCamp] = useState({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 30 });
 
   const generateObstacles = useCallback(() => {
     const newObstacles: Obstacle[] = [];
@@ -236,12 +235,6 @@ export const EverestGame: React.FC = () => {
       }
     });
 
-    // Draw base camp
-    ctx.fillStyle = '#8B4513';
-    ctx.fillRect(baseCamp.x - 20, baseCamp.y, 40, 20);
-    ctx.fillStyle = '#FFD700';
-    ctx.fillRect(baseCamp.x - 15, baseCamp.y - 10, 30, 10);
-
     // Draw climber
     ctx.fillStyle = '#FF6B6B';
     ctx.fillRect(climber.x, climber.y, CLIMBER_SIZE, CLIMBER_SIZE);
@@ -312,7 +305,7 @@ export const EverestGame: React.FC = () => {
       ctx.fillText(`Congratulations! You reached the top of Everest!`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 50);
       ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 80);
     }
-  }, [climber, obstacles, oxygenTanks, baseCamp, altitude, score, level, oxygen, health, gameState]);
+  }, [climber, obstacles, oxygenTanks, altitude, score, level, oxygen, health, gameState]);
 
   useEffect(() => {
     generateObstacles();
@@ -370,6 +363,20 @@ export const EverestGame: React.FC = () => {
     generateObstacles();
     generateOxygenTanks();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Climb Mount Everest! Navigate through treacherous terrain, manage oxygen levels, and reach the summit. Use arrow keys.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

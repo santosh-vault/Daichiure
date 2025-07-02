@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
@@ -413,8 +413,24 @@ export const FreeFireGame: React.FC = () => {
   // UI update on mount
   useEffect(() => {
     updateUI();
-    // eslint-disable-next-line
+     
   }, []);
+
+  const [started, setStarted] = useState(false);
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>A beautiful 2D action shooter. Move, jump, and shoot enemies. Survive as long as you can!</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'relative', width: CANVAS_WIDTH, margin: '0 auto' }}>

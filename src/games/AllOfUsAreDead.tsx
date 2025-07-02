@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
@@ -18,10 +18,12 @@ interface Mob {
 }
 
 export const RecruitRushGame: React.FC = () => {
+  const [started, setStarted] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!started) return;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!canvas || !ctx) return;
@@ -57,7 +59,6 @@ export const RecruitRushGame: React.FC = () => {
     window.addEventListener('keyup', (e) => (keys[e.key] = false));
 
     let gameOver = false;
-    let gameWon = false;
 
     function gameLoop() {
       if (!ctx) return;
@@ -155,7 +156,21 @@ export const RecruitRushGame: React.FC = () => {
       window.removeEventListener('keydown', (e) => (keys[e.key] = false));
       window.removeEventListener('keyup', (e) => (keys[e.key] = false));
     };
-  }, []);
+  }, [started]);
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Recruit allies and survive! Move with arrow keys or WASD. Convert neutrals to allies and reach the max team size to win.</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ textAlign: 'center' }}>
@@ -180,4 +195,5 @@ export const RecruitRushGame: React.FC = () => {
   );
 };
 
-export default RecruitRushGame;
+const AllOfUsAreDead: React.FC = RecruitRushGame;
+export default AllOfUsAreDead;

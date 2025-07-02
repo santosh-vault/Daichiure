@@ -165,7 +165,7 @@ const HouseBuilder: React.FC = () => {
   const [message, setMessage] = useState<string | null>(null);
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  const [gameStartTime, setGameStartTime] = useState<number>(0);
+  const [started, setStarted] = useState(false);
 
   // Timer effect
   useEffect(() => {
@@ -245,7 +245,6 @@ const HouseBuilder: React.FC = () => {
     setScore(0);
     setPlacedAssets([]);
     setGameState('building');
-    setGameStartTime(Date.now());
     setMessage(`🏁 Challenge started: ${challenge.name}`);
   };
 
@@ -353,19 +352,6 @@ const HouseBuilder: React.FC = () => {
     setScore(finalScore);
     setGameState('complete');
     setMessage(`🎉 Challenge Complete! Final Score: ${finalScore}`);
-  };
-
-  // Remove asset
-  const removeAsset = (assetId: string) => {
-    const asset = placedAssets.find(pa => pa.id === assetId);
-    if (asset) {
-      const assetData = NEPALI_ASSETS.find(a => a.id === asset.assetId);
-      if (assetData) {
-        setScore(prev => prev - assetData.points);
-        setBudget(prev => prev + assetData.cost);
-      }
-      setPlacedAssets(prev => prev.filter(pa => pa.id !== assetId));
-    }
   };
 
   // Format time
@@ -517,6 +503,20 @@ const HouseBuilder: React.FC = () => {
   };
 
   // Menu screen
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Build your dream house with blocks and materials. Use your creativity and skills to design and construct your home.</div>
+      </div>
+    );
+  }
+
   if (gameState === 'menu') {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-300 to-green-400 font-inter p-4">

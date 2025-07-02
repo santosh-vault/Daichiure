@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search, Filter } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import AdSense from '../components/AdSense';
 import { games } from '../data/games';
 import { GameCard } from '../components/GameCard';
@@ -24,7 +23,6 @@ export const Games: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
 
   const filteredGames = games.filter(game => {
     const matchesSearch = game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||

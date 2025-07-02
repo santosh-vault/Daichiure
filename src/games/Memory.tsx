@@ -19,6 +19,7 @@ export const MemoryGame: React.FC = () => {
   const [gameWon, setGameWon] = useState(false);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [bestMoves, setBestMoves] = useState<number | null>(null);
+  const [started, setStarted] = useState(false);
 
   const initializeGame = useCallback(() => {
     const shuffledValues = [...CARD_VALUES].sort(() => Math.random() - 0.5);
@@ -136,6 +137,20 @@ export const MemoryGame: React.FC = () => {
     if (moves <= 18) return 2;
     return 1;
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Test your memory by matching pairs of cards. Find all matches to win! Click cards to flip them.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

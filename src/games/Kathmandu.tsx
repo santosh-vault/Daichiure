@@ -1,18 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { MapPin, Heart, Star, Flag } from 'lucide-react';
 
 interface Player {
   x: number;
   y: number;
   health: number;
   treasures: number;
-}
-
-interface Wall {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 interface Temple {
@@ -42,6 +34,7 @@ export const KathmanduGame: React.FC = () => {
   const [level, setLevel] = useState(1);
   const [health, setHealth] = useState(100);
   const [treasures, setTreasures] = useState(0);
+  const [started, setStarted] = useState(false);
 
   const [player, setPlayer] = useState<Player>({
     x: 1,
@@ -53,7 +46,6 @@ export const KathmanduGame: React.FC = () => {
   const [maze, setMaze] = useState<boolean[][]>([]);
   const [temples, setTemples] = useState<Temple[]>([]);
   const [treasureItems, setTreasureItems] = useState<Treasure[]>([]);
-  const [exit, setExit] = useState({ x: MAZE_WIDTH - 2, y: 1 });
 
   const generateMaze = useCallback(() => {
     const newMaze = Array(MAZE_HEIGHT).fill(null).map(() => Array(MAZE_WIDTH).fill(true));
@@ -167,7 +159,7 @@ export const KathmanduGame: React.FC = () => {
     }
 
     // Check if reached exit
-    if (newX === exit.x && newY === exit.y) {
+    if (newX === MAZE_WIDTH - 2 && newY === 1) {
       setGameState('won');
     }
 
@@ -176,7 +168,7 @@ export const KathmanduGame: React.FC = () => {
       x: newX,
       y: newY
     }));
-  }, [player, gameState, maze, temples, treasureItems, exit]);
+  }, [player, gameState, maze, temples, treasureItems]);
 
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
     if (gameState === 'gameOver') return;
@@ -272,13 +264,6 @@ export const KathmanduGame: React.FC = () => {
       }
     });
 
-    // Draw exit
-    ctx.fillStyle = '#00FF00';
-    ctx.fillRect(exit.x * CELL_SIZE + 5, exit.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-    ctx.fillStyle = '#000000';
-    ctx.font = '16px Arial';
-    ctx.fillText('🚪', exit.x * CELL_SIZE + 8, exit.y * CELL_SIZE + 25);
-
     // Draw player
     ctx.fillStyle = '#FF6B6B';
     ctx.fillRect(player.x * CELL_SIZE + 5, player.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
@@ -346,7 +331,7 @@ export const KathmanduGame: React.FC = () => {
       ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 80);
       ctx.fillText(`Treasures Found: ${treasures}/5`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 110);
     }
-  }, [player, maze, temples, treasureItems, exit, score, level, treasures, health, gameState]);
+  }, [player, maze, temples, treasureItems, score, level, treasures, health, gameState]);
 
   useEffect(() => {
     generateMaze();
@@ -392,6 +377,20 @@ export const KathmanduGame: React.FC = () => {
     });
     generateMaze();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Navigate through the ancient streets of Kathmandu. Find hidden temples and avoid obstacles in this cultural maze adventure.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

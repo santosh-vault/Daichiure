@@ -61,6 +61,7 @@ const Shooter: React.FC = () => {
   const reloadTimeout = useRef<NodeJS.Timeout | null>(null);
   const surviveStart = useRef<number>(0);
   const noReloadUsed = useRef<boolean>(true);
+  const [started, setStarted] = useState(false);
 
   // Setup obstacles, enemies, etc.
   const setupLevel = useCallback(() => {
@@ -204,7 +205,7 @@ const Shooter: React.FC = () => {
     setPlayer(p => ({ ...p, angle: newAngle }));
 
     // Player movement
-    let newPos = { ...player.pos };
+    const newPos = { ...player.pos };
     if (keys.current['KeyW'] || keys.current['ArrowUp']) newPos.y -= PLAYER_SPEED * dt;
     if (keys.current['KeyS'] || keys.current['ArrowDown']) newPos.y += PLAYER_SPEED * dt;
     if (keys.current['KeyA'] || keys.current['ArrowLeft']) newPos.x -= PLAYER_SPEED * dt;
@@ -439,6 +440,20 @@ const Shooter: React.FC = () => {
     setupLevel();
     setGameState('playing');
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>A realistic 2D top-down shooting game. Move, aim, shoot, and complete challenges in an urban environment!</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 font-inter p-4">

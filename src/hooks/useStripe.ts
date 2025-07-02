@@ -66,9 +66,9 @@ export const useStripe = () => {
       }
 
       return data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      toast.error(error.message || 'Failed to start checkout');
+      toast.error(error instanceof Error ? error.message : 'Failed to start checkout');
       return null;
     } finally {
       setLoading(false);

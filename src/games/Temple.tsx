@@ -37,6 +37,7 @@ export const TempleGame: React.FC = () => {
   const [score, setScore] = useState(0);
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [bestMoves, setBestMoves] = useState<number | null>(null);
+  const [started, setStarted] = useState(false);
 
   const initializeGame = useCallback(() => {
     const tileCount = 16; // 4x4 grid
@@ -184,6 +185,20 @@ export const TempleGame: React.FC = () => {
     setLevel(prev => prev + 1);
     initializeGame();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>Solve ancient puzzles in beautiful Nepali temples. Match patterns, unlock secrets, and discover hidden treasures.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">

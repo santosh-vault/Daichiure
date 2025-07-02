@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { Search, Filter, Grid, List, Crown, Play } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Grid, List } from 'lucide-react';
 import { games } from '../data/games';
 import { GameCard } from '../components/GameCard';
-import { useAuth } from '../contexts/AuthContext';
 import { useSubscription } from '../hooks/useSubscription';
 
 interface Game {
@@ -41,8 +40,6 @@ export const Categories: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [searchParams] = useSearchParams();
-  const { user } = useAuth();
   const { hasActiveSubscription } = useSubscription();
 
   // Update category game counts
@@ -61,10 +58,6 @@ export const Categories: React.FC = () => {
     const matchesCategory = !selectedCategory || game.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
-
-  const canPlayGame = (game: Game) => {
-    return !game.is_premium || hasActiveSubscription();
-  };
 
   const getCategoryStats = () => {
     const totalGames = games.length;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sword, Shield, Heart, Zap, MapPin, Gem } from 'lucide-react';
+import { Sword, Shield, Heart, Zap, Gem } from 'lucide-react';
 
 interface Player {
   x: number;
@@ -73,6 +73,7 @@ export const RPGGame: React.FC = () => {
   const [currentEnemy, setCurrentEnemy] = useState<Enemy | null>(null);
   const [message, setMessage] = useState('');
   const [showInventory, setShowInventory] = useState(false);
+  const [started, setStarted] = useState(false);
 
   const generateWorld = useCallback(() => {
     // Generate enemies
@@ -327,6 +328,20 @@ export const RPGGame: React.FC = () => {
     setShowInventory(false);
     generateWorld();
   };
+
+  if (!started) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+        <button
+          onClick={() => setStarted(true)}
+          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+        >
+          Click to Start
+        </button>
+        <div style={{ color: '#fff', fontSize: 16 }}>A simple RPG adventure game. Explore the world, collect items, and battle monsters. Use WASD to move.</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
