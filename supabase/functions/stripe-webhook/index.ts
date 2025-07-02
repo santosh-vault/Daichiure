@@ -162,6 +162,7 @@ async function handleGamePurchase(customerId: string, metadata: any, amountTotal
     const { error: purchaseError } = await supabase.from('purchases').insert({
       user_id: customerData.user_id,
       game_id: gameData.id,
+      purchase_date: new Date().toISOString(),
       amount_paid: amountTotal / 100, // Convert from cents to dollars
     });
 
@@ -193,7 +194,7 @@ async function syncCustomerFromStripe(customerId: string) {
       const { error: noSubError } = await supabase.from('stripe_subscriptions').upsert(
         {
           customer_id: customerId,
-          subscription_status: 'not_started',
+          status: 'not_started',
         },
         {
           onConflict: 'customer_id',

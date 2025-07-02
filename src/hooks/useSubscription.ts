@@ -187,6 +187,7 @@ export const useGamePurchase = (gameSlug: string) => {
         .insert({
           user_id: user.id,
           game_id: game.id,
+          purchase_date: new Date().toISOString(),
           amount_paid: 1.00
         })
         .select();
