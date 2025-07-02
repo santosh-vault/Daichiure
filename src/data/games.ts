@@ -135,4 +135,12 @@ export const games = [
     price: null,
     category: 'action',
   },
+  {
+    slug: 'towerstack',
+    title: 'Tower Stack',
+    description: 'Stack blocks as high as you can! Press Space or Click to drop the block. Align carefully to keep building your tower.',
+    is_premium: false,
+    price: null,
+    category: 'arcade',
+  },
 ];
