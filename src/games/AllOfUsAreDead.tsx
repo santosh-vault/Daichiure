@@ -24,6 +24,7 @@ interface Mob {
 export const AllOfUsAreDead: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const infoRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number>();
 
   const mobsRef = useRef<Mob[]>([]);
   const gameRunningRef = useRef(false);
@@ -31,20 +32,88 @@ export const AllOfUsAreDead: React.FC = () => {
   const gameOverRef = useRef(false);
 
   const keys = useRef<Record<string, boolean>>({});
-  const [_, forceRender] = useState(0);
   const [started, setStarted] = useState(false);
+  const [gameStats, setGameStats] = useState({ teamSize: 1, gameOver: false, won: false });
 
+  // Initialize game
+  const initializeGame = () => {
+    const mobs: Mob[] = [];
+    
+    // Add player
+    mobs.push({
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT / 2,
+      size: MOB_SIZE,
+      color: '#00ff00',
+      vx: 0,
+      vy: 0,
+      isAlly: true,
+    });
+
+    // Create neutral groups
+    let groupIdCounter = 1;
+    for (let i = 0; i < GROUP_COUNT; i++) {
+      const groupSize = Math.floor(Math.random() * 5) + 1;
+      const baseX = Math.random() * (CANVAS_WIDTH - 100) + 50;
+      const baseY = Math.random() * (CANVAS_HEIGHT - 100) + 50;
+      const vx = (Math.random() - 0.5) * NEUTRAL_SPEED;
+      const vy = (Math.random() - 0.5) * NEUTRAL_SPEED;
+
+      for (let j = 0; j < groupSize; j++) {
+        const offsetX = (Math.random() - 0.5) * 30;
+        const offsetY = (Math.random() - 0.5) * 30;
+
+        mobs.push({
+          x: baseX + offsetX,
+          y: baseY + offsetY,
+          size: MOB_SIZE,
+          color: '#888888',
+          vx,
+          vy,
+          isAlly: false,
+          groupId: groupIdCounter,
+          offsetX,
+          offsetY,
+        });
+      }
+      groupIdCounter++;
+    }
+
+    mobsRef.current = mobs;
+    gameRunningRef.current = true;
+    gamePausedRef.current = false;
+    gameOverRef.current = false;
+    setGameStats({ teamSize: 1, gameOver: false, won: false });
+  };
+
+  // Handle keyboard input
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!canvas || !ctx) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      keys.current[e.key.toLowerCase()] = true;
+      keys.current[e.code] = true;
+    };
 
-    window.addEventListener('keydown', (e) => (keys.current[e.key] = true));
-    window.addEventListener('keyup', (e) => (keys.current[e.key] = false));
+    const handleKeyUp = (e: KeyboardEvent) => {
+      keys.current[e.key.toLowerCase()] = false;
+      keys.current[e.code] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  // Game loop
+  useEffect(() => {
+    if (!started || !gameRunningRef.current) return;
 
     const gameLoop = () => {
-      if (!ctx || !gameRunningRef.current || gamePausedRef.current || gameOverRef.current) {
-        requestAnimationFrame(gameLoop);
+      if (!gameRunningRef.current || gamePausedRef.current || gameOverRef.current) {
+        animationRef.current = requestAnimationFrame(gameLoop);
         return;
       }
 
@@ -53,16 +122,21 @@ export const AllOfUsAreDead: React.FC = () => {
       const neutrals = mobs.filter((m) => !m.isAlly);
       const player = allies[0];
 
-      // Player movement
-      if (player) {
-        if (keys.current['ArrowLeft'] || keys.current['a']) player.x -= SPEED;
-        if (keys.current['ArrowRight'] || keys.current['d']) player.x += SPEED;
-        if (keys.current['ArrowUp'] || keys.current['w']) player.y -= SPEED;
-        if (keys.current['ArrowDown'] || keys.current['s']) player.y += SPEED;
-
-        player.x = Math.max(MOB_SIZE, Math.min(CANVAS_WIDTH - MOB_SIZE, player.x));
-        player.y = Math.max(MOB_SIZE, Math.min(CANVAS_HEIGHT - MOB_SIZE, player.y));
+      if (!player) {
+        gameOverRef.current = true;
+        setGameStats(prev => ({ ...prev, gameOver: true }));
+        return;
       }
+
+      // Player movement
+      if (keys.current['arrowleft'] || keys.current['a']) player.x -= SPEED;
+      if (keys.current['arrowright'] || keys.current['d']) player.x += SPEED;
+      if (keys.current['arrowup'] || keys.current['w']) player.y -= SPEED;
+      if (keys.current['arrowdown'] || keys.current['s']) player.y += SPEED;
+
+      // Keep player in bounds
+      player.x = Math.max(MOB_SIZE, Math.min(CANVAS_WIDTH - MOB_SIZE, player.x));
+      player.y = Math.max(MOB_SIZE, Math.min(CANVAS_HEIGHT - MOB_SIZE, player.y));
 
       // Group movement
       const groupLeaders = new Map<number, Mob>();
@@ -91,14 +165,10 @@ export const AllOfUsAreDead: React.FC = () => {
         }
       }
 
-      // Clear canvas
-      ctx.fillStyle = '#1a1a2e';
-      ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-      // ✅ Group-based collision logic
+      // Collision detection
       const collidedGroups = new Set<number>();
       for (const mob of neutrals) {
-        const dist = player ? Math.hypot(player.x - mob.x, player.y - mob.y) : Infinity;
+        const dist = Math.hypot(player.x - mob.x, player.y - mob.y);
         if (dist < MOB_SIZE * 1.5 && mob.groupId) {
           collidedGroups.add(mob.groupId);
         }
@@ -126,167 +196,158 @@ export const AllOfUsAreDead: React.FC = () => {
         }
       });
 
-      // Draw all mobs
-      for (const mob of mobsRef.current) {
-        ctx.fillStyle = mob.color;
-        ctx.beginPath();
-        ctx.arc(mob.x, mob.y, mob.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+      // Update game stats
+      const currentAllies = mobsRef.current.filter(m => m.isAlly);
+      setGameStats({
+        teamSize: currentAllies.length,
+        gameOver: currentAllies.length === 0,
+        won: currentAllies.length >= MAX_TEAM
+      });
 
-        // Optional: show group sizes above leaders
-        if (!mob.isAlly && mob.groupId && groupLeaders.get(mob.groupId) === mob) {
-          const groupSize = mobsRef.current.filter((m) => m.groupId === mob.groupId).length;
-          ctx.fillStyle = "#ffcc00";
-          ctx.font = "14px Arial";
-          ctx.textAlign = "center";
-          ctx.fillText(`G: ${groupSize}`, mob.x, mob.y - MOB_SIZE - 5);
-        }
-      }
-
-      // Show player team size
-      if (player && ctx) {
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "16px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText(`Team: ${allies.length}`, player.x, player.y - MOB_SIZE - 10);
-      }
-
-      // Update info
-      if (infoRef.current) {
-        infoRef.current.innerHTML = `<div style="color: white; font-size: 18px;">Team Size: ${allies.length}</div>`;
-      }
-
-      if (allies.length >= MAX_TEAM) {
+      // Check win/lose conditions
+      if (currentAllies.length >= MAX_TEAM) {
         gameOverRef.current = true;
-        if (infoRef.current) {
-          infoRef.current.innerHTML += `<div style="color: #00ff00; font-size: 24px;">You Win!</div>`;
-        }
       }
 
-      if (allies.length === 0) {
+      if (currentAllies.length === 0) {
         gameOverRef.current = true;
-        if (infoRef.current) {
-          infoRef.current.innerHTML += `<div style="color: red; font-size: 24px;">You Lost!</div>`;
-        }
       }
 
-      requestAnimationFrame(gameLoop);
+      // Draw the game
+      draw();
+
+      animationRef.current = requestAnimationFrame(gameLoop);
     };
 
-    requestAnimationFrame(gameLoop);
+    animationRef.current = requestAnimationFrame(gameLoop);
 
     return () => {
-      window.removeEventListener('keydown', (e) => (keys.current[e.key] = false));
-      window.removeEventListener('keyup', (e) => (keys.current[e.key] = false));
-    };
-  }, []);
-
-  const createNeutralGroups = () => {
-    const mobs: Mob[] = [];
-    let groupIdCounter = 1;
-
-    for (let i = 0; i < GROUP_COUNT; i++) {
-      const groupSize = Math.floor(Math.random() * 5) + 1;
-      const baseX = Math.random() * (CANVAS_WIDTH - 100) + 50;
-      const baseY = Math.random() * (CANVAS_HEIGHT - 100) + 50;
-      const vx = (Math.random() - 0.5) * NEUTRAL_SPEED;
-      const vy = (Math.random() - 0.5) * NEUTRAL_SPEED;
-
-      for (let j = 0; j < groupSize; j++) {
-        const offsetX = (Math.random() - 0.5) * 30;
-        const offsetY = (Math.random() - 0.5) * 30;
-
-        mobs.push({
-          x: baseX + offsetX,
-          y: baseY + offsetY,
-          size: MOB_SIZE,
-          color: '#888888',
-          vx,
-          vy,
-          isAlly: false,
-          groupId: groupIdCounter,
-          offsetX,
-          offsetY,
-        });
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
       }
+    };
+  }, [started]);
 
-      groupIdCounter++;
+  const draw = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Clear canvas
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    // Draw all mobs
+    for (const mob of mobsRef.current) {
+      ctx.fillStyle = mob.color;
+      ctx.beginPath();
+      ctx.arc(mob.x, mob.y, mob.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
     }
 
-    return mobs;
+    // Draw player indicator
+    const player = mobsRef.current.find(m => m.isAlly);
+    if (player) {
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "16px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText(`Team: ${mobsRef.current.filter(m => m.isAlly).length}`, player.x, player.y - MOB_SIZE - 10);
+    }
   };
 
   const handleStart = () => {
     setStarted(true);
-    mobsRef.current = [
-      {
-        x: CANVAS_WIDTH / 2,
-        y: CANVAS_HEIGHT / 2,
-        size: MOB_SIZE,
-        color: '#00ff00',
-        vx: 0,
-        vy: 0,
-        isAlly: true,
-      },
-      ...createNeutralGroups(),
-    ];
-    gameOverRef.current = false;
-    gamePausedRef.current = false;
-    gameRunningRef.current = true;
-    forceRender((x) => x + 1);
+    initializeGame();
   };
 
   const handlePause = () => {
-    gamePausedRef.current = true;
-    forceRender((x) => x + 1);
+    gamePausedRef.current = !gamePausedRef.current;
   };
 
-  const handleResume = () => {
-    gamePausedRef.current = false;
-    forceRender((x) => x + 1);
+  const handleRestart = () => {
+    setStarted(false);
+    gameRunningRef.current = false;
+    gameOverRef.current = false;
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    setTimeout(() => {
+      setStarted(true);
+      initializeGame();
+    }, 100);
   };
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
-        <button
-          onClick={handleStart}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
-        >
-          Click to Start
-        </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>
-          Recruit allies and survive! Move with arrow keys or WASD. Convert smaller groups to grow. Avoid bigger groups!
+      <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white p-8">
+        <div className="text-center max-w-md">
+          <h1 className="text-4xl font-bold text-red-400 mb-4">All Of Us Are Dead</h1>
+          <p className="text-gray-300 mb-6">
+            Recruit allies and survive! Move with arrow keys or WASD. Convert smaller groups to grow your team. 
+            Avoid bigger groups or you'll lose members. Reach {MAX_TEAM} allies to win!
+          </p>
+          <button
+            onClick={handleStart}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg text-xl transition-colors"
+          >
+            Start Survival
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ textAlign: 'center' }}>
+    <div className="flex flex-col items-center justify-center h-full bg-gray-900 text-white">
+      <div className="mb-4 text-center">
+        <div className="flex items-center justify-center space-x-6 mb-2">
+          <div className="text-lg">
+            <span className="text-green-400">Team Size: {gameStats.teamSize}</span>
+          </div>
+          <div className="text-lg">
+            <span className="text-blue-400">Target: {MAX_TEAM}</span>
+          </div>
+        </div>
+        <div className="flex space-x-4">
+          <button
+            onClick={handlePause}
+            className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded transition-colors"
+          >
+            {gamePausedRef.current ? 'Resume' : 'Pause'}
+          </button>
+          <button
+            onClick={handleRestart}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+          >
+            Restart
+          </button>
+        </div>
+      </div>
+
       <canvas
         ref={canvasRef}
         width={CANVAS_WIDTH}
         height={CANVAS_HEIGHT}
-        style={{
-          border: '2px solid #ffffff',
-          backgroundColor: '#1a1a2e',
-          display: 'block',
-          margin: '0 auto',
-        }}
+        className="border-2 border-gray-600 rounded-lg bg-gray-800"
       />
-      <div ref={infoRef} style={{ marginTop: 10 }}></div>
-      <div style={{ marginTop: 10 }}>
-        <button onClick={handlePause}>Pause</button>
-        <button onClick={handleResume}>Resume</button>
+
+      <div ref={infoRef} className="mt-4 text-center">
+        {gameStats.won && (
+          <div className="text-green-400 text-2xl font-bold">🎉 YOU WON! 🎉</div>
+        )}
+        {gameStats.gameOver && !gameStats.won && (
+          <div className="text-red-400 text-2xl font-bold">💀 GAME OVER 💀</div>
+        )}
       </div>
-      <div style={{ color: '#ffffff', marginTop: 10, fontSize: 14 }}>
-        <p>Controls: Arrow Keys or WASD to move</p>
-        <p>Touch smaller mobs/teams (gray) to grow your team (green)</p>
-        <p>If you touch a bigger team, you lose. Reach {MAX_TEAM} allies to win!</p>
+
+      <div className="mt-4 text-center text-gray-400 text-sm max-w-md">
+        <p><strong>Controls:</strong> Arrow Keys or WASD to move</p>
+        <p><strong>Goal:</strong> Touch smaller groups (gray) to recruit them. Avoid larger groups!</p>
+        <p><strong>Win Condition:</strong> Reach {MAX_TEAM} team members</p>
       </div>
     </div>
   );
