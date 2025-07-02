@@ -5,8 +5,10 @@ const CANVAS_HEIGHT = 600;
 const MOB_SIZE = 20;
 const SPEED = 2;
 const NEUTRAL_SPEED = 0.5;
+const ALLY_FOLLOW_SPEED = 1.8;
 const MAX_TEAM = 50;
 const GROUP_COUNT = 15;
+const FOLLOW_DISTANCE = 40; // Distance allies try to maintain from player
 
 interface Mob {
   x: number;
@@ -19,6 +21,9 @@ interface Mob {
   groupId?: number;
   offsetX?: number;
   offsetY?: number;
+  isPlayer?: boolean;
+  followTargetX?: number;
+  followTargetY?: number;
 }
 
 export const AllOfUsAreDead: React.FC = () => {
@@ -48,6 +53,7 @@ export const AllOfUsAreDead: React.FC = () => {
       vx: 0,
       vy: 0,
       isAlly: true,
+      isPlayer: true,
     });
 
     // Create neutral groups
@@ -120,7 +126,7 @@ export const AllOfUsAreDead: React.FC = () => {
       const mobs = mobsRef.current;
       const allies = mobs.filter((m) => m.isAlly);
       const neutrals = mobs.filter((m) => !m.isAlly);
-      const player = allies[0];
+      const player = allies.find(m => m.isPlayer);
 
       if (!player) {
         gameOverRef.current = true;
@@ -138,10 +144,37 @@ export const AllOfUsAreDead: React.FC = () => {
       player.x = Math.max(MOB_SIZE, Math.min(CANVAS_WIDTH - MOB_SIZE, player.x));
       player.y = Math.max(MOB_SIZE, Math.min(CANVAS_HEIGHT - MOB_SIZE, player.y));
 
-      // Group movement
+      // Move allies to follow the player
+      const nonPlayerAllies = allies.filter(m => !m.isPlayer);
+      nonPlayerAllies.forEach((ally, index) => {
+        // Calculate desired position around the player
+        const angle = (index / nonPlayerAllies.length) * Math.PI * 2;
+        const distance = FOLLOW_DISTANCE + (Math.floor(index / 8) * 25); // Create rings of followers
+        const targetX = player.x + Math.cos(angle) * distance;
+        const targetY = player.y + Math.sin(angle) * distance;
+
+        // Move towards target position
+        const dx = targetX - ally.x;
+        const dy = targetY - ally.y;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 5) { // Only move if not close enough
+          const moveX = (dx / dist) * ALLY_FOLLOW_SPEED;
+          const moveY = (dy / dist) * ALLY_FOLLOW_SPEED;
+          
+          ally.x += moveX;
+          ally.y += moveY;
+
+          // Keep allies in bounds
+          ally.x = Math.max(MOB_SIZE, Math.min(CANVAS_WIDTH - MOB_SIZE, ally.x));
+          ally.y = Math.max(MOB_SIZE, Math.min(CANVAS_HEIGHT - MOB_SIZE, ally.y));
+        }
+      });
+
+      // Group movement for neutrals
       const groupLeaders = new Map<number, Mob>();
-      for (const mob of mobs) {
-        if (!mob.isAlly && mob.groupId) {
+      for (const mob of neutrals) {
+        if (mob.groupId) {
           if (!groupLeaders.has(mob.groupId)) {
             groupLeaders.set(mob.groupId, mob);
           }
@@ -155,8 +188,8 @@ export const AllOfUsAreDead: React.FC = () => {
         if (leader.y <= MOB_SIZE || leader.y >= CANVAS_HEIGHT - MOB_SIZE) leader.vy *= -1;
       });
 
-      for (const mob of mobs) {
-        if (!mob.isAlly && mob.groupId) {
+      for (const mob of neutrals) {
+        if (mob.groupId) {
           const leader = groupLeaders.get(mob.groupId);
           if (leader && mob !== leader) {
             mob.x = leader.x + (mob.offsetX || 0);
@@ -179,15 +212,20 @@ export const AllOfUsAreDead: React.FC = () => {
         const groupSize = groupMobs.length;
 
         if (allies.length >= groupSize) {
+          // Convert neutral group to allies
           for (const mob of groupMobs) {
             mob.isAlly = true;
             mob.color = '#00ff00';
+            mob.groupId = undefined; // Remove from neutral group
+            mob.offsetX = undefined;
+            mob.offsetY = undefined;
           }
         } else {
+          // Player's team is smaller, lose some allies
           const toRemove = groupSize - allies.length;
           let removed = 0;
           mobsRef.current = mobsRef.current.filter((m) => {
-            if (removed < toRemove && m.isAlly) {
+            if (removed < toRemove && m.isAlly && !m.isPlayer) {
               removed++;
               return false;
             }
@@ -244,18 +282,45 @@ export const AllOfUsAreDead: React.FC = () => {
       ctx.beginPath();
       ctx.arc(mob.x, mob.y, mob.size, 0, Math.PI * 2);
       ctx.fill();
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 2;
+      
+      // Different stroke for player
+      if (mob.isPlayer) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+      }
       ctx.stroke();
+
+      // Draw group size for neutral groups
+      if (!mob.isAlly && mob.groupId) {
+        const groupSize = mobsRef.current.filter(m => m.groupId === mob.groupId).length;
+        const groupLeader = mobsRef.current.find(m => 
+          m.groupId === mob.groupId && 
+          !mobsRef.current.some(other => 
+            other.groupId === mob.groupId && 
+            other !== m && 
+            (other.x < m.x || (other.x === m.x && other.y < m.y))
+          )
+        );
+        
+        if (mob === groupLeader) {
+          ctx.fillStyle = "#ffcc00";
+          ctx.font = "12px Arial";
+          ctx.textAlign = "center";
+          ctx.fillText(`${groupSize}`, mob.x, mob.y - MOB_SIZE - 5);
+        }
+      }
     }
 
-    // Draw player indicator
-    const player = mobsRef.current.find(m => m.isAlly);
+    // Draw player team size
+    const player = mobsRef.current.find(m => m.isPlayer);
     if (player) {
       ctx.fillStyle = "#ffffff";
       ctx.font = "16px Arial";
       ctx.textAlign = "center";
-      ctx.fillText(`Team: ${mobsRef.current.filter(m => m.isAlly).length}`, player.x, player.y - MOB_SIZE - 10);
+      ctx.fillText(`Team: ${mobsRef.current.filter(m => m.isAlly).length}`, player.x, player.y - MOB_SIZE - 15);
     }
   };
 
@@ -288,7 +353,7 @@ export const AllOfUsAreDead: React.FC = () => {
           <h1 className="text-4xl font-bold text-red-400 mb-4">All Of Us Are Dead</h1>
           <p className="text-gray-300 mb-6">
             Recruit allies and survive! Move with arrow keys or WASD. Convert smaller groups to grow your team. 
-            Avoid bigger groups or you'll lose members. Reach {MAX_TEAM} allies to win!
+            Your allies will follow you around. Avoid bigger groups or you'll lose members. Reach {MAX_TEAM} allies to win!
           </p>
           <button
             onClick={handleStart}
@@ -346,7 +411,8 @@ export const AllOfUsAreDead: React.FC = () => {
 
       <div className="mt-4 text-center text-gray-400 text-sm max-w-md">
         <p><strong>Controls:</strong> Arrow Keys or WASD to move</p>
-        <p><strong>Goal:</strong> Touch smaller groups (gray) to recruit them. Avoid larger groups!</p>
+        <p><strong>Goal:</strong> Touch smaller groups (gray) to recruit them. Your allies will follow you!</p>
+        <p><strong>Strategy:</strong> Avoid larger groups that can eliminate your team members</p>
         <p><strong>Win Condition:</strong> Reach {MAX_TEAM} team members</p>
       </div>
     </div>
