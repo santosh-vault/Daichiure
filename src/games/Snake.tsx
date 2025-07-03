@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { gameThumbnails } from '../constants/gameThumbnails';
 
 export default function App() {
   return (
@@ -107,7 +108,7 @@ export const SnakeGame: React.FC = () => {
       currentScoreRef.current += 10;
       setScore(currentScoreRef.current);
 
-      let newFoodPos;
+      let newFoodPos: { x: number; y: number };
       do {
         newFoodPos = {
           x: Math.floor(Math.random() * boardSize),
@@ -120,13 +121,37 @@ export const SnakeGame: React.FC = () => {
     }
   }, [paused, gameOver, boardSize]);
 
+  // Facebook share
+  const gameName = 'Snake Classic';
+  const gameSlug = 'snake';
+  const thumbnail = gameThumbnails[gameSlug];
+  const shareOnFacebook = () => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(`I scored ${score} in ${gameName}! Can you beat me?`);
+    const image = encodeURIComponent(thumbnail);
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}&picture=${image}`;
+    window.open(fbShareUrl, '_blank');
+  };
+
+  // Brand button style
+  const brandBtn = {
+    background: '#00bcd4',
+    color: '#222',
+    border: 'none',
+    borderRadius: 8,
+    fontWeight: 'bold',
+    fontSize: 18,
+    padding: '10px 32px',
+    margin: 8,
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px #0004',
+    transition: 'background 0.2s',
+  };
+
   // Handle keyboard inputs
   const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    e.preventDefault(); // Prevent default browser actions for arrow keys/space
-
+    e.preventDefault();
     if (gameOver) return;
-
-    // Allow changing direction only if not going directly opposite to prevent instant self-collision
     switch (e.key) {
       case 'ArrowUp':
       case 'w':
@@ -148,7 +173,7 @@ export const SnakeGame: React.FC = () => {
       case 'D':
         if (directionRef.current.x === 0) directionRef.current = { x: 1, y: 0 };
         break;
-      case ' ': // Spacebar for pause
+      case 'Enter': // Use Enter for pause
         setPaused(prev => !prev);
         break;
     }
@@ -209,63 +234,50 @@ export const SnakeGame: React.FC = () => {
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', minHeight: 600 }}>
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={brandBtn}
         >
-          Click to Start
+          Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>The classic snake game. Eat food, grow longer, and avoid walls and your own tail. Use arrow keys or WASD.</div>
+        <div style={{ color: '#fff', fontSize: 16, marginTop: 16 }}>The classic snake game. Eat food, grow longer, and avoid walls and your own tail. Use arrow keys or WASD.</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center p-4 sm:p-6 lg:p-8 font-inter">
-      <div className="bg-gray-900 rounded-3xl shadow-2xl p-8 sm:p-10 border border-gray-800 text-gray-100
-                  transform transition-all duration-500 ease-in-out hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(255,215,0,0.4)]
-                  flex flex-col items-center">
-        <div className="text-center mb-6">
-          <h2 className="text-4xl font-bold font-['Orbitron'] text-amber-400 mb-4 drop-shadow-md">Snake Game</h2>
-          <div className="flex justify-center items-center space-x-6 mb-4 text-xl">
-            <div className="font-semibold text-gray-300">Score: <span className="text-amber-300">{score}</span></div>
-            {paused && (
-              <div className="text-yellow-500 font-bold font-['Orbitron'] text-shadow-md">PAUSED</div>
-            )}
-            {gameOver && (
-              <div className="text-red-500 font-bold font-['Orbitron'] text-shadow-md">GAME OVER!</div>
-            )}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #232946 0%, #1a1a2e 100%)', fontFamily: 'inter' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#18181b', borderRadius: 24, boxShadow: '0 8px 32px #0008', padding: 32, margin: 24 }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
+          <h2 style={{ fontSize: 36, fontWeight: 700, color: '#FFD700', marginBottom: 12 }}>Snake Game</h2>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 32, fontSize: 24 }}>
+            <div style={{ color: '#FFA500' }}>Score: <span style={{ color: '#FFD700' }}>{score}</span></div>
+            {paused && <div style={{ color: '#00bcd4', fontWeight: 700 }}>PAUSED</div>}
+            {gameOver && <div style={{ color: '#f44336', fontWeight: 700 }}>GAME OVER!</div>}
           </div>
         </div>
-
-        <canvas
-          ref={canvasRef}
-          width={canvasSize}
-          height={canvasSize}
-          className="border-4 border-amber-600 rounded-lg shadow-xl mb-6 bg-gray-950"
-          style={{
-            // Ensure canvas is responsive while maintaining aspect ratio
-            maxWidth: '100%',
-            height: 'auto'
-          }}
-        />
-
-        <div className="text-center">
-          <div className="text-base text-gray-400 mb-6 leading-relaxed">
-            Use <span className="font-bold text-amber-300">WASD</span> or <span className="font-bold text-amber-300">Arrow Keys</span> to move <br/>
-            Press <span className="font-bold text-amber-300">Space</span> to pause
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+            <button style={brandBtn} onClick={() => setPaused((p) => !p)}>{paused ? 'Resume' : 'Pause'}</button>
+            <button style={brandBtn} onClick={resetGame}>Restart</button>
           </div>
-          {(gameOver || paused) && ( // Show play again button if game over or paused
-            <button
-              onClick={resetGame}
-              className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-8 py-3 rounded-full font-bold text-lg
-                         hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-all duration-300 ease-in-out transform hover:scale-105
-                         shadow-md"
-            >
-              {gameOver ? 'Play Again' : 'Resume Game'}
-            </button>
+          <canvas
+            ref={canvasRef}
+            width={canvasSize}
+            height={canvasSize}
+            style={{ border: '4px solid #FFD700', borderRadius: 12, background: '#111', boxShadow: '0 4px 24px #0008', marginBottom: 16 }}
+          />
+          {(gameOver) && (
+            <>
+              <button style={brandBtn} onClick={resetGame}>Restart Game</button>
+              <button style={{ ...brandBtn, background: '#4267B2', color: '#fff' }} onClick={shareOnFacebook}>Share on Facebook</button>
+            </>
           )}
+        </div>
+        <div style={{ color: '#fff', marginTop: 16, fontSize: 15, textAlign: 'center' }}>
+          <p>Use <b>WASD</b> or <b>Arrow Keys</b> to move</p>
+          <p>Press <b>Enter</b> to pause/resume</p>
         </div>
       </div>
     </div>
