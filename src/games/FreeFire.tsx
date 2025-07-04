@@ -46,6 +46,9 @@ export const FreeFireGame: React.FC = () => {
   const animationRef = useRef<number>();
   const gameOver = useRef(false);
   const reloadTimeout = useRef<NodeJS.Timeout | null>(null);
+  const gameLoopRunning = useRef(false);
+
+  const [started, setStarted] = useState(false);
 
   // UI update
   const updateUI = () => {
@@ -249,9 +252,6 @@ export const FreeFireGame: React.FC = () => {
       }
     });
 
-    // Ammo pickups
-    // (no movement)
-
     // Collision detection: bullets hit enemies
     bullets.current.forEach((b, bi) => {
       enemies.current.forEach((e, ei) => {
@@ -333,26 +333,41 @@ export const FreeFireGame: React.FC = () => {
 
   // Main game loop
   useEffect(() => {
-    const ctx = canvasRef.current?.getContext('2d');
-    if (!ctx) return;
+    if (!started || gameLoopRunning.current) return;
+    
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+
+    gameLoopRunning.current = true;
     let running = true;
+
     function loop() {
-      if (!running) return;
+      if (!running || gameOver.current) return;
       update();
-      if (ctx) draw(ctx);
+      draw(ctx);
       animationRef.current = requestAnimationFrame(loop);
     }
-    loop();
+    
+    // Start the game loop
+    animationRef.current = requestAnimationFrame(loop);
+
     return () => {
       running = false;
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      if (reloadTimeout.current) clearTimeout(reloadTimeout.current);
+      gameLoopRunning.current = false;
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      if (reloadTimeout.current) {
+        clearTimeout(reloadTimeout.current);
+      }
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [started]);
 
   // Controls
   useEffect(() => {
+    if (!started) return;
+
     const down = (e: KeyboardEvent) => {
       keys.current[e.code] = true;
       if (e.code === 'KeyZ') {
@@ -373,14 +388,17 @@ export const FreeFireGame: React.FC = () => {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup', up);
     };
-    // eslint-disable-next-line
-  }, []);
+  }, [started]);
 
   // Mouse aiming and shooting
   useEffect(() => {
+    if (!started) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const move = (e: MouseEvent) => {
-      const rect = canvasRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      const rect = canvas.getBoundingClientRect();
       mouse.current.x = e.clientX - rect.left;
       mouse.current.y = e.clientY - rect.top;
     };
@@ -388,40 +406,39 @@ export const FreeFireGame: React.FC = () => {
       e.preventDefault();
       shoot();
     };
-    const canvas = canvasRef.current;
-    if (canvas) {
-      canvas.addEventListener('mousemove', move);
-      canvas.addEventListener('mousedown', click);
-      return () => {
-        canvas.removeEventListener('mousemove', move);
-        canvas.removeEventListener('mousedown', click);
-      };
-    }
-    // eslint-disable-next-line
-  }, []);
+    
+    canvas.addEventListener('mousemove', move);
+    canvas.addEventListener('mousedown', click);
+    return () => {
+      canvas.removeEventListener('mousemove', move);
+      canvas.removeEventListener('mousedown', click);
+    };
+  }, [started]);
 
   // Enemy spawn interval
   useEffect(() => {
+    if (!started) return;
+
     const interval = setInterval(() => {
       if (!gameOver.current) spawnEnemy();
     }, 1500);
     return () => clearInterval(interval);
-  }, []);
+  }, [started]);
 
   // Ammo spawn interval
   useEffect(() => {
+    if (!started) return;
+
     const interval = setInterval(() => {
       if (!gameOver.current && ammos.current.length < 2) spawnAmmo();
     }, 4000);
     return () => clearInterval(interval);
-  }, []);
+  }, [started]);
 
   // UI update on mount
   useEffect(() => {
     updateUI();
   }, []);
-
-  const [started, setStarted] = useState(false);
 
   if (!started) {
     return (
