@@ -14,7 +14,11 @@ const PLAYER_MAX_HEALTH = 100;
 const ENEMY_MAX_HEALTH = 40;
 const ENEMY_SPAWN_DELAY = 2000; // 2 seconds after kill
 const AMMO_SPAWN_CHANCE = 0.3; // 30% chance to spawn ammo after enemy kill
+const HEALTH_SPAWN_CHANCE = 0.2; // 20% chance to spawn health after enemy kill
 const AMMO_SPAWN_DELAY = 5000; // 5 seconds minimum between ammo spawns
+const HEALTH_SPAWN_DELAY = 8000; // 8 seconds minimum between health spawns
+const BULLET_DAMAGE = 20; // Damage per bullet (2 hits to kill enemy with 40 health)
+const DIFFICULTY_INCREASE_INTERVAL = 20; // Increase difficulty every 20 kills
 
 const CHALLENGES = [
   { name: 'Clear All Enemies', description: 'Eliminate all enemies to win.' },
@@ -25,8 +29,9 @@ const CHALLENGES = [
 // Types
 interface Vec2 { x: number; y: number; }
 interface Bullet { pos: Vec2; vel: Vec2; fromPlayer: boolean; alive: boolean; }
-interface Enemy { pos: Vec2; health: number; alive: boolean; cooldown: number; id: number; }
+interface Enemy { pos: Vec2; health: number; maxHealth: number; alive: boolean; cooldown: number; id: number; }
 interface Obstacle { x: number; y: number; w: number; h: number; }
+interface Pickup { pos: Vec2; type: 'ammo' | 'health'; alive: boolean; id: number; }
 
 function distance(a: Vec2, b: Vec2) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -50,6 +55,7 @@ const Shooter: React.FC = () => {
   const [reloadMsg, setReloadMsg] = useState(false);
   const [score, setScore] = useState(0);
   const [enemiesKilled, setEnemiesKilled] = useState(0);
+  const [difficultyLevel, setDifficultyLevel] = useState(1);
   const [player, setPlayer] = useState({
     pos: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 80 },
     health: PLAYER_MAX_HEALTH,
@@ -60,7 +66,7 @@ const Shooter: React.FC = () => {
   const [bullets, setBullets] = useState<Bullet[]>([]);
   const [enemies, setEnemies] = useState<Enemy[]>([]);
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
-  const [ammoPickups, setAmmoPickups] = useState<Vec2[]>([]);
+  const [pickups, setPickups] = useState<Pickup[]>([]);
   const [cameraOffset, setCameraOffset] = useState({ x: 0, y: 0 });
   
   const keys = useRef<{ [k: string]: boolean }>({});
@@ -70,7 +76,9 @@ const Shooter: React.FC = () => {
   const surviveStart = useRef<number>(0);
   const noReloadUsed = useRef<boolean>(true);
   const nextEnemyId = useRef<number>(0);
+  const nextPickupId = useRef<number>(0);
   const lastAmmoSpawn = useRef<number>(0);
+  const lastHealthSpawn = useRef<number>(0);
   const [started, setStarted] = useState(false);
 
   // Generate random obstacles for each game
@@ -129,16 +137,19 @@ const Shooter: React.FC = () => {
     });
     setBullets([]);
     setEnemies([]);
-    setAmmoPickups([]);
+    setPickups([]);
     setScore(0);
     setEnemiesKilled(0);
+    setDifficultyLevel(1);
     setMessage(null);
     setReloadMsg(false);
     noReloadUsed.current = true;
     setTimer(0);
     surviveStart.current = Date.now();
     nextEnemyId.current = 0;
+    nextPickupId.current = 0;
     lastAmmoSpawn.current = 0;
+    lastHealthSpawn.current = 0;
     setCameraOffset({ x: 0, y: 0 });
     
     // Generate random obstacles for this game
@@ -178,24 +189,43 @@ const Shooter: React.FC = () => {
     );
     
     if (attempts < 20) {
+      // Scale enemy health with difficulty
+      const scaledHealth = ENEMY_MAX_HEALTH + (difficultyLevel - 1) * 10;
+      
       setEnemies(prev => [...prev, {
         pos: enemyPos,
-        health: ENEMY_MAX_HEALTH,
+        health: scaledHealth,
+        maxHealth: scaledHealth,
         alive: true,
         cooldown: 0,
         id: nextEnemyId.current++
       }]);
     }
-  }, [player.pos, checkObstacleCollision]);
+  }, [player.pos, checkObstacleCollision, difficultyLevel]);
 
-  // Spawn ammo pickup
-  const spawnAmmoPickup = useCallback((pos: Vec2) => {
+  // Spawn pickup
+  const spawnPickup = useCallback((pos: Vec2, type: 'ammo' | 'health') => {
     const now = Date.now();
-    if (now - lastAmmoSpawn.current < AMMO_SPAWN_DELAY) return;
+    const lastSpawn = type === 'ammo' ? lastAmmoSpawn.current : lastHealthSpawn.current;
+    const spawnDelay = type === 'ammo' ? AMMO_SPAWN_DELAY : HEALTH_SPAWN_DELAY;
     
-    if (Math.random() < AMMO_SPAWN_CHANCE) {
-      setAmmoPickups(prev => [...prev, { x: pos.x, y: pos.y }]);
-      lastAmmoSpawn.current = now;
+    if (now - lastSpawn < spawnDelay) return;
+    
+    const spawnChance = type === 'ammo' ? AMMO_SPAWN_CHANCE : HEALTH_SPAWN_CHANCE;
+    
+    if (Math.random() < spawnChance) {
+      setPickups(prev => [...prev, {
+        pos: { x: pos.x, y: pos.y },
+        type,
+        alive: true,
+        id: nextPickupId.current++
+      }]);
+      
+      if (type === 'ammo') {
+        lastAmmoSpawn.current = now;
+      } else {
+        lastHealthSpawn.current = now;
+      }
     }
   }, []);
 
@@ -237,7 +267,7 @@ const Shooter: React.FC = () => {
     };
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
-  }, [gameState, player, bullets, enemies, obstacles, ammoPickups, challenge, cameraOffset]);
+  }, [gameState, player, bullets, enemies, obstacles, pickups, challenge, cameraOffset, difficultyLevel]);
 
   // Timer for challenges
   useEffect(() => {
@@ -310,6 +340,14 @@ const Shooter: React.FC = () => {
   // Game update logic
   const updateGame = useCallback((dt: number) => {
     if (gameState !== 'playing') return;
+
+    // Update difficulty based on kills
+    const newDifficultyLevel = Math.floor(enemiesKilled / DIFFICULTY_INCREASE_INTERVAL) + 1;
+    if (newDifficultyLevel !== difficultyLevel) {
+      setDifficultyLevel(newDifficultyLevel);
+      setMessage(`Difficulty increased! Level ${newDifficultyLevel}`);
+      setTimeout(() => setMessage(null), 2000);
+    }
 
     // Update player angle (aiming)
     const dx = mouse.current.x - player.pos.x;
@@ -384,9 +422,12 @@ const Shooter: React.FC = () => {
       return { ...bullet, pos: newBulletPos };
     }).filter(b => b.alive));
 
-    // Update enemies with obstacle collision
+    // Update enemies with obstacle collision and scaled speed
     setEnemies(enemies => enemies.map(enemy => {
       if (!enemy.alive) return enemy;
+      
+      // Scale enemy speed with difficulty
+      const scaledSpeed = ENEMY_SPEED * (1 + (difficultyLevel - 1) * 0.2);
       
       // Simple AI: move towards player while avoiding obstacles
       const dx = player.pos.x - enemy.pos.x;
@@ -394,8 +435,8 @@ const Shooter: React.FC = () => {
       const dist = Math.hypot(dx, dy);
       
       if (dist > 0) {
-        const moveX = (dx / dist) * ENEMY_SPEED * dt;
-        const moveY = (dy / dist) * ENEMY_SPEED * dt;
+        const moveX = (dx / dist) * scaledSpeed * dt;
+        const moveY = (dy / dist) * scaledSpeed * dt;
         
         const testPos = {
           x: enemy.pos.x + moveX,
@@ -424,8 +465,10 @@ const Shooter: React.FC = () => {
         newPos.x = clamp(newPos.x, ENEMY_RADIUS, GAME_WIDTH - ENEMY_RADIUS);
         newPos.y = clamp(newPos.y, ENEMY_RADIUS, GAME_HEIGHT - ENEMY_RADIUS);
         
-        // Enemy shooting
+        // Enemy shooting with scaled rate
         let newCooldown = enemy.cooldown - dt;
+        const shootingRate = Math.max(30, 60 - (difficultyLevel - 1) * 5); // Faster shooting at higher difficulty
+        
         if (newCooldown <= 0 && dist < 200) {
           // Shoot at player
           const angle = Math.atan2(dy, dx);
@@ -435,7 +478,7 @@ const Shooter: React.FC = () => {
             fromPlayer: false,
             alive: true,
           }]);
-          newCooldown = 60; // Reset cooldown
+          newCooldown = shootingRate; // Reset cooldown
         }
         
         return { ...enemy, pos: newPos, cooldown: newCooldown };
@@ -451,28 +494,32 @@ const Shooter: React.FC = () => {
       if (bullet.fromPlayer) {
         for (const enemy of enemies) {
           if (enemy.alive && distance(bullet.pos, enemy.pos) < ENEMY_RADIUS) {
-            // Damage enemy (2 bullets to kill)
+            // Damage enemy
             setEnemies(enemies => enemies.map(e => 
-              e.id === enemy.id ? { ...e, health: e.health - 20 } : e
+              e.id === enemy.id ? { ...e, health: e.health - BULLET_DAMAGE } : e
             ));
             
             // Check if enemy died
-            if (enemy.health <= 20) {
+            if (enemy.health <= BULLET_DAMAGE) {
               setEnemies(enemies => enemies.map(e => 
                 e.id === enemy.id ? { ...e, alive: false } : e
               ));
               setScore(s => s + 10);
               setEnemiesKilled(k => k + 1);
               
-              // Chance to spawn ammo pickup
-              spawnAmmoPickup(enemy.pos);
+              // Chance to spawn pickups
+              spawnPickup(enemy.pos, 'ammo');
+              spawnPickup(enemy.pos, 'health');
               
-              // Spawn new enemy after delay
-              setTimeout(() => {
-                if (gameState === 'playing') {
-                  spawnEnemy();
-                }
-              }, ENEMY_SPAWN_DELAY);
+              // Spawn new enemy after delay (more enemies at higher difficulty)
+              const spawnCount = Math.min(3, Math.floor(difficultyLevel / 2) + 1);
+              for (let i = 0; i < spawnCount; i++) {
+                setTimeout(() => {
+                  if (gameState === 'playing') {
+                    spawnEnemy();
+                  }
+                }, ENEMY_SPAWN_DELAY + i * 500);
+              }
             }
             
             return { ...bullet, alive: false };
@@ -489,10 +536,19 @@ const Shooter: React.FC = () => {
       return bullet;
     }));
 
-    // Check ammo pickup collection
-    setAmmoPickups(pickups => pickups.filter(pickup => {
-      if (distance(pickup, player.pos) < PLAYER_RADIUS + 10) {
-        setPlayer(p => ({ ...p, ammo: Math.min(p.ammo + 4, MAX_AMMO) }));
+    // Check pickup collection
+    setPickups(pickups => pickups.filter(pickup => {
+      if (!pickup.alive) return false;
+      
+      if (distance(pickup.pos, player.pos) < PLAYER_RADIUS + 15) {
+        if (pickup.type === 'ammo') {
+          setPlayer(p => ({ ...p, ammo: Math.min(p.ammo + 4, MAX_AMMO) }));
+          setMessage('Ammo collected!');
+        } else if (pickup.type === 'health') {
+          setPlayer(p => ({ ...p, health: Math.min(p.health + 30, PLAYER_MAX_HEALTH) }));
+          setMessage('Health restored!');
+        }
+        setTimeout(() => setMessage(null), 1500);
         return false; // Remove pickup
       }
       return true;
@@ -521,7 +577,7 @@ const Shooter: React.FC = () => {
       setGameState('win');
       return;
     }
-  }, [gameState, player, enemies, challenge, timer, enemiesKilled, checkObstacleCollision, spawnAmmoPickup, spawnEnemy]);
+  }, [gameState, player, enemies, challenge, timer, enemiesKilled, checkObstacleCollision, spawnPickup, spawnEnemy, difficultyLevel]);
 
   // Drawing function
   const draw = useCallback(() => {
@@ -568,22 +624,39 @@ const Shooter: React.FC = () => {
       ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
     });
     
-    // Draw ammo pickups
-    ammoPickups.forEach(pickup => {
+    // Draw pickups
+    pickups.forEach(pickup => {
+      if (!pickup.alive) return;
+      
       ctx.save();
-      ctx.fillStyle = '#00ff00';
       ctx.strokeStyle = '#ffffff';
       ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(pickup.x, pickup.y, 8, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
       
-      // Draw ammo symbol
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 10px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('A', pickup.x, pickup.y + 3);
+      if (pickup.type === 'ammo') {
+        ctx.fillStyle = '#00ff00';
+        ctx.beginPath();
+        ctx.arc(pickup.pos.x, pickup.pos.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw ammo symbol
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('A', pickup.pos.x, pickup.pos.y + 4);
+      } else if (pickup.type === 'health') {
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(pickup.pos.x, pickup.pos.y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        
+        // Draw health cross
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(pickup.pos.x - 6, pickup.pos.y - 2, 12, 4);
+        ctx.fillRect(pickup.pos.x - 2, pickup.pos.y - 6, 4, 12);
+      }
+      
       ctx.restore();
     });
     
@@ -596,9 +669,11 @@ const Shooter: React.FC = () => {
       ctx.fill();
     });
     
-    // Draw enemies
+    // Draw enemies with health bars
     enemies.forEach(enemy => {
       if (!enemy.alive || enemy.health <= 0) return;
+      
+      // Enemy body
       ctx.beginPath();
       ctx.arc(enemy.pos.x, enemy.pos.y, ENEMY_RADIUS, 0, Math.PI * 2);
       ctx.fillStyle = '#ff4444';
@@ -608,11 +683,14 @@ const Shooter: React.FC = () => {
       ctx.stroke();
       
       // Health bar
-      const healthPercent = enemy.health / ENEMY_MAX_HEALTH;
+      const healthPercent = enemy.health / enemy.maxHealth;
       ctx.fillStyle = '#333';
-      ctx.fillRect(enemy.pos.x - 15, enemy.pos.y - 30, 30, 4);
-      ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : '#ff0000';
-      ctx.fillRect(enemy.pos.x - 15, enemy.pos.y - 30, 30 * healthPercent, 4);
+      ctx.fillRect(enemy.pos.x - 20, enemy.pos.y - 35, 40, 6);
+      ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+      ctx.fillRect(enemy.pos.x - 20, enemy.pos.y - 35, 40 * healthPercent, 6);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(enemy.pos.x - 20, enemy.pos.y - 35, 40, 6);
     });
     
     // Draw player
@@ -638,9 +716,12 @@ const Shooter: React.FC = () => {
     // Player health bar
     const healthPercent = player.health / PLAYER_MAX_HEALTH;
     ctx.fillStyle = '#333';
-    ctx.fillRect(player.pos.x - 20, player.pos.y - 35, 40, 5);
-    ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : '#ff0000';
-    ctx.fillRect(player.pos.x - 20, player.pos.y - 35, 40 * healthPercent, 5);
+    ctx.fillRect(player.pos.x - 25, player.pos.y - 40, 50, 8);
+    ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+    ctx.fillRect(player.pos.x - 25, player.pos.y - 40, 50 * healthPercent, 8);
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(player.pos.x - 25, player.pos.y - 40, 50, 8);
     
     // Restore context
     ctx.restore();
@@ -653,9 +734,10 @@ const Shooter: React.FC = () => {
     ctx.fillText(`Ammo: ${player.ammo}/${MAX_AMMO}`, 10, 55);
     ctx.fillText(`Score: ${score}`, 10, 80);
     ctx.fillText(`Enemies Killed: ${enemiesKilled}`, 10, 105);
+    ctx.fillText(`Difficulty: ${difficultyLevel}`, 10, 130);
     
     if (challenge === 1) {
-      ctx.fillText(`Time: ${60 - timer}s`, 10, 130);
+      ctx.fillText(`Time: ${60 - timer}s`, 10, 155);
     }
     
     if (reloadMsg) {
@@ -671,7 +753,7 @@ const Shooter: React.FC = () => {
       ctx.textAlign = 'center';
       ctx.fillText(message, canvas.width / 2, canvas.height / 2 + 30);
     }
-  }, [player, bullets, enemies, obstacles, ammoPickups, score, enemiesKilled, timer, reloadMsg, message, challenge, cameraOffset]);
+  }, [player, bullets, enemies, obstacles, pickups, score, enemiesKilled, timer, reloadMsg, message, challenge, cameraOffset, difficultyLevel]);
 
   // Start game
   const startGame = () => {
@@ -740,6 +822,7 @@ const Shooter: React.FC = () => {
             <h2 className="text-green-400 text-6xl font-extrabold mb-4 animate-bounce">MISSION COMPLETE!</h2>
             <p className="text-white text-2xl mb-2">Score: {score}</p>
             <p className="text-white text-xl mb-2">Enemies Killed: {enemiesKilled}</p>
+            <p className="text-white text-xl mb-2">Difficulty Reached: {difficultyLevel}</p>
             <p className="text-white text-xl mb-8">Challenge completed successfully!</p>
             <button
               onClick={() => setGameState('start')}
@@ -756,6 +839,7 @@ const Shooter: React.FC = () => {
             <h2 className="text-red-500 text-6xl font-extrabold mb-4 animate-shake">MISSION FAILED!</h2>
             <p className="text-white text-2xl mb-2">Score: {score}</p>
             <p className="text-white text-xl mb-2">Enemies Killed: {enemiesKilled}</p>
+            <p className="text-white text-xl mb-2">Difficulty Reached: {difficultyLevel}</p>
             <p className="text-white text-xl mb-8">Try again to complete the challenge!</p>
             <button
               onClick={() => setGameState('start')}
@@ -768,9 +852,9 @@ const Shooter: React.FC = () => {
       </div>
       <div className="mt-8 text-center text-white">
         <p className="text-lg">Enhanced Features:</p>
-        <p className="text-md">• Larger map with camera following • Random obstacle generation</p>
-        <p className="text-md">• Enemies take 2 bullets to kill • Rare ammo pickups after kills</p>
-        <p className="text-md">• Smart enemy spawning • Improved collision detection</p>
+        <p className="text-md">• Enemies take 2 hits to kill • Health and ammo pickups</p>
+        <p className="text-md">• Progressive difficulty every 20 kills • Enhanced enemy AI</p>
+        <p className="text-md">• Improved collision detection • Better visual feedback</p>
         <p className="text-md">Move: <span className="text-yellow-300">WASD</span> • Aim: <span className="text-yellow-300">Mouse</span> • Shoot: <span className="text-yellow-300">Click/Space</span> • Reload: <span className="text-yellow-300">R</span></p>
       </div>
     </div>
