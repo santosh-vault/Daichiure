@@ -202,15 +202,15 @@ export const FreeFireGame: React.FC = () => {
 
   const update = () => {
     // Player movement
-    if (keys.current['ArrowRight'] || keys.current['d']) player.current.x += player.current.speed;
-    if (keys.current['ArrowLeft'] || keys.current['a']) player.current.x -= player.current.speed;
-    if (keys.current['ArrowUp'] || keys.current['w']) {
+    if (keys.current['ArrowRight'] || keys.current['KeyD']) player.current.x += player.current.speed;
+    if (keys.current['ArrowLeft'] || keys.current['KeyA']) player.current.x -= player.current.speed;
+    if (keys.current['ArrowUp'] || keys.current['KeyW']) {
       if (!player.current.jumping && player.current.y >= GROUND - player.current.h) {
         player.current.jumping = true;
         player.current.velocityY = -11;
       }
     }
-    if (keys.current['ArrowDown'] || keys.current['s']) player.current.y += player.current.speed;
+    if (keys.current['ArrowDown'] || keys.current['KeyS']) player.current.y += player.current.speed;
     // Clamp player
     player.current.x = Math.max(0, Math.min(CANVAS_WIDTH - player.current.w, player.current.x));
     player.current.y = Math.max(0, Math.min(GROUND - player.current.h, player.current.y));
@@ -354,16 +354,18 @@ export const FreeFireGame: React.FC = () => {
   // Controls
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      keys.current[e.key] = true;
-      if ((e.key === ' ' || e.key === 'w' || e.key === 'ArrowUp') && !player.current.jumping && player.current.y >= GROUND - player.current.h) {
-        player.current.jumping = true;
-        player.current.velocityY = -11;
+      keys.current[e.code] = true;
+      if (e.code === 'KeyZ') {
+        e.preventDefault();
+        shoot();
       }
-      if (e.key === 'z') shoot();
-      if (e.key === 'r') reload();
+      if (e.code === 'KeyR') {
+        e.preventDefault();
+        reload();
+      }
     };
     const up = (e: KeyboardEvent) => {
-      delete keys.current[e.key];
+      keys.current[e.code] = false;
     };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
@@ -383,14 +385,18 @@ export const FreeFireGame: React.FC = () => {
       mouse.current.y = e.clientY - rect.top;
     };
     const click = (e: MouseEvent) => {
+      e.preventDefault();
       shoot();
     };
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mousedown', click);
-    return () => {
-      window.removeEventListener('mousemove', move);
-      window.removeEventListener('mousedown', click);
-    };
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mousedown', click);
+      return () => {
+        canvas.removeEventListener('mousemove', move);
+        canvas.removeEventListener('mousedown', click);
+      };
+    }
     // eslint-disable-next-line
   }, []);
 
@@ -413,7 +419,6 @@ export const FreeFireGame: React.FC = () => {
   // UI update on mount
   useEffect(() => {
     updateUI();
-     
   }, []);
 
   const [started, setStarted] = useState(false);
@@ -462,11 +467,11 @@ export const FreeFireGame: React.FC = () => {
         </div>
         <div ref={reloadRef} style={{ color: '#0ff', fontWeight: 'bold', display: 'none', marginTop: 4 }}>Reloading...</div>
         <div style={{ marginTop: 8, fontSize: 13, color: '#aaa' }}>
-          Controls: Move (←/→/A/D/W/S), Jump (Space/W/↑), Aim (mouse), Shoot (Z/Left Click), Reload (R)
+          Controls: Move (←/→/A/D/W/S), Shoot (Z/Left Click), Reload (R)
         </div>
       </div>
     </div>
   );
 };
 
-export default FreeFireGame; 
+export default FreeFireGame;
