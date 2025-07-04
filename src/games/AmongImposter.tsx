@@ -39,6 +39,8 @@ export const AmongImposterGame: React.FC = () => {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    if (!started) return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -79,8 +81,12 @@ export const AmongImposterGame: React.FC = () => {
 
     // Input handling
     const keys: { [key: string]: boolean } = {};
-    const handleKeyDown = (e: KeyboardEvent) => { keys[e.key] = true; };
-    const handleKeyUp = (e: KeyboardEvent) => { keys[e.key] = false; };
+    const handleKeyDown = (e: KeyboardEvent) => { 
+      keys[e.code] = true; 
+    };
+    const handleKeyUp = (e: KeyboardEvent) => { 
+      keys[e.code] = false; 
+    };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
 
@@ -124,10 +130,10 @@ export const AmongImposterGame: React.FC = () => {
 
       // Update player position
       if (!guessPhase) {
-        if (keys['ArrowLeft'] || keys['a'] || keys['A']) player.x -= SPEED;
-        if (keys['ArrowRight'] || keys['d'] || keys['D']) player.x += SPEED;
-        if (keys['ArrowUp'] || keys['w'] || keys['W']) player.y -= SPEED;
-        if (keys['ArrowDown'] || keys['s'] || keys['S']) player.y += SPEED;
+        if (keys['ArrowLeft'] || keys['KeyA']) player.x -= SPEED;
+        if (keys['ArrowRight'] || keys['KeyD']) player.x += SPEED;
+        if (keys['ArrowUp'] || keys['KeyW']) player.y -= SPEED;
+        if (keys['ArrowDown'] || keys['KeyS']) player.y += SPEED;
       }
 
       // Keep player in bounds
@@ -251,7 +257,7 @@ export const AmongImposterGame: React.FC = () => {
       window.removeEventListener('keyup', handleKeyUp);
       canvas.removeEventListener('click', handleCanvasClick);
     };
-  }, []);
+  }, [started]);
 
   if (!started) {
     return (
@@ -290,4 +296,4 @@ export const AmongImposterGame: React.FC = () => {
   );
 };
 
-export default AmongImposterGame; 
+export default AmongImposterGame;

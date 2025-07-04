@@ -8,6 +8,8 @@ export const PongGame: React.FC = () => {
   const [started, setStarted] = useState(false);
 
   useEffect(() => {
+    if (!started) return;
+    
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -155,26 +157,26 @@ export const PongGame: React.FC = () => {
       ball.dy = Math.random() > 0.5 ? 3 : -3;
     };
 
+    const keys: { [key: string]: boolean } = {};
+    
     const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowUp':
-        case 'w':
-        case 'W':
-          playerPaddle.dy = -5;
-          break;
-        case 'ArrowDown':
-        case 's':
-        case 'S':
-          playerPaddle.dy = 5;
-          break;
-        case ' ':
-          setPaused(prev => !prev);
-          break;
+      keys[e.code] = true;
+      
+      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+        playerPaddle.dy = -5;
+      }
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+        playerPaddle.dy = 5;
+      }
+      if (e.code === 'KeyP') {
+        setPaused(prev => !prev);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
+      keys[e.code] = false;
+      
+      if (e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'KeyW' || e.code === 'KeyS') {
         playerPaddle.dy = 0;
       }
     };
@@ -195,7 +197,7 @@ export const PongGame: React.FC = () => {
       document.removeEventListener('keyup', handleKeyUp);
       clearInterval(gameLoop);
     };
-  }, [paused, gameOver]);
+  }, [paused, gameOver, started]);
 
   const resetGame = () => {
     setScore({ player: 0, computer: 0 });
@@ -251,7 +253,7 @@ export const PongGame: React.FC = () => {
         
         <div className="text-center">
           <div className="text-sm text-gray-300 mb-4">
-            Use W/S or Arrow Keys to move • Space to pause • First to 5 wins
+            Use W/S or Arrow Keys to move • P to pause • First to 5 wins
           </div>
           {gameOver && (
             <button
