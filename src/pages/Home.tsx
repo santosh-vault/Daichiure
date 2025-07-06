@@ -5,9 +5,12 @@ import AdSense from '../components/AdSense';
 import { Helmet } from 'react-helmet-async';
 import { games } from '../data/games';
 import { GameCard } from '../components/GameCard';
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 import "../App.css";
 
 export const Home: React.FC = () => {
+  const { trackEvent } = useGoogleAnalytics();
+  
   // Custom order for the first 8 games (2 rows of 4)
   const customOrder = [
     'freefire', 'shooter', 'towerstack', 'allofaredead', // 1st row
@@ -55,6 +58,7 @@ export const Home: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-6 justify-center">
                 <Link
                   to="/games"
+                  onClick={() => trackEvent('cta_click', 'engagement', 'play_now_home')}
                   className="bg-gradient-to-r from-amber-400 to-amber-600 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center space-x-3 border-2 border-transparent hover:border-amber-700"
                 >
                   <Play className="h-6 w-6" />
@@ -62,6 +66,7 @@ export const Home: React.FC = () => {
                 </Link>
                 <Link
                   to="/register"
+                  onClick={() => trackEvent('cta_click', 'engagement', 'join_free_home')}
                   className="border-2 border-amber-400 text-amber-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-amber-400 hover:text-gray-900 transition-all duration-300 ease-in-out flex items-center justify-center space-x-3 hover:shadow-[0_0_25px_rgba(255,215,0,0.5)]"
                 >
                   <span>Join Free</span>
@@ -117,6 +122,7 @@ export const Home: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to="/games"
+                  onClick={() => trackEvent('cta_click', 'engagement', 'view_all_games')}
                   className="inline-flex items-center space-x-3 bg-gradient-to-r from-amber-500 to-amber-700 text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-shadow transform hover:scale-105 ease-in-out"
                 >
                   <span>View All Games</span>
@@ -124,6 +130,7 @@ export const Home: React.FC = () => {
                 </Link>
                 <Link
                   to="/categories"
+                  onClick={() => trackEvent('cta_click', 'engagement', 'browse_categories')}
                   className="inline-flex items-center space-x-3 bg-gray-800 text-gray-300 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-700 hover:text-amber-400 transition-all duration-300 border border-gray-700"
                 >
                   <span>Browse Categories</span>
@@ -153,6 +160,7 @@ export const Home: React.FC = () => {
             
             <Link
               to="/register"
+              onClick={() => trackEvent('cta_click', 'engagement', 'create_account_cta')}
               className="bg-amber-400 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out border-2 border-transparent hover:border-amber-700"
             >
               Create Free Account

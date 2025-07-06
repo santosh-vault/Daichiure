@@ -5,6 +5,7 @@ import AdSense from '../components/AdSense';
 import { games } from '../data/games';
 import { GameCard } from '../components/GameCard';
 import { Helmet } from 'react-helmet-async';
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 
 interface Category {
   id: number;
@@ -25,6 +26,7 @@ export const Games: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchParams] = useSearchParams();
+  const { trackEvent } = useGoogleAnalytics();
 
   // Custom order for the first 8 games (2 rows of 4)
   const customOrder = [
@@ -75,7 +77,12 @@ export const Games: React.FC = () => {
                   type="text"
                   placeholder="Search games..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    if (e.target.value) {
+                      trackEvent('game_search', 'engagement', e.target.value);
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-base"
                 />
               </div>
@@ -83,7 +90,12 @@ export const Games: React.FC = () => {
                 <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
                 <select
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => {
+                    setSelectedCategory(e.target.value);
+                    if (e.target.value) {
+                      trackEvent('game_filter', 'engagement', e.target.value);
+                    }
+                  }}
                   className="w-full pl-10 pr-8 py-2 border border-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent bg-gray-800 text-gray-100 appearance-none text-base"
                 >
                   <option value="">All Categories</option>

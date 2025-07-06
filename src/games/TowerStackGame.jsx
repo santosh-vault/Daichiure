@@ -6,13 +6,15 @@ const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
 const BASE_BLOCK_WIDTH = 70;
 const BASE_BLOCK_HEIGHT = 40;
-const SWING_SPEED = 0.012;
+const SWING_SPEED = 0.018; // Increased swinging speed
 const DROP_SPEED = 5;
 const ALIGNMENT_TOLERANCE = 30;
 const MIN_BLOCK_WIDTH = 60;
 const MAX_BLOCK_HEIGHT = 36;
 const BALANCE_ANIMATION_FRAMES = 24;
-const TOWER_FALL_FRAMES = 40;
+const TOWER_FALL_FRAMES = 60; // Increased fall animation duration
+const TOWER_SHAKE_SPEED = 0.08; // Speed of tower shaking
+const TOWER_SHAKE_AMPLITUDE = 2; // Amplitude of tower shaking
 
 /**
  * @typedef {Object} Block
@@ -46,6 +48,7 @@ export const TowerStackGame = () => {
   const cameraOffsetRef = useRef(0);
   const towerFallFrameRef = useRef(0);
   const towerFallingRef = useRef(false);
+  const towerShakeRef = useRef(0); // Tower shake animation
 
   // Helper: get block size for current stack
   function getBlockSize(stackIndex) {
@@ -80,6 +83,7 @@ export const TowerStackGame = () => {
     gameOverRef.current = false;
     scoreRef.current = 0;
     cameraOffsetRef.current = 0;
+    towerShakeRef.current = 0;
     setScore(0);
     setGameOver(false);
     setShowRestart(false);
@@ -147,30 +151,43 @@ export const TowerStackGame = () => {
       for (let i = 0; i < blocks.length; i++) {
         const block = blocks[i];
         let { x, y, width, height } = block;
+        
         // Balancing animation
         let wobble = 0;
         if (block.balancing && block.balanceFrame < BALANCE_ANIMATION_FRAMES) {
           wobble = Math.sin((block.balanceFrame / BALANCE_ANIMATION_FRAMES) * Math.PI * 2) * 8 * (1 - block.balanceFrame / BALANCE_ANIMATION_FRAMES);
         }
+        
+        // Tower shake animation - makes the whole tower unstable
+        let shakeX = 0;
+        let shakeY = 0;
+        if (!towerFallingRef.current && blocks.length > 1) {
+          // Shake increases with tower height
+          const shakeIntensity = Math.min(blocks.length / 10, 1) * TOWER_SHAKE_AMPLITUDE;
+          shakeX = Math.sin(towerShakeRef.current + i * 0.5) * shakeIntensity;
+          shakeY = Math.cos(towerShakeRef.current + i * 0.3) * shakeIntensity * 0.5;
+        }
+        
         // Tower fall animation
         let fallAngle = 0;
         let fallX = 0;
         let fallY = 0;
         if (towerFallingRef.current) {
           const progress = towerFallFrameRef.current / TOWER_FALL_FRAMES;
-          // Each block falls with a slight delay for a cascading effect
-          const blockDelay = i * 2;
+          // Each block falls with a delay for a cascading effect
+          const blockDelay = i * 3; // Increased delay between blocks
           let localProgress = Math.max(0, progress - blockDelay / TOWER_FALL_FRAMES);
           if (localProgress > 0) {
-            fallAngle = Math.min(localProgress * Math.PI * 1.2, Math.PI / 2);
-            fallX = Math.sin(fallAngle) * 300 * localProgress;
-            fallY = Math.pow(localProgress, 1.5) * 200;
+            fallAngle = Math.min(localProgress * Math.PI * 1.5, Math.PI / 2); // More dramatic fall
+            fallX = Math.sin(fallAngle) * 400 * localProgress; // More horizontal movement
+            fallY = Math.pow(localProgress, 1.8) * 300; // More vertical movement
           }
         }
+        
         ctx.save();
         ctx.shadowColor = '#222';
         ctx.shadowBlur = 10;
-        ctx.translate(x + width / 2 + wobble + fallX, y + height / 2 + cameraOffset + fallY);
+        ctx.translate(x + width / 2 + wobble + shakeX + fallX, y + height / 2 + cameraOffset + shakeY + fallY);
         ctx.rotate(wobble * 0.01 + fallAngle);
         ctx.fillStyle = '#00bcd4';
         ctx.fillRect(-width / 2, -height / 2, width, height);
@@ -183,29 +200,29 @@ export const TowerStackGame = () => {
         const { width, height } = getBlockSize(stackIndex);
         const swingX = CANVAS_WIDTH / 2 + Math.sin(angleRef.current) * 120;
         const swingY = 50;
-        // Rope
+        // Rope - fixed position, no camera offset
         ctx.save();
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(CANVAS_WIDTH / 2, 0 + cameraOffset);
-        ctx.lineTo(swingX + width / 2, swingY + cameraOffset);
+        ctx.moveTo(CANVAS_WIDTH / 2, 0);
+        ctx.lineTo(swingX + width / 2, swingY);
         ctx.stroke();
         ctx.restore();
-        // Shadow
+        // Shadow - fixed position, no camera offset
         ctx.save();
         ctx.globalAlpha = 0.2;
         ctx.beginPath();
-        ctx.ellipse(swingX + width / 2, swingY + height + 10 + cameraOffset, width / 2, 8, 0, 0, 2 * Math.PI);
+        ctx.ellipse(swingX + width / 2, swingY + height + 10, width / 2, 8, 0, 0, 2 * Math.PI);
         ctx.fillStyle = '#000';
         ctx.fill();
         ctx.restore();
-        // Block
+        // Block - fixed position, no camera offset
         ctx.save();
         ctx.shadowColor = '#ffeb3b';
         ctx.shadowBlur = 16;
         ctx.fillStyle = '#ffeb3b';
-        ctx.fillRect(swingX, swingY + cameraOffset, width, height);
+        ctx.fillRect(swingX, swingY, width, height);
         ctx.restore();
       }
 
@@ -225,6 +242,11 @@ export const TowerStackGame = () => {
       // Animate swing
       if (!droppingRef.current && !gameOverRef.current) {
         angleRef.current += SWING_SPEED;
+      }
+      
+      // Animate tower shake
+      if (!towerFallingRef.current && !gameOverRef.current) {
+        towerShakeRef.current += TOWER_SHAKE_SPEED;
       }
       // Animate dropping block
       if (droppingRef.current && droppedBlockRef.current) {
@@ -273,10 +295,14 @@ export const TowerStackGame = () => {
           }
         }
       }
-      // Tower fall animation
+      // Tower fall animation - consistent duration regardless of score
       if (towerFallingRef.current) {
         towerFallFrameRef.current++;
-        if (towerFallFrameRef.current > TOWER_FALL_FRAMES + blocksRef.current.length * 2) {
+        // Fixed duration for consistent fall animation
+        const totalFallDuration = TOWER_FALL_FRAMES;
+        
+        if (towerFallFrameRef.current > totalFallDuration) {
+          console.log('Tower fall animation completed');
           towerFallingRef.current = false;
           setShowRestart(true);
         }
@@ -309,6 +335,7 @@ export const TowerStackGame = () => {
   };
 
   const triggerTowerFall = () => {
+    console.log('Triggering tower fall animation');
     towerFallingRef.current = true;
     towerFallFrameRef.current = 0;
     setShowRestart(false);

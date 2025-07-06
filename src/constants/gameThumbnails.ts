@@ -17,4 +17,5 @@ export const gameThumbnails: Record<string, string> = {
   housebuilder: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
   allofaredead: 'https://i.pinimg.com/736x/fd/14/e0/fd14e009b62752a0b1def0179fe18288.jpg',
   towerstack: 'https://i.pinimg.com/736x/8b/4a/92/8b4a92e02330caa96c0a6df7c0287aea.jpg',
+  uno: 'https://i.pinimg.com/736x/4c/65/e5/4c65e5d9cb574bfd846490ca7f947088.jpg',
 };

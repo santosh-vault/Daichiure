@@ -17,6 +17,7 @@ import { Debug } from './pages/Debug';
 import { StripeSetupPage } from './pages/StripeSetup';
 import { AdminPanel } from './pages/Admin/AdminPanel';
 import ScrollToTop from './components/ScrollToTop';
+import { GoogleAnalyticsTracker } from './components/GoogleAnalyticsTracker';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -31,6 +32,7 @@ function App() {
     <HelmetProvider>
       <AuthProvider>
         <Router>
+          <GoogleAnalyticsTracker />
           <ScrollToTop />
           {loading && (
             <div className="loading-overlay">

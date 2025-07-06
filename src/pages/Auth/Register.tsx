@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 export const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export const Register: React.FC = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const { trackEvent } = useGoogleAnalytics();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -37,11 +39,15 @@ export const Register: React.FC = () => {
 
     try {
       await signUp(formData.email, formData.password, formData.fullName);
+      // Track successful registration
+      trackEvent('signup', 'authentication', 'success');
       setMessage({ type: 'success', text: 'Account created successfully!' });
       setTimeout(() => {
         navigate('/games');
       }, 1500);
     } catch (error) {
+      // Track failed registration
+      trackEvent('signup', 'authentication', 'failed');
       setMessage({ type: 'error', text: 'Failed to create account. Please try again.' });
     } finally {
       setLoading(false);

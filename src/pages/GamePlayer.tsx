@@ -7,6 +7,7 @@ import { gameComponents } from '../games';
 import { games } from '../data/games';
 import { PremiumGameGate } from '../components/PremiumGameGate';
 import { Helmet } from 'react-helmet-async';
+import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
 
 interface GameData {
   id: number;
@@ -26,6 +27,7 @@ export const GamePlayer: React.FC = () => {
   const navigate = useNavigate();
   const [game, setGame] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
+  const { trackEvent } = useGoogleAnalytics();
 
   useEffect(() => {
     if (slug) {
@@ -41,6 +43,9 @@ export const GamePlayer: React.FC = () => {
 
     try {
       console.log('🎮 Loading game:', slug);
+      // Track game load attempt
+      trackEvent('game_load', 'engagement', slug);
+      
       // First, check if it's a local React game using the games array
       const localGame = games.find(g => g.slug === slug);
       if (localGame) {
@@ -57,6 +62,8 @@ export const GamePlayer: React.FC = () => {
         };
         setGame(gameData as unknown as GameData);
         setLoading(false);
+        // Track successful local game load
+        trackEvent('game_loaded', 'engagement', slug, 1);
         return;
       }
 
@@ -92,6 +99,8 @@ export const GamePlayer: React.FC = () => {
         };
 
         setGame(gameData as unknown as GameData);
+        // Track successful database game load
+        trackEvent('game_loaded', 'engagement', slug, 1);
       } catch (dbError) {
         console.warn('❌ Database connection failed:', dbError);
         setGame(null);
@@ -107,6 +116,9 @@ export const GamePlayer: React.FC = () => {
   };
 
   const handleShare = async () => {
+    // Track share event
+    trackEvent('game_share', 'engagement', game?.title || slug);
+    
     if (navigator.share) {
       try {
         await navigator.share({

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
 export const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export const Login: React.FC = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const { trackEvent } = useGoogleAnalytics();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -28,11 +30,15 @@ export const Login: React.FC = () => {
 
     try {
       await signIn(formData.email, formData.password);
+      // Track successful login
+      trackEvent('login', 'authentication', 'success');
       setMessage({ type: 'success', text: 'Signed in successfully!' });
       setTimeout(() => {
         navigate('/games');
       }, 1500);
     } catch (error) {
+      // Track failed login
+      trackEvent('login', 'authentication', 'failed');
       setMessage({ type: 'error', text: 'Invalid email or password. Please try again.' });
     } finally {
       setLoading(false);

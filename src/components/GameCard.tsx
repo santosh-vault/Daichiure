@@ -1,6 +1,13 @@
 import React from 'react';
 import { GameThumbnail } from './GameThumbnail';
 
+// Declare global gtag function
+declare global {
+  interface Window {
+    gtag: (...args: any[]) => void;
+  }
+}
+
 interface GameCardProps {
   game: {
     slug: string;
@@ -12,8 +19,21 @@ interface GameCardProps {
   onClick?: () => void;
 }
 
-export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => (
-  <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700 cursor-pointer" onClick={onClick}>
+export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => {
+  const handleClick = () => {
+    // Track game click
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', 'game_click', {
+        event_category: 'engagement',
+        event_label: game.title,
+        value: game.is_premium ? 1 : 0
+      });
+    }
+    if (onClick) onClick();
+  };
+
+  return (
+    <div className="bg-gray-800 rounded-xl shadow-xl overflow-hidden border border-gray-700 cursor-pointer" onClick={handleClick}>
     <GameThumbnail slug={game.slug} alt={game.title} />
     <div className="p-4 flex flex-col items-center">
       <h3 className="text-lg font-bold text-white mb-2">{game.title}</h3>
@@ -29,4 +49,5 @@ export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => (
       </button>
     </div>
   </div>
-); 
+  );
+}; 
