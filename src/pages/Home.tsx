@@ -8,8 +8,14 @@ import { GameCard } from '../components/GameCard';
 import "../App.css";
 
 export const Home: React.FC = () => {
-  // Pick the first 9 games as featured (customize as needed)
-  const featuredGames = games.slice(0, 9);
+  // Custom order for the first 8 games (2 rows of 4)
+  const customOrder = [
+    'freefire', 'shooter', 'towerstack', 'allofaredead', // 1st row
+    'snake', 'pong', 'tetris', 'breakout',              // 2nd row
+  ];
+  const orderedGames = customOrder
+    .map(slug => games.find(g => g.slug === slug))
+    .filter(Boolean);
 
   return (
     <>
@@ -23,7 +29,7 @@ export const Home: React.FC = () => {
       </Helmet>
       <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden py-24 lg:py-36 rounded-b-3xl shadow-xl">
+        <section className="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden py-24 lg:py-36 rounded-b-3xl shadow-xl" aria-labelledby="hero-heading">
           {/* Video game image background with opacity */}
           <div
             className="absolute inset-0 z-0 bg-cover bg-center"
@@ -36,7 +42,7 @@ export const Home: React.FC = () => {
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 z-20">
             <div className="text-center">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-6 leading-tight drop-shadow-lg">
+              <h1 id="hero-heading" className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-6 leading-tight drop-shadow-lg">
                 Your Ultimate
                 <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
                   {' '}Gaming Hub
@@ -67,10 +73,10 @@ export const Home: React.FC = () => {
         </section>
 
         {/* Featured Games Section */}
-        <section className="py-20 bg-gray-950">
+        <section className="py-20 bg-gray-950" aria-labelledby="featured-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <h2 className="text-4xl sm:text-5xl font-bruno-ace text-amber-400 mb-6 drop-shadow-md">
+              <h2 id="featured-heading" className="text-4xl sm:text-5xl font-bruno-ace text-amber-400 mb-6 drop-shadow-md">
                 Featured Games
               </h2>
               <p className="text-xl text-gray-400 max-w-3xl mx-auto font-inter leading-relaxed">
@@ -85,16 +91,19 @@ export const Home: React.FC = () => {
               style={{ minHeight: '90px' }}
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-              {featuredGames.map((game) => (
-                <Link
-                  key={game.slug}
-                  to={`/games/${game.slug}`}
-                  className="block group"
-                >
-                  <GameCard game={game} />
-                </Link>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+              {orderedGames.map((game) => {
+                if (!game) return null;
+                return (
+                  <Link
+                    key={game.slug}
+                    to={`/games/${game.slug}`}
+                    className="block group"
+                  >
+                    <GameCard game={game} />
+                  </Link>
+                );
+              })}
             </div>
 
             {/* AdSense Banner - Middle of Games Section */}
@@ -126,9 +135,9 @@ export const Home: React.FC = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-3xl shadow-xl">
+        <section className="py-20 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-3xl shadow-xl" aria-labelledby="cta-heading">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl sm:text-5xl font-bruno-ace mb-6 drop-shadow-md">
+            <h2 id="cta-heading" className="text-4xl sm:text-5xl font-bruno-ace mb-6 drop-shadow-md">
               Ready to Start Gaming?
             </h2>
             <p className="text-xl text-gray-300 mb-10 font-inter">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { HelmetProvider } from 'react-helmet-async';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -19,12 +19,31 @@ import { AdminPanel } from './pages/Admin/AdminPanel';
 import ScrollToTop from './components/ScrollToTop';
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate loading for 2s or until first paint
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <HelmetProvider>
       <AuthProvider>
         <Router>
           <ScrollToTop />
-          <div className="App">
+          {loading && (
+            <div className="loading-overlay">
+              <div className="loading-spinner" />
+              <div className="loading-text">
+                Loading
+                <span className="loading-dots">
+                  <span>.</span><span>.</span><span>.</span>
+                </span>
+              </div>
+            </div>
+          )}
+          <div className="App" style={{ filter: loading ? 'blur(2px)' : 'none' }}>
             <Layout>
               <Routes>
                 <Route path="/" element={<Home />} />

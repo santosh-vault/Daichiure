@@ -4,7 +4,7 @@ import { TetrisGame } from './Tetris';
 import { BreakoutGame } from './Breakout';
 import { MemoryGame } from './Memory';
 import { RPGGame } from './RPG';
-import { EverestGame } from './Everest';
+
 import { KathmanduGame } from './Kathmandu';
 import { TempleGame } from './Temple';
 import Runner from './Runner';
@@ -16,6 +16,7 @@ import FreeFireGame from './FreeFire';
 import AmongImposterGame from './AmongImposter';
 import AllOfUsAreDead from './AllOfUsAreDead';
 import TowerStackGame from './TowerStackGame';
+import Uno from './Uno';
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
   'freefire': FreeFireGame,
@@ -27,7 +28,6 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'breakout': BreakoutGame,
   'memory': MemoryGame,
   'rpg': RPGGame,
-  'everest': EverestGame,
   'kathmandu': KathmanduGame,
   'temple': TempleGame,
   'runner': Runner,
@@ -36,6 +36,7 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'housebuilder': HouseBuilder,
   'allofaredead': AllOfUsAreDead,
   'towerstack': TowerStackGame,
+  'uno': Uno,
 };
 
-export { Fighter, Shooter, Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, EverestGame, KathmanduGame, TempleGame, AllOfUsAreDead }; 
+export { Fighter, Shooter, Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno }; 

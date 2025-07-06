@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { gameComponents } from '../games';
 import { games } from '../data/games';
 import { PremiumGameGate } from '../components/PremiumGameGate';
+import { Helmet } from 'react-helmet-async';
 
 interface GameData {
   id: number;
@@ -154,23 +155,69 @@ export const GamePlayer: React.FC = () => {
     slug
   });
 
+  // Helmet meta tags for the game page
+  const ogImage = game.thumbnail_url || 'https://yourdomain.com/og-image.png';
+  const canonicalUrl = `${window.location.origin}/games/${slug}`;
+
   // If it's a premium game, wrap with PremiumGameGate
   if (game.is_premium) {
     console.log('🔒 Premium game detected, showing gate');
     return (
-      <PremiumGameGate
-        gameTitle={game.title}
-        gamePrice={game.price || 0}
-        gameSlug={slug || ''}
-      >
-        <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />
-      </PremiumGameGate>
+      <>
+        <Helmet>
+          <title>{game.title} | PlayHub</title>
+          <meta name="description" content={game.description} />
+          <meta name="keywords" content={`Nepali games, ${game.title}, online games, play ${game.title}, ${game.category?.name || ''}, 2D games`} />
+          <meta property="og:title" content={`${game.title} | Play Free 2D Browser Games | Nepali Games`} />
+          <meta property="og:description" content={game.description} />
+          <meta property="og:image" content={ogImage} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content={canonicalUrl} />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${game.title} | PlayHub`} />
+          <meta name="twitter:description" content={game.description} />
+          <meta name="twitter:image" content={ogImage} />
+          <meta name="robots" content="index, follow" />
+          <link rel="canonical" href={canonicalUrl} />
+        </Helmet>
+        <PremiumGameGate
+          gameTitle={game.title}
+          gamePrice={game.price || 0}
+          gameSlug={slug || ''}
+        >
+          <article aria-labelledby="game-title">
+            <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />
+          </article>
+        </PremiumGameGate>
+      </>
     );
   }
 
   console.log('🆓 Free game, showing directly');
   // For free games, show directly
-  return <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />;
+  return (
+    <>
+      <Helmet>
+        <title>{game.title} | PlayHub</title>
+        <meta name="description" content={game.description} />
+        <meta name="keywords" content={`Nepali games, ${game.title}, online games, play ${game.title}, ${game.category?.name || ''}, 2D games`} />
+        <meta property="og:title" content={`${game.title} | Play Free 2D Browser Games | Nepali Games`} />
+        <meta property="og:description" content={game.description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${game.title} | PlayHub`} />
+        <meta name="twitter:description" content={game.description} />
+        <meta name="twitter:image" content={ogImage} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
+      <article aria-labelledby="game-title">
+        <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />
+      </article>
+    </>
+  );
 };
 
 // Separate component for the actual game content

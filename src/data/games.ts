@@ -64,6 +64,14 @@ export const games = [
     category: 'puzzle',
   },
   {
+    slug: 'uno',
+    title: 'UNO 2D',
+    description: 'The classic UNO card game! Match colors and numbers, use special cards, and be the first to get rid of all your cards. Play against AI opponents.',
+    is_premium: false,
+    price: null,
+    category: 'card',
+  },
+  {
     slug: 'rpg',
     title: 'Pixel Adventure',
     description: 'A simple RPG adventure game. Explore the world, collect items, and battle monsters. Use WASD to move.',

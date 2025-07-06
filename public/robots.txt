@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# If you have a sitemap, uncomment and update the next line:
+Sitemap: https://daichiure.vercel.com/sitemap.xml 

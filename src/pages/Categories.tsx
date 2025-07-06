@@ -4,6 +4,7 @@ import { Search, Grid, List } from 'lucide-react';
 import { games } from '../data/games';
 import { GameCard } from '../components/GameCard';
 import { useSubscription } from '../hooks/useSubscription';
+import { Helmet } from 'react-helmet-async';
 
 interface Game {
   slug: string;
@@ -70,126 +71,137 @@ export const Categories: React.FC = () => {
   const stats = getCategoryStats();
 
   return (
-    <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold font-bruno-ace text-amber-400 mb-4 drop-shadow-md">
-            Game Categories
-          </h1>
-          <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
-            Explore games by category and discover your next favorite
-          </p>
-        </div>
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
-            <div className="text-2xl font-bold text-amber-400">{stats.totalGames}</div>
-            <div className="text-sm text-gray-400">Total Games</div>
-          </div>
-          <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
-            <div className="text-2xl font-bold text-green-400">{stats.freeGames}</div>
-            <div className="text-sm text-gray-400">Free Games</div>
-          </div>
-          <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
-            <div className="text-2xl font-bold text-purple-400">{stats.premiumGames}</div>
-            <div className="text-sm text-gray-400">Premium Games</div>
-          </div>
-          <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
-            <div className="text-2xl font-bold text-blue-400">{stats.categoriesCount}</div>
-            <div className="text-sm text-gray-400">Categories</div>
-          </div>
-        </div>
-        {/* Categories Grid */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-amber-400 mb-6">Browse by Category</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                onClick={() => setSelectedCategory(selectedCategory === category.slug ? '' : category.slug)}
-                className={
-                  `bg-gray-900 rounded-xl p-6 cursor-pointer transition-all duration-300 border-2
-                  ${selectedCategory === category.slug 
-                    ? 'border-amber-500 shadow-[0_0_20px_rgba(255,215,0,0.3)]' 
-                    : 'border-gray-800 hover:border-gray-700'}
-                  hover:shadow-lg hover:scale-105`
-                }
-              >
-                <div className="text-4xl mb-4">{category.icon}</div>
-                <h3 className="text-xl font-bold text-amber-400 mb-2">{category.name}</h3>
-                <p className="text-gray-400 text-sm mb-3">{category.description}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">{category.gameCount} games</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        {/* Search and View Mode */}
-        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-          <div className="flex-1 relative w-full md:w-auto">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-6 w-6" />
-            <input
-              type="text"
-              placeholder="Search games..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-6 py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-lg"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              className={`p-2 rounded-lg border ${viewMode === 'grid' ? 'bg-amber-500 text-gray-900 border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="h-5 w-5" />
-            </button>
-            <button
-              className={`p-2 rounded-lg border ${viewMode === 'list' ? 'bg-amber-500 text-gray-900 border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
-              onClick={() => setViewMode('list')}
-            >
-              <List className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-        {/* Games Grid/List */}
-        {filteredGames.length === 0 ? (
-          <div className="text-center py-20 bg-gray-900 rounded-xl shadow-xl border border-gray-800">
-            <div className="text-gray-600 mb-6">
-              <Search className="h-20 w-20 mx-auto text-gray-700" />
-            </div>
-            <h3 className="text-3xl font-bold font-bruno-ace text-amber-400 mb-4">No games found</h3>
-            <p className="text-xl text-gray-400">
-              Try adjusting your search or filter criteria.
+    <>
+      <Helmet>
+        <title>Game Categories | PlayHub</title>
+        <meta name="description" content="Explore and discover games by category. Find your favorite Nepali and 2D games by genre, type, and more!" />
+        <meta name="keywords" content="game categories, Nepali games, 2D games, online games, puzzle, action, sports, adventure, arcade" />
+        <meta property="og:title" content="Game Categories | Online 2D Browser Games | Nepali Games | No Download required" />
+        <meta property="og:description" content="Explore and discover games by category. Find your favorite Nepali and 2D games by genre, type, and more!" />
+        <meta property="og:image" content="https://yourdomain.com/og-image.png" />
+      </Helmet>
+      <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased py-8">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" aria-labelledby="categories-heading">
+          {/* Header */}
+          <div className="mb-10 text-center">
+            <h1 id="categories-heading" className="text-4xl sm:text-5xl font-bold font-bruno-ace text-amber-400 mb-4 drop-shadow-md">
+              Game Categories
+            </h1>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+              Explore games by category and discover your next favorite
             </p>
           </div>
-        ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredGames.map((game) => (
-              <Link
-                key={game.slug}
-                to={`/games/${game.slug}`}
-                className="block"
+          {/* Stats */}
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" aria-label="Category Stats">
+            <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
+              <div className="text-2xl font-bold text-amber-400">{stats.totalGames}</div>
+              <div className="text-sm text-gray-400">Total Games</div>
+            </div>
+            <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
+              <div className="text-2xl font-bold text-green-400">{stats.freeGames}</div>
+              <div className="text-sm text-gray-400">Free Games</div>
+            </div>
+            <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
+              <div className="text-2xl font-bold text-purple-400">{stats.premiumGames}</div>
+              <div className="text-sm text-gray-400">Premium Games</div>
+            </div>
+            <div className="bg-gray-900 rounded-xl p-4 text-center border border-gray-800">
+              <div className="text-2xl font-bold text-blue-400">{stats.categoriesCount}</div>
+              <div className="text-sm text-gray-400">Categories</div>
+            </div>
+          </section>
+          {/* Categories Grid */}
+          <section className="mb-12" aria-labelledby="browse-categories-heading">
+            <h2 id="browse-categories-heading" className="text-2xl font-bold text-amber-400 mb-6">Browse by Category</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  onClick={() => setSelectedCategory(selectedCategory === category.slug ? '' : category.slug)}
+                  className={
+                    `bg-gray-900 rounded-xl p-6 cursor-pointer transition-all duration-300 border-2
+                    ${selectedCategory === category.slug 
+                      ? 'border-amber-500 shadow-[0_0_20px_rgba(255,215,0,0.3)]' 
+                      : 'border-gray-800 hover:border-gray-700'}
+                    hover:shadow-lg hover:scale-105`
+                  }
+                  aria-label={category.name}
+                >
+                  <div className="text-4xl mb-4">{category.icon}</div>
+                  <h3 className="text-xl font-bold text-amber-400 mb-2">{category.name}</h3>
+                  <p className="text-gray-400 text-sm mb-3">{category.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-500">{category.gameCount} games</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+          {/* Search and View Mode */}
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+            <div className="flex-1 relative w-full md:w-auto">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 h-6 w-6" />
+              <input
+                type="text"
+                placeholder="Search games..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-6 py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-lg"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                className={`p-2 rounded-lg border ${viewMode === 'grid' ? 'bg-amber-500 text-gray-900 border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
+                onClick={() => setViewMode('grid')}
               >
-                <GameCard game={game} />
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-6">
-            {filteredGames.map((game) => (
-              <Link
-                key={game.slug}
-                to={`/games/${game.slug}`}
-                className="block"
+                <Grid className="h-5 w-5" />
+              </button>
+              <button
+                className={`p-2 rounded-lg border ${viewMode === 'list' ? 'bg-amber-500 text-gray-900 border-amber-500' : 'bg-gray-800 text-gray-400 border-gray-700'}`}
+                onClick={() => setViewMode('list')}
               >
-                <GameCard game={game} />
-              </Link>
-            ))}
+                <List className="h-5 w-5" />
+              </button>
+            </div>
           </div>
-        )}
+          {/* Games Grid/List */}
+          {filteredGames.length === 0 ? (
+            <div className="text-center py-20 bg-gray-900 rounded-xl shadow-xl border border-gray-800">
+              <div className="text-gray-600 mb-6">
+                <Search className="h-20 w-20 mx-auto text-gray-700" />
+              </div>
+              <h3 className="text-3xl font-bold font-bruno-ace text-amber-400 mb-4">No games found</h3>
+              <p className="text-xl text-gray-400">
+                Try adjusting your search or filter criteria.
+              </p>
+            </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredGames.map((game) => (
+                <Link
+                  key={game.slug}
+                  to={`/games/${game.slug}`}
+                  className="block"
+                >
+                  <GameCard game={game} />
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {filteredGames.map((game) => (
+                <Link
+                  key={game.slug}
+                  to={`/games/${game.slug}`}
+                  className="block"
+                >
+                  <GameCard game={game} />
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-    </div>
+    </>
   );
 }; 
