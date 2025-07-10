@@ -17,6 +17,7 @@ import AmongImposterGame from './AmongImposter';
 import AllOfUsAreDead from './AllOfUsAreDead';
 import TowerStackGame from './TowerStackGame';
 import Uno from './Uno';
+import SquidGame from './SquidGame';
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
   'freefire': FreeFireGame,
@@ -37,6 +38,7 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'allofaredead': AllOfUsAreDead,
   'towerstack': TowerStackGame,
   'uno': Uno,
+  'squidgame': SquidGame,
 };
 
 export { Fighter, Shooter, Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno }; 

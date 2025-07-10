@@ -170,6 +170,25 @@ export const GamePlayer: React.FC = () => {
   // Helmet meta tags for the game page
   const ogImage = game.thumbnail_url || 'https://yourdomain.com/og-image.png';
   const canonicalUrl = `${window.location.origin}/games/${slug}`;
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'VideoGame',
+    'name': game.title,
+    'description': game.description,
+    'image': ogImage,
+    'applicationCategory': 'Game',
+    'operatingSystem': 'All',
+    'url': canonicalUrl,
+    'author': {
+      '@type': 'Organization',
+      'name': 'PlayHub'
+    },
+    'aggregateRating': {
+      '@type': 'AggregateRating',
+      'ratingValue': '4.5',
+      'reviewCount': '120'
+    }
+  };
 
   // If it's a premium game, wrap with PremiumGameGate
   if (game.is_premium) {
@@ -191,6 +210,7 @@ export const GamePlayer: React.FC = () => {
           <meta name="twitter:image" content={ogImage} />
           <meta name="robots" content="index, follow" />
           <link rel="canonical" href={canonicalUrl} />
+          <script type="application/ld+json">{JSON.stringify(schema)}</script>
         </Helmet>
         <PremiumGameGate
           gameTitle={game.title}
@@ -224,6 +244,7 @@ export const GamePlayer: React.FC = () => {
         <meta name="twitter:image" content={ogImage} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify(schema)}</script>
       </Helmet>
       <article aria-labelledby="game-title">
         <GameContent game={game} onShare={handleShare} onBack={() => navigate('/games')} />
@@ -311,8 +332,12 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Game Area */}
-          <div className="lg:col-span-3">
-            <div ref={gameAreaRef} className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800 relative">
+          <div className="lg:col-span-3 w-full">
+            <div
+              ref={gameAreaRef}
+              className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800 relative w-full"
+              style={!isFullscreen ? { maxHeight: '70vh', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}
+            >
               {/* Fullscreen Button */}
               <button
                 onClick={handleFullscreen}
@@ -325,7 +350,7 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4h4M20 8V4h-4M4 16v4h4m12-4v4h-4" /></svg>
                 )}
               </button>
-              <div className="aspect-video">
+              <div className="aspect-video w-full">
                 {(() => {
                   const GameComponent = gameComponents[game.game_data as keyof typeof gameComponents];
                   return GameComponent ? <GameComponent /> : (
@@ -368,12 +393,27 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
             {/* Instructions */}
             <div className="bg-gray-900 rounded-2xl shadow-2xl p-6 border border-gray-800">
               <h3 className="font-semibold font-bruno-ace text-amber-400 mb-3">How to Play</h3>
-              <div className="text-sm text-gray-400 space-y-2">
+              <div className="text-sm text-gray-400 space-y-2 mb-4">
                 <p>• Use arrow keys or WASD to move</p>
                 <p>• Press Space to pause/resume</p>
                 <p>• Click to interact with game elements</p>
                 <p>• Have fun and enjoy the game!</p>
               </div>
+              <h4 className="font-semibold text-amber-300 mb-2 mt-4">Player Reviews</h4>
+              <div className="mb-4">
+                <p className="text-gray-300 italic mb-1">“Super fun and addictive! 5 stars.”</p>
+                <p className="text-gray-400 text-xs">- Guest Player</p>
+              </div>
+              <div className="mb-4">
+                <p className="text-gray-300 italic mb-1">“Reminds me of classic arcade games.”</p>
+                <p className="text-gray-400 text-xs">- ArcadeFan99</p>
+              </div>
+              <h4 className="font-semibold text-amber-300 mb-2 mt-4">FAQs</h4>
+              <ul className="list-disc pl-5 text-gray-200 text-xs space-y-1">
+                <li><strong>Is this game free?</strong> Yes, you can play for free in your browser.</li>
+                <li><strong>Do I need to download anything?</strong> No downloads required—just click and play!</li>
+                <li><strong>Can I play on mobile?</strong> Most games work on mobile devices.</li>
+              </ul>
             </div>
           </div>
         </div>

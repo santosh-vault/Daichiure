@@ -34,6 +34,9 @@ export const FreeFireGame: React.FC = () => {
   const [bossActive, setBossActive] = useState(false);
   const [gameTime, setGameTime] = useState(0);
 
+  // Add a state to track game over for UI
+  const [showRestart, setShowRestart] = useState(false);
+
   // Game state refs
   const player = useRef({
     x: MAP_WIDTH / 2 - PLAYER_W / 2, // Start in center of large map
@@ -554,10 +557,7 @@ export const FreeFireGame: React.FC = () => {
     
     if (player.current.health <= 0 && !gameOver.current) {
       gameOver.current = true;
-      setTimeout(() => {
-        alert(`Game Over! Score: ${player.current.score} | Level: ${difficultyLevel}`);
-        window.location.reload();
-      }, 100);
+      setShowRestart(true);
     }
   };
 
@@ -920,6 +920,48 @@ export const FreeFireGame: React.FC = () => {
     updateUI();
   }, []);
 
+  // For simplicity, add a helper to reset all game state
+  const resetGame = () => {
+    // Reset all refs and state to initial values
+    player.current = {
+      x: MAP_WIDTH / 2 - PLAYER_W / 2,
+      y: MAP_HEIGHT / 2 - PLAYER_H / 2,
+      w: PLAYER_W,
+      h: PLAYER_H,
+      speed: 5,
+      color: PLAYER_COLOR,
+      jumping: false,
+      velocityY: 0,
+      health: 100,
+      maxHealth: 100,
+      ammo: MAX_AMMO,
+      score: 0,
+      reloading: false,
+      angle: 0,
+      muzzleFlash: 0,
+      invulnerable: 0,
+      powerUpActive: 0,
+      powerUpType: '',
+    };
+    camera.current = { x: 0, y: 0 };
+    bullets.current = [];
+    enemyBullets.current = [];
+    enemies.current = [];
+    bosses.current = [];
+    ammos.current = [];
+    powerUps.current = [];
+    keys.current = {};
+    mouse.current = { x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT / 2 };
+    gameOver.current = false;
+    setDifficultyLevel(1);
+    setBossActive(false);
+    setGameTime(0);
+    setShowRestart(false);
+    setStarted(false); // Force unmount
+    setTimeout(() => setStarted(true), 0); // Remount and restart game loop
+    updateUI();
+  };
+
   if (!started) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
@@ -989,6 +1031,38 @@ export const FreeFireGame: React.FC = () => {
           </div>
         )}
       </div>
+      {showRestart && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 10,
+          }}
+        >
+          <button
+            onClick={resetGame}
+            style={{
+              padding: '20px 60px',
+              fontSize: 32,
+              borderRadius: 12,
+              background: '#00ff00',
+              color: '#222',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 32px #000',
+            }}
+          >
+            Restart
+          </button>
+        </div>
+      )}
     </div>
   );
 };

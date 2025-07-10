@@ -18,6 +18,10 @@ import { StripeSetupPage } from './pages/StripeSetup';
 import { AdminPanel } from './pages/Admin/AdminPanel';
 import ScrollToTop from './components/ScrollToTop';
 import { GoogleAnalyticsTracker } from './components/GoogleAnalyticsTracker';
+import About from './pages/About';
+import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import Contact from './pages/Contact';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -59,6 +63,10 @@ function App() {
                 <Route path="/debug" element={<Debug />} />
                 <Route path="/stripe-setup" element={<StripeSetupPage />} />
                 <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/contact" element={<Contact />} />
               </Routes>
             </Layout>
             <Toaster 

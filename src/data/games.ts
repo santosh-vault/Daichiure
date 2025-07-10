@@ -152,4 +152,12 @@ export const games = [
     price: null,
     category: 'action',
   },
+  {
+    slug: 'squidgame',
+    title: 'Squid Game',
+    description: 'Play through multiple levels inspired by the Squid Game series! Red Light Green Light, Dalgona Candy, and Tug of War await.',
+    is_premium: false,
+    price: null,
+    category: 'arcade',
+  },
 ];
