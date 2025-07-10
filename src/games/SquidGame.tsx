@@ -24,6 +24,18 @@ const SquidGame: React.FC = () => {
   const [ropePos, setRopePos] = useState(50); // 0 (AI wins) to 100 (player wins)
   const [fatigue, setFatigue] = useState(0); // 0 to 100, higher = weaker
   const [showTransition, setShowTransition] = useState(false);
+  // Add state for crack animation
+  const [crackAnim, setCrackAnim] = useState(false);
+  // Add state to track if loss was due to timer
+  const [timedOut, setTimedOut] = useState(false);
+
+  // 1. Add a font style for Helvetica and clear instructions for each level
+  const fontStyle = { fontFamily: 'Helvetica, Arial, sans-serif' };
+  const instructions = [
+    'Level 1: Red Light, Green Light - Tap ▶️ only when the light is green to move forward. Reach the finish line to win.',
+    'Level 2: Dalgona Candy - Click inside the green zone to carve the candy. Avoid cracking it! Fill the bar before time runs out.',
+    'Level 3: Tug of War - Tap 💪 repeatedly to pull the rope to your side before the AI wins.'
+  ];
 
   // Red Light, Green Light logic (harder, more visual)
   React.useEffect(() => {
@@ -54,37 +66,55 @@ const SquidGame: React.FC = () => {
     if (intervalId) clearInterval(intervalId);
   }, [level, status]);
 
-  // Dalgona Candy timer (harder, more visual)
+  // 2. Dalgona: set precision ONCE per level, not every interval, and keep it away from edges
   React.useEffect(() => {
     if (level === 1 && status === 'playing') {
-      setTimer(8 + Math.floor(Math.random() * 4));
+      setTimer(12 + Math.floor(Math.random() * 4)); // 12-15 seconds
       setShape(getRandomShape());
       setCrackMeter(0);
       setProgress(0);
-      setPrecision(Math.random() * 80 + 10);
+      // Precision between 10% and 85% (so 5% zone is always visible)
+      setPrecision(Math.random() * 75 + 10);
+      setTimedOut(false);
+      if (intervalId) clearInterval(intervalId);
       const id = setInterval(() => {
         setTimer(t => {
           if (t <= 1) {
             clearInterval(id);
+            setTimedOut(true);
             setStatus('lost');
             return 0;
           }
           return t - 1;
         });
-        setPrecision(Math.random() * 80 + 10);
-      }, 900);
+        // Move precision zone slightly (±5%)
+        setPrecision(p => {
+          let newP = p + (Math.random() * 10 - 5);
+          if (newP < 10) newP = 10;
+          if (newP > 85) newP = 85;
+          return newP;
+        });
+      }, 1000);
       setIntervalId(id);
       return () => clearInterval(id);
     }
     if (intervalId) clearInterval(intervalId);
   }, [level, status]);
 
-  // Tug of War logic (harder, more visual)
+  // 3. Ensure all intervals are cleared on win/loss/level change
+  React.useEffect(() => {
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [level, status]);
+
+  // Tug of War logic (easier AI)
   React.useEffect(() => {
     if (level === 2 && status === 'playing') {
       setRopePos(50);
       setProgress(0);
       setFatigue(0);
+      if (intervalId) clearInterval(intervalId);
       const id = setInterval(() => {
         setRopePos(p => {
           if (p <= 0) {
@@ -97,11 +127,11 @@ const SquidGame: React.FC = () => {
             setStatus('won');
             return 100;
           }
-          // AI pulls harder as fatigue increases
-          return p - (2 + Math.random() * 3 + fatigue * 0.05);
+          // AI pulls less hard now
+          return p - (1 + Math.random() * 2 + fatigue * 0.03);
         });
         setFatigue(f => Math.max(0, f - 2)); // fatigue recovers slowly
-      }, 150);
+      }, 200); // slower AI interval
       setIntervalId(id);
       return () => clearInterval(id);
     }
@@ -119,6 +149,7 @@ const SquidGame: React.FC = () => {
     setReactionPenalty(false);
     setFatigue(0);
     setShowTransition(false);
+    setTimedOut(false);
   }, [level]);
 
   // Red Light, Green Light handler
@@ -151,14 +182,14 @@ const SquidGame: React.FC = () => {
     }
   };
 
-  // Dalgona Candy handler
+  // Dalgona Candy handler (harder)
   const handleDalgona = (e: React.MouseEvent) => {
     // Only count if click is inside the precision zone
     const bar = e.currentTarget as HTMLDivElement;
     const rect = bar.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const clickPercent = (clickX / rect.width) * 100;
-    if (clickPercent >= precision && clickPercent <= precision + 10) {
+    if (clickPercent >= precision && clickPercent <= precision + 5) { // 5% zone
       setProgress(p => {
         if (p >= 100) {
           setShowTransition(true);
@@ -169,7 +200,7 @@ const SquidGame: React.FC = () => {
           if (intervalId) clearInterval(intervalId);
           return 100;
         }
-        return p + 10 + Math.random() * 5;
+        return p + 6 + Math.random() * 2; // 6-8 per success
       });
       setCrackMeter(c => Math.max(0, c - 10));
     } else {
@@ -179,12 +210,15 @@ const SquidGame: React.FC = () => {
           if (intervalId) clearInterval(intervalId);
           return 100;
         }
-        return c + 15 + Math.random() * 10;
+        // Trigger crack animation
+        setCrackAnim(true);
+        setTimeout(() => setCrackAnim(false), 300);
+        return c + 20 + Math.random() * 5; // 20-25 per miss
       });
     }
   };
 
-  // Tug of War handler
+  // Tug of War handler (stronger player)
   const handleTugOfWar = () => {
     setRopePos(p => {
       if (p >= 100) {
@@ -202,7 +236,7 @@ const SquidGame: React.FC = () => {
         return 0;
       }
       setFatigue(f => Math.min(100, f + 8));
-      return p + 4 - fatigue * 0.07 + Math.random() * 2;
+      return p + 6 - fatigue * 0.05 + Math.random() * 2;
     });
   };
 
@@ -226,14 +260,19 @@ const SquidGame: React.FC = () => {
     setReactionPenalty(false);
     setFatigue(0);
     setShowTransition(false);
+    setTimedOut(false);
   };
 
   // Visual feedback for win/loss/transition
   if (status === 'lost') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center" style={fontStyle}>
         <div className="flex flex-col items-center">
           <span className="text-8xl mb-6">❌</span>
+          {timedOut && level === 1 && (
+            <div className="mb-2 text-2xl text-red-400 font-bold animate-pulse">Time’s Up!</div>
+          )}
+          <div className="mb-4 text-xl text-white text-center max-w-lg">{instructions[level]}</div>
           <button onClick={handleRestart} className="bg-amber-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-2xl hover:bg-amber-600 transition-colors">Restart</button>
         </div>
       </div>
@@ -241,9 +280,10 @@ const SquidGame: React.FC = () => {
   }
   if (status === 'won' && level === 2) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center" style={fontStyle}>
         <div className="flex flex-col items-center">
           <span className="text-8xl mb-6">✅</span>
+          <div className="mb-4 text-xl text-white text-center max-w-lg">Congratulations! You completed all levels.</div>
           <button onClick={handleRestart} className="bg-amber-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-2xl hover:bg-amber-600 transition-colors">Play Again</button>
         </div>
       </div>
@@ -251,9 +291,10 @@ const SquidGame: React.FC = () => {
   }
   if (status === 'won' && level < 2) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center" style={fontStyle}>
         <div className="flex flex-col items-center">
           <span className="text-8xl mb-6">✅</span>
+          <div className="mb-4 text-xl text-white text-center max-w-lg">{instructions[level + 1]}</div>
           <button onClick={handleNextLevel} className="bg-amber-500 text-gray-900 px-8 py-4 rounded-2xl font-bold text-2xl hover:bg-amber-600 transition-colors">Next</button>
         </div>
       </div>
@@ -261,14 +302,15 @@ const SquidGame: React.FC = () => {
   }
   if (showTransition) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center" style={fontStyle}>
         <span className="text-8xl animate-bounce">🎉</span>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center py-8 px-2">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-950 to-black flex flex-col items-center justify-center py-8 px-2" style={fontStyle}>
+      <div className="mb-6 text-xl text-white text-center max-w-lg">{instructions[level]}</div>
       {/* Red Light, Green Light */}
       {level === 0 && (
         <div className="w-full max-w-xl flex flex-col items-center">
@@ -296,17 +338,40 @@ const SquidGame: React.FC = () => {
             <span className="text-7xl">🍬</span>
             <span className="text-5xl ml-4">{shape.emoji}</span>
           </div>
-          <div className="relative w-full h-10 bg-gray-800 rounded-full mb-2 cursor-pointer" onClick={handleDalgona}>
+          {/* Prominent timer display */}
+          <div className="mb-2 text-3xl font-bold text-amber-300 flex items-center gap-2">
+            <span className="text-4xl">⏰</span>
+            <span>{timer}s</span>
+          </div>
+          <div
+            className={`relative w-full h-10 bg-gray-800 rounded-full mb-2 cursor-pointer transition-transform duration-150 ${crackAnim ? 'animate-shake' : ''}`}
+            onClick={handleDalgona}
+            style={{ position: 'relative' }}
+          >
             <div className="absolute top-0 left-0 h-10 bg-amber-400 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
             {/* Precision zone */}
-            <div className="absolute top-0 h-10 rounded-full border-4 border-green-400 opacity-80" style={{ left: `${precision}%`, width: '10%', pointerEvents: 'none' }}></div>
+            <div className="absolute top-0 h-10 rounded-full border-4 border-green-400 opacity-80" style={{ left: `${precision}%`, width: '5%', pointerEvents: 'none' }}></div>
+            {/* Crack overlay if crackMeter > 60 */}
+            {crackMeter > 60 && (
+              <>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none text-4xl animate-pulse" style={{ zIndex: 2 }}>
+                  💥
+                </div>
+                {/* Simple jagged SVG line overlay */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
+                  <polyline points="0,10 10,20 20,5 30,25 40,10 50,20 60,5 70,25 80,10 90,20 100,5 110,25 120,10 130,20 140,5 150,25 160,10 170,20 180,5 190,25 200,10" fill="none" stroke="#fff" strokeWidth="3" opacity="0.7" />
+                </svg>
+              </>
+            )}
           </div>
+          {crackAnim && (
+            <div className="text-red-400 font-bold text-lg animate-pulse mb-1">Cracked!</div>
+          )}
           <div className="w-full bg-red-900/40 rounded-full h-3 mb-2">
             <div className="bg-red-500 h-3 rounded-full" style={{ width: `${crackMeter}%` }}></div>
           </div>
           <div className="flex items-center justify-between w-full">
-            <span className="text-2xl">⏰</span>
-            <span className="text-2xl">{timer}s</span>
+            <span className="text-2xl">Progress</span>
             <span className="text-2xl">{crackMeter > 60 ? '💥' : ''}</span>
           </div>
         </div>

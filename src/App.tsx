@@ -15,7 +15,9 @@ import { Dashboard } from './pages/Dashboard/Dashboard';
 import { Success } from './pages/Success';
 import { Debug } from './pages/Debug';
 import { StripeSetupPage } from './pages/StripeSetup';
-import { AdminPanel } from './pages/Admin/AdminPanel';
+import AdminBlogs from './pages/Admin/Blogs';
+import Blogs from './pages/Blogs';
+import BlogDetail from './pages/Blogs/[id]';
 import ScrollToTop from './components/ScrollToTop';
 import { GoogleAnalyticsTracker } from './components/GoogleAnalyticsTracker';
 import About from './pages/About';
@@ -62,7 +64,9 @@ function App() {
                 <Route path="/success" element={<Success />} />
                 <Route path="/debug" element={<Debug />} />
                 <Route path="/stripe-setup" element={<StripeSetupPage />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/admin/blogs" element={<AdminBlogs />} />
+                <Route path="/blogs" element={<Blogs />} />
+                <Route path="/blogs/:id" element={<BlogDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />

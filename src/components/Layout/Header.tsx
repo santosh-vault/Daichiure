@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Gamepad2, User, LogOut, Menu, X, Settings, Shield } from 'lucide-react';
+import { Gamepad2, User, LogOut, Menu, X } from 'lucide-react';
 
 // Admin user emails - should match AdminPanel.tsx
 const ADMIN_EMAILS = ['admin@playhub.com', 'developer@playhub.com'];
@@ -52,6 +52,12 @@ export const Header: React.FC = () => {
           >
             Categories
           </Link>
+          <Link
+            to="/blogs"
+            className="text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
+          >
+            Blog
+          </Link>
           {user ? (
             <div className="flex items-center space-x-6">
               <Link
@@ -61,24 +67,6 @@ export const Header: React.FC = () => {
                 <User className="h-5 w-5" />
                 <span>Dashboard</span>
               </Link>
-              {isAdmin && (
-                <>
-                  <Link
-                    to="/admin"
-                    className="flex items-center space-x-2 text-gray-300 hover:text-red-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
-                  >
-                    <Shield className="h-5 w-5" />
-                    <span>Admin</span>
-                  </Link>
-                  <Link
-                    to="/stripe-setup"
-                    className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
-                  >
-                    <Settings className="h-5 w-5" />
-                    <span>Stripe Setup</span>
-                  </Link>
-                </>
-              )}
               <button
                 onClick={handleSignOut}
                 className="flex items-center space-x-2 text-gray-300 hover:text-red-500 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
@@ -132,6 +120,13 @@ export const Header: React.FC = () => {
             >
               Categories
             </Link>
+            <Link
+              to="/blogs"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 py-2 border-b border-gray-800"
+            >
+              Blog
+            </Link>
             {user ? (
               <>
                 <Link
@@ -142,16 +137,6 @@ export const Header: React.FC = () => {
                   <User className="h-5 w-5" />
                   <span>Dashboard</span>
                 </Link>
-                {isAdmin && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center space-x-2 text-gray-300 hover:text-red-400 font-medium text-md transition-colors duration-300 py-2 border-b border-gray-800"
-                  >
-                    <Shield className="h-5 w-5" />
-                    <span>Admin Panel</span>
-                  </Link>
-                )}
                 <button
                   onClick={handleSignOut}
                   className="flex items-center space-x-2 text-gray-300 hover:text-red-500 font-medium text-md transition-colors duration-300 text-left py-2"
