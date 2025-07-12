@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const fontStyle = { fontFamily: 'Helvetica, Arial, sans-serif' };
+
+const quillModules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['blockquote', 'code-block'],
+    ['link', 'image'],
+    [{ 'align': [] }],
+    ['clean']
+  ]
+};
 
 const AdminBlogs: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -14,26 +28,7 @@ const AdminBlogs: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Check admin authentication
-  useEffect(() => {
-    const checkAdmin = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const user = userData?.user;
-      if (!user) {
-        window.location.href = '/admin/login';
-        return;
-      }
-      const { data: profile } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', user.id)
-        .single();
-      if (!profile || profile.role !== 'admin') {
-        window.location.href = '/admin/login';
-      }
-    };
-    checkAdmin();
-  }, []);
+  // Admin authentication is now handled by AdminRouteGuard
 
   // Handle image upload and preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,13 +108,18 @@ const AdminBlogs: React.FC = () => {
           onChange={e => setDescription(e.target.value)}
           className="px-4 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
         />
-        <textarea
-          placeholder="Content (Markdown supported)"
-          value={content}
-          onChange={e => setContent(e.target.value)}
-          className="px-4 py-3 rounded-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-amber-400 min-h-[120px]"
-          required
-        />
+        <div>
+          <label className="block text-white mb-2">Content</label>
+          <ReactQuill
+            value={content}
+            onChange={setContent}
+            theme="snow"
+            modules={quillModules}
+          />
+          {(!content || content === '<p><br></p>') && (
+            <div className="text-red-400 text-xs mt-1">Content is required</div>
+          )}
+        </div>
         <input
           type="text"
           placeholder="Category"

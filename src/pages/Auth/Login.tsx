@@ -122,11 +122,17 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center space-y-2">
             <p className="text-gray-400">
               Don't have an account?{' '}
               <Link to="/register" className="font-bold text-amber-400 hover:text-amber-300 transition-colors duration-200">
                 Sign up
+              </Link>
+            </p>
+            <p className="text-gray-500 text-sm">
+              Admin?{' '}
+              <Link to="/admin/login" className="text-amber-400 hover:text-amber-300 transition-colors duration-200">
+                Admin login
               </Link>
             </p>
           </div>

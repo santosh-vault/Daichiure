@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Gamepad2, User, LogOut, Menu, X } from 'lucide-react';
 
-// Admin user emails - should match AdminPanel.tsx
+// Admin user emails - should match Dashboard.tsx
 const ADMIN_EMAILS = ['admin@playhub.com', 'developer@playhub.com'];
 
 export const Header: React.FC = () => {
@@ -61,11 +61,11 @@ export const Header: React.FC = () => {
           {user ? (
             <div className="flex items-center space-x-6">
               <Link
-                to="/dashboard"
+                to={isAdmin ? "/dashboard" : "/user-dashboard"}
                 className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 ease-in-out transform hover:scale-105"
               >
                 <User className="h-5 w-5" />
-                <span>Dashboard</span>
+                <span>{isAdmin ? 'Dashboard' : 'My Dashboard'}</span>
               </Link>
               <button
                 onClick={handleSignOut}
@@ -130,12 +130,12 @@ export const Header: React.FC = () => {
             {user ? (
               <>
                 <Link
-                  to="/dashboard"
+                  to={isAdmin ? "/dashboard" : "/user-dashboard"}
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center space-x-2 text-gray-300 hover:text-amber-400 font-medium text-md transition-colors duration-300 py-2 border-b border-gray-800"
                 >
                   <User className="h-5 w-5" />
-                  <span>Dashboard</span>
+                  <span>{isAdmin ? 'Dashboard' : 'My Dashboard'}</span>
                 </Link>
                 <button
                   onClick={handleSignOut}
