@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useAwardGameCoins } from './coinAwarder';
 
 const GAME_WIDTH = 1000;
 const GAME_HEIGHT = 600;
@@ -166,6 +167,8 @@ const HouseBuilder: React.FC = () => {
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
   const [mousePos, setMousePos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [started, setStarted] = useState(false);
+
+  useAwardGameCoins(gameState === 'complete');
 
   // Timer effect
   useEffect(() => {

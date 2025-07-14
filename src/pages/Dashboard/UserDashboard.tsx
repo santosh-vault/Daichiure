@@ -34,6 +34,10 @@ const UserDashboard: React.FC = () => {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [coinData, setCoinData] = useState<{ coins: number; fair_play_coins: number; transactions: any[] } | null>(null);
+  const [redeemLoading, setRedeemLoading] = useState(false);
+  const [redeemError, setRedeemError] = useState<string | null>(null);
+  const [redeemSuccess, setRedeemSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -57,6 +61,54 @@ const UserDashboard: React.FC = () => {
     };
     fetchData();
   }, [user]);
+
+  const fetchCoinData = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const res = await fetch('/functions/v1/get-reward-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCoinData(data);
+      } else {
+        setCoinData(null);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCoinData();
+    // eslint-disable-next-line
+  }, [user]);
+
+  const handleRedeem = async () => {
+    if (!user) return;
+    setRedeemLoading(true);
+    setRedeemError(null);
+    setRedeemSuccess(null);
+    try {
+      const res = await fetch('/functions/v1/redeem-coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRedeemSuccess('Redemption successful!');
+        fetchCoinData();
+      } else {
+        setRedeemError(data.error || 'Redemption failed');
+      }
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
 
   if (!user) {
     return (
@@ -122,6 +174,59 @@ const UserDashboard: React.FC = () => {
             </div>
           )}
         </section>
+        <div className="max-w-3xl mx-auto py-10 px-4">
+          <h2 className="text-2xl font-bold mb-6">My Rewards</h2>
+          {loading ? (
+            <div>Loading...</div>
+          ) : coinData ? (
+            <>
+              <div className="flex space-x-6 mb-6">
+                <div className="bg-gray-800 px-6 py-4 rounded-xl text-amber-400 font-bold text-lg flex items-center">
+                  Coins: <span className="ml-2">{coinData.coins}</span>
+                </div>
+                <div className="bg-gray-800 px-6 py-4 rounded-xl text-blue-400 font-bold text-lg flex items-center">
+                  Fair Play: <span className="ml-2">{coinData.fair_play_coins}</span>
+                </div>
+              </div>
+              <div className="mb-6">
+                <button
+                  className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-6 py-3 rounded-full font-bold text-md hover:shadow-[0_0_20px_rgba(255,215,0,0.7)] transition-all duration-300"
+                  onClick={handleRedeem}
+                  disabled={redeemLoading || (coinData.coins < 1000000)}
+                >
+                  {redeemLoading ? 'Processing...' : 'Redeem 1,000,000 Coins'}
+                </button>
+                {redeemError && <div className="text-red-500 mt-2">{redeemError}</div>}
+                {redeemSuccess && <div className="text-green-500 mt-2">{redeemSuccess}</div>}
+              </div>
+              <h3 className="text-xl font-semibold mb-2">Recent Transactions</h3>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-gray-900 rounded-lg">
+                  <thead>
+                    <tr>
+                      <th className="px-4 py-2 text-left">Type</th>
+                      <th className="px-4 py-2 text-left">Amount</th>
+                      <th className="px-4 py-2 text-left">Description</th>
+                      <th className="px-4 py-2 text-left">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {coinData.transactions.map((tx, idx) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-2 capitalize">{tx.type}</td>
+                        <td className="px-4 py-2">{tx.amount}</td>
+                        <td className="px-4 py-2">{tx.description}</td>
+                        <td className="px-4 py-2">{new Date(tx.created_at).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          ) : (
+            <div>No reward data found.</div>
+          )}
+        </div>
       </div>
     </div>
   );

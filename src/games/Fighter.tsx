@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useAwardGameCoins } from './coinAwarder';
 
 const GAME_WIDTH = 900;
 const GAME_HEIGHT = 500;
@@ -564,6 +565,8 @@ const Fighter: React.FC = () => {
     }
   };
 
+  useAwardGameCoins(gameState === 'gameOver');
+
   if (!started) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
@@ -627,11 +630,7 @@ const Fighter: React.FC = () => {
         {/* Game Over Screen */}
         {gameState === 'gameOver' && (
           <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center rounded-lg">
-            <h2 className={`text-6xl font-extrabold mb-4 animate-bounce ${
-              playerWins > aiWins ? 'text-green-400' : 'text-red-400'
-            }`}>
-              {playerWins > aiWins ? 'VICTORY!' : 'DEFEAT!'}
-            </h2>
+            <h2 className={`text-6xl font-extrabold mb-4 animate-bounce ${playerWins > aiWins ? 'text-green-400' : 'text-red-400'}`}>{playerWins > aiWins ? 'VICTORY!' : 'DEFEAT!'}</h2>
             <p className="text-white text-2xl mb-2">Final Score: {playerWins} - {aiWins}</p>
             <p className="text-white text-xl mb-8">Great fight!</p>
             <button
@@ -642,31 +641,9 @@ const Fighter: React.FC = () => {
             </button>
           </div>
         )}
-        
-        {/* Move List Overlay */}
-        {showMoveList && (
-          <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-80 flex flex-col items-center justify-center z-30 rounded-lg">
-            <h2 className="text-3xl text-amber-400 font-bold mb-4">Move List</h2>
-            <ul className="text-white text-xl space-y-2">
-              <li>Move: <span className="text-yellow-300">A/D</span> or <span className="text-yellow-300">Arrow Keys</span></li>
-              <li>Jump: <span className="text-yellow-300">W</span> or <span className="text-yellow-300">Up Arrow</span></li>
-              <li>Punch: <span className="text-yellow-300">J</span></li>
-              <li>Kick: <span className="text-yellow-300">K</span></li>
-              <li>Block: <span className="text-yellow-300">L</span></li>
-              <li>Special: <span className="text-yellow-300">U</span> (Cooldown: {Math.ceil(specialCooldown / 60)}s)</li>
-              <li>Uppercut: <span className="text-yellow-300">J + K</span> (Combo!)</li>
-            </ul>
-            <p className="text-gray-300 mt-6">Press <span className="text-yellow-300">Tab</span> to close</p>
-          </div>
-        )}
-      </div>
-      <div className="mt-8 text-center text-white">
-        <p className="text-lg">Fighting Game Instructions:</p>
-        <p className="text-md">Press <span className="text-yellow-300">Tab</span> anytime for move list!</p>
-        <p className="text-md">Win 2 out of 3 rounds to become the champion!</p>
       </div>
     </div>
   );
 };
 
-export default Fighter; 
+export default Fighter;

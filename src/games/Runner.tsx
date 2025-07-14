@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useAwardGameCoins } from './coinAwarder';
 
 // Constants for game settings
 const GAME_WIDTH = 800;
@@ -1017,6 +1018,8 @@ const Runner: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useAwardGameCoins(gameState === 'gameOver');
 
   if (!started) {
     return (

@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { gameThumbnails } from '../constants/gameThumbnails';
+import { useAwardGameCoins } from './coinAwarder';
 
 export default function App() {
   return (
@@ -200,6 +201,7 @@ export const SnakeGame: React.FC = () => {
     };
   }, [update, draw, gameOver, paused]);
 
+  useAwardGameCoins(gameOver);
 
   // Initialize game state and event listeners on component mount
   useEffect(() => {

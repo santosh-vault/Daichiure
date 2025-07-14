@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useAwardGameCoins } from './coinAwarder';
 
 const GAME_WIDTH = 1200; // Increased map size
 const GAME_HEIGHT = 800; // Increased map size
@@ -760,6 +761,8 @@ const Shooter: React.FC = () => {
     setupLevel();
     setGameState('playing');
   };
+
+  useAwardGameCoins(gameState === 'win' || gameState === 'lose');
 
   if (!started) {
     return (

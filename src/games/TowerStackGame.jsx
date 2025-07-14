@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useRef, useEffect, useState } from 'react';
 import { gameThumbnails } from '../constants/gameThumbnails';
+import { useAwardGameCoins } from './coinAwarder';
 
 const CANVAS_WIDTH = 400;
 const CANVAS_HEIGHT = 600;
@@ -318,6 +319,8 @@ export const TowerStackGame = () => {
     };
     // eslint-disable-next-line
   }, [started, paused]);
+
+  useAwardGameCoins(gameOver);
 
   const dropBlock = () => {
     const blocks = blocksRef.current;

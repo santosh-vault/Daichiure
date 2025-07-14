@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useAwardGameCoins } from './coinAwarder';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
@@ -961,6 +962,8 @@ export const FreeFireGame: React.FC = () => {
     setTimeout(() => setStarted(true), 0); // Remount and restart game loop
     updateUI();
   };
+
+  useAwardGameCoins(gameOver.current);
 
   if (!started) {
     return (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, ArrowRight, ArrowDown, RotateCw } from 'lucide-react';
+import { useAwardGameCoins } from './coinAwarder';
 
 interface TetrisPiece {
   shape: number[][];
@@ -192,6 +193,8 @@ export const TetrisGame: React.FC = () => {
       setGameOver(true);
     }
   }, [currentPiece, piecePosition, isValidMove]);
+
+  useAwardGameCoins(gameOver);
 
   const renderBoard = () => {
     const displayBoard = board.map(row => [...row]);

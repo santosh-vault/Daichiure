@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Gamepad2, User, LogOut, Menu, X } from 'lucide-react';
@@ -10,6 +10,37 @@ export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [coinData, setCoinData] = useState<{ coins: number; fair_play_coins: number } | null>(null);
+  const [loadingCoins, setLoadingCoins] = useState(false);
+
+  // Fetch coin and fair play coin balances
+  useEffect(() => {
+    const fetchCoins = async () => {
+      if (!user) {
+        setCoinData(null);
+        return;
+      }
+      setLoadingCoins(true);
+      try {
+        const res = await fetch('/functions/v1/get-reward-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setCoinData({ coins: data.coins, fair_play_coins: data.fair_play_coins });
+        } else {
+          setCoinData(null);
+        }
+      } catch {
+        setCoinData(null);
+      } finally {
+        setLoadingCoins(false);
+      }
+    };
+    fetchCoins();
+  }, [user]);
 
   // Check if user is admin
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
@@ -93,6 +124,20 @@ export const Header: React.FC = () => {
           )}
         </nav>
 
+        {/* Coin balances */}
+        {user && (
+          <div className="flex items-center space-x-4 ml-6">
+            <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-amber-400 font-semibold text-sm">
+              <span className="mr-1">Coins:</span>
+              {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.coins ?? 0}</span>}
+            </div>
+            <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-blue-400 font-semibold text-sm">
+              <span className="mr-1">Fair Play:</span>
+              {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.fair_play_coins ?? 0}</span>}
+            </div>
+          </div>
+        )}
+
         {/* Mobile menu button */}
         <button
           onClick={toggleMobileMenu}
@@ -162,6 +207,18 @@ export const Header: React.FC = () => {
                   Get Started
                 </Link>
               </>
+            )}
+            {user && (
+              <div className="flex items-center space-x-4 mt-4">
+                <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-amber-400 font-semibold text-sm">
+                  <span className="mr-1">Coins:</span>
+                  {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.coins ?? 0}</span>}
+                </div>
+                <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-blue-400 font-semibold text-sm">
+                  <span className="mr-1">Fair Play:</span>
+                  {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.fair_play_coins ?? 0}</span>}
+                </div>
+              </div>
             )}
           </nav>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useAwardGameCoins } from './coinAwarder';
 
 interface Player {
   x: number;
@@ -362,6 +363,8 @@ export const KathmanduGame: React.FC = () => {
 
     return () => clearInterval(gameLoop);
   }, [gameState, health, drawGame]);
+
+  useAwardGameCoins(gameState === 'won' || gameState === 'gameOver');
 
   const resetGame = () => {
     setGameState('playing');

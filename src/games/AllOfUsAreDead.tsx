@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const CANVAS_WIDTH = 1200; // Increased map width
 const CANVAS_HEIGHT = 900; // Increased map height
@@ -55,6 +56,7 @@ export const AllOfUsAreDead: React.FC = () => {
   const [gameStats, setGameStats] = useState({ teamSize: 1, gameOver: false, won: false });
   const gameTimeRef = useRef(0);
   const level2SpawnedRef = useRef(false);
+  const { user } = useAuth();
 
   // Initialize game
   // Spawn level 2 mobs
@@ -436,6 +438,17 @@ export const AllOfUsAreDead: React.FC = () => {
       }
     };
   }, [started]);
+
+  // Award coins on game completion
+  useEffect(() => {
+    if ((gameStats.gameOver || gameStats.won) && user) {
+      fetch('/functions/v1/award-coins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, activity: 'game' }),
+      });
+    }
+  }, [gameStats.gameOver, gameStats.won, user]);
 
   const draw = () => {
     const canvas = canvasRef.current;
