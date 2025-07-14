@@ -20,7 +20,7 @@ const UsersList: React.FC = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/functions/v1/get-all-rewards');
+        const res = await fetch('/api/get-all-rewards');
         const data = await res.json();
         if (res.ok) {
           setUsers(data.users);

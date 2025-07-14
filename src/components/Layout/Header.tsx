@@ -22,7 +22,7 @@ export const Header: React.FC = () => {
       }
       setLoadingCoins(true);
       try {
-        const res = await fetch('/functions/v1/get-reward-data', {
+        const res = await fetch('/api/get-reward-data', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ user_id: user.id }),

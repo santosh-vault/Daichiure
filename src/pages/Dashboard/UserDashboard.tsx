@@ -66,7 +66,7 @@ const UserDashboard: React.FC = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch('/functions/v1/get-reward-data', {
+      const res = await fetch('/api/get-reward-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id }),
@@ -93,7 +93,7 @@ const UserDashboard: React.FC = () => {
     setRedeemError(null);
     setRedeemSuccess(null);
     try {
-      const res = await fetch('/functions/v1/redeem-coins', {
+      const res = await fetch('/api/redeem-coins', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: user.id }),
