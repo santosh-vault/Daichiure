@@ -8,6 +8,7 @@ import { games } from '../data/games';
 import { PremiumGameGate } from '../components/PremiumGameGate';
 import { Helmet } from 'react-helmet-async';
 import { useGoogleAnalytics } from '../hooks/useGoogleAnalytics';
+import FullscreenSuggestDialog from '../components/FullscreenSuggestDialog';
 
 interface GameData {
   id: number;
@@ -263,6 +264,7 @@ interface GameContentProps {
 const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
   const gameAreaRef = useRef<HTMLDivElement>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showFullscreenDialog, setShowFullscreenDialog] = useState(true);
 
   // Fullscreen logic
   const handleFullscreen = useCallback(() => {
@@ -278,6 +280,9 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
   useEffect(() => {
     const onFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
+      if (document.fullscreenElement) {
+        setShowFullscreenDialog(false);
+      }
     };
     document.addEventListener('fullscreenchange', onFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
@@ -294,8 +299,18 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [handleFullscreen]);
 
+  // Show dialog only once per game load
+  useEffect(() => {
+    setShowFullscreenDialog(true);
+  }, [game]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 font-inter">
+      <FullscreenSuggestDialog
+        open={showFullscreenDialog && !isFullscreen}
+        onClose={() => setShowFullscreenDialog(false)}
+        onGoFullscreen={handleFullscreen}
+      />
       {/* Header */}
       <div className="bg-gray-900 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -335,7 +350,7 @@ const GameContent: React.FC<GameContentProps> = ({ game, onShare, onBack }) => {
           <div className="lg:col-span-3 w-full">
             <div
               ref={gameAreaRef}
-              className="bg-gray-900 rounded-2xl shadow-2xl overflow-hidden border border-gray-800 relative w-full"
+              className={isFullscreen ? 'fixed inset-0 z-50 flex items-center justify-center bg-black' : ''}
               style={!isFullscreen ? { maxHeight: '70vh', minHeight: '320px', display: 'flex', alignItems: 'center', justifyContent: 'center' } : {}}
             >
               {/* Fullscreen Button */}

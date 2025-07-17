@@ -19,4 +19,12 @@ export const gameThumbnails: Record<string, string> = {
   towerstack: 'https://i.pinimg.com/736x/8b/4a/92/8b4a92e02330caa96c0a6df7c0287aea.jpg',
   uno: 'https://i.pinimg.com/736x/4c/65/e5/4c65e5d9cb574bfd846490ca7f947088.jpg',
   squidgame: 'https://i.pinimg.com/736x/0e/1a/bd/0e1abd0461ebc2396aca59eefa80bc3b.jpg',
+  '100balls': 'https://img.itch.zone/aW1hZ2UvMTkzMDMwLzEwMDYyNjAucG5n',
+  'vcecgonb': 'https://img.gamemonetize.com/vcecgonbw7uvc92nrt8xgwx9meouuqtz/512x384.jpg',
+  'zt2tti9k': 'https://img.gamemonetize.com/zt2tti9k25tgwbwmnacqoxz6l921m956/512x384.jpg',
+  'fxzsxwyi': 'https://img.gamemonetize.com/fxzsxwyiw3kdj5hf1dnsx6ogy52od6of/512x384.jpg',
+  '77b5mbmq': 'https://img.gamemonetize.com/77b5mbmq8ruyo6zqgdx6mu8zlvtab3um/512x384.jpg',
+  'rc0aptuu': 'https://img.gamemonetize.com/rc0aptuuleju6xnlpeds38lisqpz1hzu/512x384.jpg',
+  'qkqlhh9c': 'https://img.gamemonetize.com/qkqlhh9cdmommm6c3ilugfwfk4k1kal1/512x384.jpg',
+  '9ptv2pby': 'https://img.gamemonetize.com/9ptv2pbyrhiv9e9jlcj91vj9cwdwd3mw/512x384.jpg',
 };

@@ -32,7 +32,11 @@ export const Games: React.FC = () => {
   const customOrder = [
     'freefire', 'shooter', 'towerstack', 'allofaredead', // 1st row
     'snake', 'pong', 'tetris', 'breakout',              // 2nd row
-    'squidgame', // Add Squid Game to the custom order
+    // Third row: recently added games
+    '100balls', 'vcecgonb', 'zt2tti9k', 'fxzsxwyi',
+    '77b5mbmq', 'rc0aptuu', 'qkqlhh9c', '9ptv2pby',
+    // Fourth row: continue with other featured games
+    'squidgame',
   ];
 
   const filteredGames = games.filter(game => {
