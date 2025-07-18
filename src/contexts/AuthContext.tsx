@@ -109,7 +109,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           body: JSON.stringify({ user_id: user.id, activity: 'login' }),
         });
       } catch (e) {
-        // Optionally handle error (e.g., show toast)
+        console.error('Failed to award login coins:', e);
       }
     }
   };

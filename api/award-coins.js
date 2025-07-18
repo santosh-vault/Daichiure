@@ -16,14 +16,14 @@ export default async function handler(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  // Updated coin values
+  // Updated coin values according to requirements
   const COIN_VALUES = {
     visit: 10,
     game: 10,
     share: 5,
-    referral: 0, // Referral handled in its own endpoint
-    login: 1000,
-    'fair-coin-redeem': 20,
+    referral: 2000, // Referral gives 2000 coins
+    login: 1000,    // Login gives 1000 coins
+    'fair-coin-redeem': 20, // Fair coin redemption gives 20 coins
   };
   const DAILY_LIMIT = 1200;
 
@@ -47,9 +47,11 @@ export default async function handler(req) {
     dailyEarnings = 0;
   }
 
-  // Only apply daily limit to these activities
+  // Activities that are subject to daily limit
   const dailyLimited = ['visit', 'game', 'share'];
   const coinsToAward = COIN_VALUES[activity];
+  
+  // Check daily limit only for limited activities
   if (dailyLimited.includes(activity)) {
     if (dailyEarnings + coinsToAward > DAILY_LIMIT) {
       return new Response(JSON.stringify({ error: 'Daily coin limit reached' }), { status: 403 });
@@ -60,7 +62,8 @@ export default async function handler(req) {
   const newCoinBalance = user.coins + coinsToAward;
   const newDailyEarnings = dailyLimited.includes(activity)
     ? dailyEarnings + coinsToAward
-    : dailyEarnings;
+    : dailyEarnings; // Don't count referral and fair-coin-redeem towards daily limit
+  
   const updates = {
     coins: newCoinBalance,
     daily_coin_earnings: newDailyEarnings,
@@ -75,7 +78,7 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Failed to update user' }), { status: 500 });
   }
 
-  // Log transaction
+  // Log transaction with proper descriptions
   let description = '';
   switch (activity) {
     case 'login':
@@ -90,12 +93,16 @@ export default async function handler(req) {
     case 'share':
       description = 'Blog share reward';
       break;
+    case 'referral':
+      description = 'Referral reward';
+      break;
     case 'fair-coin-redeem':
       description = 'Fair play coin redeemed for coins';
       break;
     default:
       description = `${activity} reward`;
   }
+  
   await supabase.from('coin_transactions').insert({
     user_id,
     type: activity,
@@ -107,4 +114,4 @@ export default async function handler(req) {
     JSON.stringify({ coins: newCoinBalance, daily_coin_earnings: newDailyEarnings }),
     { status: 200 }
   );
-} 
+}

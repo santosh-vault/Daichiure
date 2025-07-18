@@ -85,4 +85,4 @@ export default async function handler(req) {
   }
 
   return new Response(JSON.stringify({ awarded: updatedCount }), { status: 200 });
-} 
+}

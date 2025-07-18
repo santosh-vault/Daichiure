@@ -174,9 +174,8 @@ const Rewards: React.FC = () => {
       });
       const data = await res.json();
       if (res.ok) {
-        showMessage('success', 'Referral successful! You earned bonus coins.');
+        showMessage('success', 'Referral sent! You will earn 2000 coins when they confirm.');
         setReferralEmail(''); // Clear input
-        fetchCoinData(); // Refresh coin data
       } else {
         showMessage('error', data.error || 'Failed to send referral. Please check the email.');
       }

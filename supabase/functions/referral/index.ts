@@ -32,6 +32,8 @@ serve(async (req) => {
     if (!referrer_id || !referred_email) {
       return new Response(JSON.stringify({ error: 'Missing referrer_id or referred_email' }), { status: 400, headers: getCorsHeaders(origin) });
     }
+    
+    // Check if referred user exists
     const { data: referredUser, error: referredUserError } = await supabase
       .from('users')
       .select('id')
@@ -40,6 +42,8 @@ serve(async (req) => {
     if (referredUserError || !referredUser) {
       return new Response(JSON.stringify({ error: 'Referred user not found' }), { status: 404, headers: getCorsHeaders(origin) });
     }
+    
+    // Check if referral already exists
     const { data: existingReferral } = await supabase
       .from('referrals')
       .select('id')
@@ -49,7 +53,11 @@ serve(async (req) => {
     if (existingReferral) {
       return new Response(JSON.stringify({ error: 'Referral already exists' }), { status: 409, headers: getCorsHeaders(origin) });
     }
+    
+    // Generate a unique token for referral confirmation
     const token = Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+    
+    // Log referral as pending
     await supabase.from('referrals').insert({
       referrer_id,
       referred_id: referredUser.id,
@@ -57,8 +65,9 @@ serve(async (req) => {
       token,
       created_at: new Date().toISOString(),
     });
+    
     return new Response(JSON.stringify({ message: 'Referral created. Awaiting confirmation.', token }), { status: 200, headers: getCorsHeaders(origin) });
   } catch (err) {
     return new Response(JSON.stringify({ error: 'Server error', details: err.message }), { status: 500, headers: getCorsHeaders(origin) });
   }
-}); 
+});

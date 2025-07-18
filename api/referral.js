@@ -49,6 +49,5 @@ export default async function handler(req) {
     created_at: new Date().toISOString(),
   });
 
-  // Return the token so it can be sent to the referred user (e.g., via email)
   return new Response(JSON.stringify({ message: 'Referral created. Awaiting confirmation.', token }), { status: 200 });
-} 
+}

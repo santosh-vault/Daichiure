@@ -48,4 +48,4 @@ export default async function handler(req) {
   });
 
   return new Response(JSON.stringify({ message: 'Referral confirmed and coins awarded.' }), { status: 200 });
-} 
+}
