@@ -9,6 +9,15 @@ if (!supabaseUrl || !supabaseKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Helper to get the Supabase Edge Functions base URL
+export function getSupabaseFunctionUrl(functionName: string) {
+  // supabaseUrl: https://<project-ref>.supabase.co
+  // Edge Functions: https://<project-ref>.supabase.co/functions/v1/<functionName>
+  if (!supabaseUrl) throw new Error('Missing Supabase URL');
+  const projectRef = supabaseUrl.replace('https://', '').split('.')[0];
+  return `https://${projectRef}.supabase.co/functions/v1/${functionName}`;
+}
+
 export interface Database {
   public: {
     Tables: {

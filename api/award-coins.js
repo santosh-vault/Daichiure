@@ -6,7 +6,7 @@ export default async function handler(req) {
   }
 
   const { user_id, activity } = await req.json();
-  if (!user_id || !['visit', 'game', 'share', 'referral'].includes(activity)) {
+  if (!user_id || !['visit', 'game', 'share', 'referral', 'login', 'fair-coin-redeem'].includes(activity)) {
     return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400 });
   }
 
@@ -16,11 +16,14 @@ export default async function handler(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
+  // Updated coin values
   const COIN_VALUES = {
     visit: 10,
-    game: 50,
-    share: 20,
-    referral: 1000,
+    game: 10,
+    share: 5,
+    referral: 0, // Referral handled in its own endpoint
+    login: 1000,
+    'fair-coin-redeem': 20,
   };
   const DAILY_LIMIT = 1200;
 
@@ -44,15 +47,20 @@ export default async function handler(req) {
     dailyEarnings = 0;
   }
 
-  // Check daily limit
+  // Only apply daily limit to these activities
+  const dailyLimited = ['visit', 'game', 'share'];
   const coinsToAward = COIN_VALUES[activity];
-  if (dailyEarnings + coinsToAward > DAILY_LIMIT) {
-    return new Response(JSON.stringify({ error: 'Daily coin limit reached' }), { status: 403 });
+  if (dailyLimited.includes(activity)) {
+    if (dailyEarnings + coinsToAward > DAILY_LIMIT) {
+      return new Response(JSON.stringify({ error: 'Daily coin limit reached' }), { status: 403 });
+    }
   }
 
   // Award coins and update user
   const newCoinBalance = user.coins + coinsToAward;
-  const newDailyEarnings = dailyEarnings + coinsToAward;
+  const newDailyEarnings = dailyLimited.includes(activity)
+    ? dailyEarnings + coinsToAward
+    : dailyEarnings;
   const updates = {
     coins: newCoinBalance,
     daily_coin_earnings: newDailyEarnings,
@@ -68,11 +76,31 @@ export default async function handler(req) {
   }
 
   // Log transaction
+  let description = '';
+  switch (activity) {
+    case 'login':
+      description = 'Login reward';
+      break;
+    case 'game':
+      description = 'Game start reward';
+      break;
+    case 'visit':
+      description = 'Daily visit reward';
+      break;
+    case 'share':
+      description = 'Blog share reward';
+      break;
+    case 'fair-coin-redeem':
+      description = 'Fair play coin redeemed for coins';
+      break;
+    default:
+      description = `${activity} reward`;
+  }
   await supabase.from('coin_transactions').insert({
     user_id,
     type: activity,
     amount: coinsToAward,
-    description: `${activity} reward`,
+    description,
   });
 
   return new Response(

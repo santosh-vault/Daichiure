@@ -16,7 +16,7 @@ export default async function handler(req) {
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
 
-  const COINS_FOR_SHARE = 20;
+  const COINS_FOR_SHARE = 5;
   const DAILY_LIMIT = 1200;
 
   // Fetch user data

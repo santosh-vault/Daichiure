@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { User as UserIcon } from 'lucide-react';
+import { getSupabaseFunctionUrl } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 
 interface User {
   id: string;
@@ -20,7 +22,13 @@ const UsersList: React.FC = () => {
     const fetchUsers = async () => {
       setLoading(true);
       try {
-        const res = await fetch('/api/get-all-rewards');
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+        const res = await fetch(getSupabaseFunctionUrl('get-all-rewards'), {
+          headers: {
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+          },
+        });
         const data = await res.json();
         if (res.ok) {
           setUsers(data.users);

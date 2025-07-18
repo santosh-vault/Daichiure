@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { getSupabaseFunctionUrl } from '../../lib/supabase';
 
 const fontStyle = { fontFamily: 'Helvetica, Arial, sans-serif' };
 
@@ -66,9 +67,14 @@ const UserDashboard: React.FC = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/get-reward-data', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      const res = await fetch(getSupabaseFunctionUrl('get-reward-data'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        },
         body: JSON.stringify({ user_id: user.id }),
       });
       const data = await res.json();
@@ -93,9 +99,14 @@ const UserDashboard: React.FC = () => {
     setRedeemError(null);
     setRedeemSuccess(null);
     try {
-      const res = await fetch('/api/redeem-coins', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      const res = await fetch(getSupabaseFunctionUrl('redeem-coins'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        },
         body: JSON.stringify({ user_id: user.id }),
       });
       const data = await res.json();

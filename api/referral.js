@@ -37,30 +37,18 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Referral already exists' }), { status: 409 });
   }
 
-  // Log referral
+  // Generate a unique token for referral confirmation
+  const token = Math.random().toString(36).substr(2, 12) + Date.now().toString(36);
+
+  // Log referral as pending
   await supabase.from('referrals').insert({
     referrer_id,
     referred_id: referredUser.id,
+    status: 'pending',
+    token,
+    created_at: new Date().toISOString(),
   });
 
-  // Award coins to referrer
-  const COINS_FOR_REFERRAL = 1000;
-  const { data: referrer, error: referrerError } = await supabase
-    .from('users')
-    .select('coins')
-    .eq('id', referrer_id)
-    .single();
-  if (referrerError || !referrer) {
-    return new Response(JSON.stringify({ error: 'Referrer not found' }), { status: 404 });
-  }
-  const newBalance = referrer.coins + COINS_FOR_REFERRAL;
-  await supabase.from('users').update({ coins: newBalance }).eq('id', referrer_id);
-  await supabase.from('coin_transactions').insert({
-    user_id: referrer_id,
-    type: 'referral',
-    amount: COINS_FOR_REFERRAL,
-    description: 'Referral reward',
-  });
-
-  return new Response(JSON.stringify({ coins: newBalance }), { status: 200 });
+  // Return the token so it can be sent to the referred user (e.g., via email)
+  return new Response(JSON.stringify({ message: 'Referral created. Awaiting confirmation.', token }), { status: 200 });
 } 

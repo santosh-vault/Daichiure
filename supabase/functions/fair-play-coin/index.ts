@@ -1,5 +1,5 @@
-import { serve } from 'std/server';
-import { createClient } from '@supabase/supabase-js';
+import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -17,14 +17,32 @@ function getLastWeekDates() {
   return dates;
 }
 
-serve(async (_req) => {
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://daichiure.vercel.app',
+];
+function getCorsHeaders(origin: string | null) {
+  const allowOrigin = allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
+  return {
+    'Access-Control-Allow-Origin': allowOrigin,
+    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+serve(async (req) => {
+  const origin = req.headers.get('origin');
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: getCorsHeaders(origin) });
+  }
   try {
     // Get all users
     const { data: users, error } = await supabase
       .from('users')
       .select('id, weekly_fair_play_awarded, fair_play_coins');
     if (error) {
-      return new Response(JSON.stringify({ error: 'Failed to fetch users' }), { status: 500 });
+      return new Response(JSON.stringify({ error: 'Failed to fetch users' }), { status: 500, headers: getCorsHeaders(origin) });
     }
 
     const lastWeekDates = getLastWeekDates();
@@ -54,8 +72,8 @@ serve(async (_req) => {
       }
     }
 
-    return new Response(JSON.stringify({ awarded: updatedCount }), { status: 200 });
+    return new Response(JSON.stringify({ awarded: updatedCount }), { status: 200, headers: getCorsHeaders(origin) });
   } catch (err) {
-    return new Response(JSON.stringify({ error: 'Server error', details: err.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: 'Server error', details: err.message }), { status: 500, headers: getCorsHeaders(origin) });
   }
 }); 

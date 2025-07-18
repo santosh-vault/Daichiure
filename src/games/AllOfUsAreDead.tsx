@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getSupabaseFunctionUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 const CANVAS_WIDTH = 1200; // Increased map width
 const CANVAS_HEIGHT = 900; // Increased map height
@@ -442,10 +444,16 @@ export const AllOfUsAreDead: React.FC = () => {
   // Award coins on game completion
   useEffect(() => {
     if ((gameStats.gameOver || gameStats.won) && user) {
-      fetch('/functions/v1/award-coins', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id, activity: 'game' }),
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        const accessToken = session?.access_token;
+        fetch(getSupabaseFunctionUrl('award-coins'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify({ user_id: user.id, activity: 'game' }),
+        });
       });
     }
   }, [gameStats.gameOver, gameStats.won, user]);

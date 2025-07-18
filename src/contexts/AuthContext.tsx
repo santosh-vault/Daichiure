@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { getSupabaseFunctionUrl } from '../lib/supabase';
 
 interface AuthState {
   user: User | null;
@@ -83,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -91,6 +92,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (error) {
       toast.error(error.message);
       throw error;
+    }
+
+    // Award login coins if login is successful
+    const user = data?.user;
+    if (user) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+        await fetch(getSupabaseFunctionUrl('award-coins'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+          },
+          body: JSON.stringify({ user_id: user.id, activity: 'login' }),
+        });
+      } catch (e) {
+        // Optionally handle error (e.g., show toast)
+      }
     }
   };
 

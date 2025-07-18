@@ -5,11 +5,37 @@ export default async function handler(req) {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
 
+  const { redeem, user_id } = await req.json();
   const { createClient } = await import('@supabase/supabase-js');
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
     process.env.SUPABASE_SERVICE_ROLE_KEY
   );
+
+  if (redeem && user_id) {
+    // Redeem 1 fair play coin for 20 coins
+    const { data: user, error: userError } = await supabase
+      .from('users')
+      .select('fair_play_coins, coins')
+      .eq('id', user_id)
+      .single();
+    if (userError || !user) {
+      return new Response(JSON.stringify({ error: 'User not found' }), { status: 404 });
+    }
+    if (user.fair_play_coins < 1) {
+      return new Response(JSON.stringify({ error: 'Not enough fair play coins' }), { status: 400 });
+    }
+    const newFair = user.fair_play_coins - 1;
+    const newCoins = user.coins + 20;
+    await supabase.from('users').update({ fair_play_coins: newFair, coins: newCoins }).eq('id', user_id);
+    await supabase.from('coin_transactions').insert({
+      user_id,
+      type: 'fair-coin-redeem',
+      amount: 20,
+      description: 'Fair play coin redeemed for coins',
+    });
+    return new Response(JSON.stringify({ coins: newCoins, fair_play_coins: newFair }), { status: 200 });
+  }
 
   // Helper to get all dates in the last week (UTC, yyyy-mm-dd)
   function getLastWeekDates() {

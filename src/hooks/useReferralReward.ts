@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getSupabaseFunctionUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export function useReferralReward() {
   const { user } = useAuth();
@@ -13,9 +15,14 @@ export function useReferralReward() {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch('/api/referral', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      const res = await fetch(getSupabaseFunctionUrl('referral'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        },
         body: JSON.stringify({ referrer_id: user.id, referred_email: referredEmail }),
       });
       const data = await res.json();

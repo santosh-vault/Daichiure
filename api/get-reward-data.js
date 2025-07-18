@@ -19,7 +19,7 @@ export default async function handler(req) {
   // Fetch user balances
   const { data: user, error: userError } = await supabase
     .from('users')
-    .select('coins, fair_play_coins')
+    .select('coins, fair_play_coins, daily_coin_earnings')
     .eq('id', user_id)
     .single();
   if (userError || !user) {
@@ -41,6 +41,7 @@ export default async function handler(req) {
     JSON.stringify({
       coins: user.coins,
       fair_play_coins: user.fair_play_coins,
+      daily_coin_earnings: user.daily_coin_earnings,
       transactions,
     }),
     { status: 200 }

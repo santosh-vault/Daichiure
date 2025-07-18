@@ -30,6 +30,7 @@ import { AddEditArticle } from './pages/Dashboard/AddEditArticle';
 import { AdminRouteGuard } from './components/AdminRouteGuard';
 import { supabase } from './lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import Rewards from './pages/Rewards';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -169,6 +170,7 @@ function App() {
                 <Route path="/blogs" element={<Blogs />} />
                 <Route path="/blogs/:id" element={<BlogDetail />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/rewards" element={<Rewards />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/contact" element={<Contact />} />

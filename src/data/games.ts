@@ -161,14 +161,6 @@ export const games = [
     category: 'arcade',
   },
   {
-    slug: '100balls',
-    title: '100 Balls',
-    description: 'Catch the balls in cups! Test your timing and skill. Play the classic 100 Balls game in your browser.',
-    is_premium: false,
-    price: null,
-    category: 'arcade',
-  },
-  {
     slug: 'vcecgonb',
     title: 'Color Tunnel 3D',
     description: 'Dodge obstacles in a vibrant tunnel! Play Color Tunnel 3D directly in your browser.',

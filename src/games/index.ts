@@ -19,7 +19,6 @@ import AllOfUsAreDead from './AllOfUsAreDead';
 import TowerStackGame from './TowerStackGame';
 import Uno from './Uno';
 import SquidGame from './SquidGame';
-import Itch100Balls from './Itch100Balls';
 import GameMonetizeVCECGONB from './GameMonetizeVCECGONB';
 import GameMonetizeZT2TTI9K from './GameMonetizeZT2TTI9K';
 import GameMonetizeFXZSXWYI from './GameMonetizeFXZSXWYI';
@@ -48,7 +47,6 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'towerstack': TowerStackGame,
   'uno': Uno,
   'squidgame': SquidGame,
-  '100balls': Itch100Balls,
   'vcecgonb': GameMonetizeVCECGONB,
   'zt2tti9k': GameMonetizeZT2TTI9K,
   'fxzsxwyi': GameMonetizeFXZSXWYI,

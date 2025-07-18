@@ -33,7 +33,8 @@ export const Games: React.FC = () => {
     'freefire', 'shooter', 'towerstack', 'allofaredead', // 1st row
     'snake', 'pong', 'tetris', 'breakout',              // 2nd row
     // Third row: recently added games
-    '100balls', 'vcecgonb', 'zt2tti9k', 'fxzsxwyi',
+    // Removed: '100balls',
+    'vcecgonb', 'zt2tti9k', 'fxzsxwyi',
     '77b5mbmq', 'rc0aptuu', 'qkqlhh9c', '9ptv2pby',
     // Fourth row: continue with other featured games
     'squidgame',

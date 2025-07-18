@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getSupabaseFunctionUrl } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 
 export function useBlogShareReward() {
   const { user } = useAuth();
@@ -13,9 +15,14 @@ export function useBlogShareReward() {
     setError(null);
     setSuccess(null);
     try {
-      const res = await fetch('/api/blog-share', {
+      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      const res = await fetch(getSupabaseFunctionUrl('blog-share'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+        },
         body: JSON.stringify({ user_id: user.id, blog_id: blogId }),
       });
       const data = await res.json();
