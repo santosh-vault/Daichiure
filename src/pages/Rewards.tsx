@@ -457,6 +457,12 @@ const Rewards: React.FC = () => {
             <li className="flex items-start gap-3 pt-1">
               <span className="text-xl">💰</span>
               <div>
+                <b className="text-yellow-700">Login Bonus:</b> Get 1000 coins every time you log in (not subject to daily limit).
+              </div>
+            </li>
+            <li className="flex items-start gap-3 pt-1">
+              <span className="text-xl">🎁</span>
+              <div>
                 <b className="text-yellow-700">Redeem:</b> Exchange {REDEEM_THRESHOLD.toLocaleString()} coins for exciting real rewards!
               </div>
             </li>

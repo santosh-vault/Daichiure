@@ -27,9 +27,9 @@ export function useReferralReward() {
       });
       const data = await res.json();
       if (res.ok) {
-        setSuccess('Referral successful! You earned coins.');
+        setSuccess('Referral sent! You will earn 2000 coins when they confirm their visit.');
       } else {
-        setError(data.error || 'Failed to award referral coins.');
+        setError(data.error || 'Failed to send referral. Please check the email.');
       }
     } catch (e) {
       setError('Network error.');
@@ -38,5 +38,30 @@ export function useReferralReward() {
     }
   };
 
-  return { referUser, loading, error, success };
-} 
+  const confirmReferral = async (token: string) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await fetch('/api/referral-confirm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setSuccess('Referral confirmed! Coins have been awarded.');
+      } else {
+        setError(data.error || 'Failed to confirm referral.');
+      }
+    } catch (e) {
+      setError('Network error.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { referUser, confirmReferral, loading, error, success };
+}
