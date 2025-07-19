@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 const GAME_WIDTH = 900;
 const GAME_HEIGHT = 500;
@@ -565,7 +565,7 @@ const Fighter: React.FC = () => {
     }
   };
 
-  useAwardGameCoins(gameState === 'gameOver');
+
 
   if (!started) {
     return (

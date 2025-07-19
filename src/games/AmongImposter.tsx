@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useAwardGameCoins } from './coinAwarder';
 
 const CANVAS_WIDTH = 800;
 const CANVAS_HEIGHT = 600;
@@ -259,8 +258,6 @@ export const AmongImposterGame: React.FC = () => {
       canvas.removeEventListener('click', handleCanvasClick);
     };
   }, [started]);
-
-  useAwardGameCoins(gameOver);
 
   if (!started) {
     return (

@@ -4,6 +4,9 @@ import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 import { getSupabaseFunctionUrl } from '../lib/supabase';
 
+// Admin user emails - should match Header.tsx
+const ADMIN_EMAILS = ['admin@playhub.com', 'developer@playhub.com'];
+
 interface AuthState {
   user: User | null;
   session: Session | null;
@@ -84,33 +87,68 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error, data } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      console.log('Attempting sign in with email:', email);
+      
+      const { error, data } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      toast.error(error.message);
-      throw error;
-    }
-
-    // Award login coins if login is successful
-    const user = data?.user;
-    if (user) {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        await fetch(getSupabaseFunctionUrl('award-coins'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
-          },
-          body: JSON.stringify({ user_id: user.id, activity: 'login' }),
+      if (error) {
+        console.error('Sign in error details:', {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+          details: error
         });
-      } catch (e) {
-        console.error('Failed to award login coins:', e);
+        
+        // Check for specific error types
+        if (error.message.includes('Email not confirmed')) {
+          toast.error('Please check your email and confirm your account before signing in.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          toast.error('Invalid email or password. Please check your credentials.');
+        } else {
+          toast.error(error.message);
+        }
+        throw error;
       }
+
+      console.log('Sign in successful for user:', data?.user?.email);
+
+      // Award login coins only for regular users, not admins
+      const user = data?.user;
+      if (user && !ADMIN_EMAILS.includes(user.email || '')) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const accessToken = session?.access_token;
+          
+          // Check if we can get the function URL
+          let functionUrl;
+          try {
+            functionUrl = getSupabaseFunctionUrl('award-coins');
+          } catch (urlError) {
+            console.error('Failed to get function URL:', urlError);
+            return; // Don't break login if function URL fails
+          }
+          
+          await fetch(functionUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
+            },
+            body: JSON.stringify({ user_id: user.id, activity: 'login' }),
+          });
+        } catch (e) {
+          console.error('Failed to award login coins:', e);
+          // Don't throw error - login should still succeed even if coin awarding fails
+        }
+      }
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      toast.error(error.message || 'Sign in failed');
+      throw error;
     }
   };
 

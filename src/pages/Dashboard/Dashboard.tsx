@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { Users, FileText, Settings as SettingsIcon, PlusCircle, Edit, Trash2, Loader, User as UserIcon, BookOpen, UploadCloud, Link2, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ArticlesList } from './ArticlesList';
-import { UsersList } from './UsersList';
+import UsersList from './UsersList';
 import { SettingsPanel } from './SettingsPanel';
 
 const fontStyle = { fontFamily: 'Helvetica, Arial, sans-serif' };

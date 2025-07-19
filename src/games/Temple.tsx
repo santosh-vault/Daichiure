@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Star, Heart, Zap, Target } from 'lucide-react';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 interface Tile {
   id: number;
@@ -170,7 +170,7 @@ export const TempleGame: React.FC = () => {
     if (savedBestMoves) setBestMoves(parseInt(savedBestMoves));
   }, []);
 
-  useAwardGameCoins(gameWon);
+
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

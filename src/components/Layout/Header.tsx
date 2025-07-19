@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Gamepad2, User, LogOut, Menu, X } from 'lucide-react';
-import { getSupabaseFunctionUrl } from '../../lib/supabase';
-import { supabase } from '../../lib/supabase';
+import { Gamepad2, User, LogOut, Menu, X, Coins, Trophy } from 'lucide-react';
+import { useRewards } from '../../hooks/useRewards';
 
 // Admin user emails - should match Dashboard.tsx
 const ADMIN_EMAILS = ['admin@playhub.com', 'developer@playhub.com'];
@@ -12,42 +11,7 @@ export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [coinData, setCoinData] = useState<{ coins: number; fair_play_coins: number } | null>(null);
-  const [loadingCoins, setLoadingCoins] = useState(false);
-
-  // Fetch coin and fair play coin balances
-  useEffect(() => {
-    const fetchCoins = async () => {
-      if (!user) {
-        setCoinData(null);
-        return;
-      }
-      setLoadingCoins(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        const res = await fetch(getSupabaseFunctionUrl('get-reward-data'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
-          },
-          body: JSON.stringify({ user_id: user.id }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setCoinData({ coins: data.coins, fair_play_coins: data.fair_play_coins });
-        } else {
-          setCoinData(null);
-        }
-      } catch {
-        setCoinData(null);
-      } finally {
-        setLoadingCoins(false);
-      }
-    };
-    fetchCoins();
-  }, [user]);
+  const { rewardData, loading: rewardsLoading } = useRewards();
 
   // Check if user is admin
   const isAdmin = user && ADMIN_EMAILS.includes(user.email || '');
@@ -131,22 +95,22 @@ export const Header: React.FC = () => {
           )}
         </nav>
 
-        {/* Coin balances */}
-        {user && (
+        {/* Coin balances - Only for regular users, not admins */}
+        {user && !isAdmin && (
           <div className="flex items-center space-x-4 ml-6">
             <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-amber-400 font-semibold text-sm">
-              <span className="mr-1">Coins:</span>
-              {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.coins ?? 0}</span>}
+              <Coins className="h-4 w-4 mr-1" />
+              {rewardsLoading ? <span className="animate-pulse">...</span> : <span>{rewardData?.coins?.toLocaleString() ?? 0}</span>}
             </div>
             <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-blue-400 font-semibold text-sm">
-              <span className="mr-1">Fair Play:</span>
-              {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.fair_play_coins ?? 0}</span>}
+              <Trophy className="h-4 w-4 mr-1" />
+              {rewardsLoading ? <span className="animate-pulse">...</span> : <span>{rewardData?.fair_coins ?? 0}</span>}
             </div>
             <button
               onClick={() => navigate('/rewards')}
               className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-5 py-2 rounded-full font-bold text-md ml-2 hover:shadow-[0_0_20px_rgba(255,215,0,0.7)] transition-all duration-300"
             >
-              Claim Reward
+              Rewards
             </button>
           </div>
         )}
@@ -221,24 +185,26 @@ export const Header: React.FC = () => {
                 </Link>
               </>
             )}
-            {user && (
+            {/* Coin balances - Only for regular users, not admins */}
+            {user && !isAdmin && (
               <div className="flex items-center space-x-4 mt-4">
                 <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-amber-400 font-semibold text-sm">
-                  <span className="mr-1">Coins:</span>
-                  {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.coins ?? 0}</span>}
+                  <Coins className="h-4 w-4 mr-1" />
+                  {rewardsLoading ? <span className="animate-pulse">...</span> : <span>{rewardData?.coins?.toLocaleString() ?? 0}</span>}
                 </div>
                 <div className="flex items-center bg-gray-800 px-3 py-1 rounded-full text-blue-400 font-semibold text-sm">
-                  <span className="mr-1">Fair Play:</span>
-                  {loadingCoins ? <span className="animate-pulse">...</span> : <span>{coinData?.fair_play_coins ?? 0}</span>}
+                  <Trophy className="h-4 w-4 mr-1" />
+                  {rewardsLoading ? <span className="animate-pulse">...</span> : <span>{rewardData?.fair_coins ?? 0}</span>}
                 </div>
               </div>
             )}
-            {user && (
+            {/* Rewards button - Only for regular users, not admins */}
+            {user && !isAdmin && (
               <button
                 onClick={() => { setIsMobileMenuOpen(false); navigate('/rewards'); }}
                 className="bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 px-5 py-2 rounded-full font-bold text-md mt-2 hover:shadow-[0_0_20px_rgba(255,215,0,0.7)] transition-all duration-300"
               >
-                Claim Reward
+                Rewards
               </button>
             )}
           </nav>

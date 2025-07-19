@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { RotateCw, Clock, Star } from 'lucide-react';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 interface Card {
   id: number;
@@ -127,7 +127,19 @@ export const MemoryGame: React.FC = () => {
     if (savedBestMoves) setBestMoves(parseInt(savedBestMoves));
   }, []);
 
-  useAwardGameCoins(gameWon);
+  useEffect(() => {
+    if (gameWon) {
+      // Update best scores
+      if (!bestTime || time < bestTime) {
+        setBestTime(time);
+        localStorage.setItem('memoryBestTime', time.toString());
+      }
+      if (!bestMoves || moves < bestMoves) {
+        setBestMoves(moves);
+        localStorage.setItem('memoryBestMoves', moves.toString());
+      }
+    }
+  }, [gameWon, time, moves, bestTime, bestMoves]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

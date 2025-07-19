@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { gameThumbnails } from '../constants/gameThumbnails';
-import { useAwardGameCoins } from './coinAwarder';
 
 export default function App() {
   return (
@@ -461,8 +460,6 @@ export const BreakoutGame: React.FC = () => {
       infoRef.current.innerHTML = '';
     }
   };
-
-  useAwardGameCoins(gameOver);
 
   return (
     <div style={{ textAlign: 'center' }}>

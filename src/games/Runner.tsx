@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAwardGameCoins } from './coinAwarder';
+import { useGameCoins } from '../hooks/useGameCoins';
 
 // Constants for game settings
 const GAME_WIDTH = 800;
@@ -116,6 +116,7 @@ const Runner: React.FC = () => {
     isActive: false,
   });
   const [started, setStarted] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(0);
 
   // Function to draw rounded rectangles
   const roundRect = (
@@ -412,6 +413,7 @@ const Runner: React.FC = () => {
 
   // Game initialization / reset
   const initializeGame = useCallback(() => {
+    setGameStartTime(Date.now());
     setScore(0);
     setGameSpeed(INITIAL_GAME_SPEED);
     setPlayer({
@@ -1019,7 +1021,14 @@ const Runner: React.FC = () => {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  useAwardGameCoins(gameState === 'gameOver');
+  // Use the new game coins hook
+  useGameCoins({
+    gameId: 'runner',
+    trigger: gameState === 'gameOver',
+    score: Math.floor(score),
+    duration: Math.floor((Date.now() - gameStartTime) / 1000)
+  });
+
 
   if (!started) {
     return (

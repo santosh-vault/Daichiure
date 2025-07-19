@@ -1,148 +1,228 @@
-import { serve } from "https://deno.land/std@0.203.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
+import { createClient } from 'npm:@supabase/supabase-js@2.49.1';
 
-// Environment variables for service role key and URL
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '');
 
-// Updated coin values according to requirements
-const COIN_VALUES: Record<string, number> = {
-  visit: 10,
-  game: 10,
+// Coin values for different activities
+const COIN_VALUES = {
+  login: 100,
+  game: 20,
+  comment: 5,
   share: 5,
-  referral: 2000, // Referral gives 2000 coins
-  login: 1000,    // Login gives 1000 coins
-  'fair-coin-redeem': 20, // Fair coin redemption gives 20 coins
+  referral: 1000,
+  fair_coin_redeem: 100
 };
+
 const DAILY_LIMIT = 1200;
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://daichiure.vercel.app',
-];
-function getCorsHeaders(origin: string | null) {
-  const allowOrigin = allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0];
-  return {
-    'Access-Control-Allow-Origin': allowOrigin,
-    'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type,Authorization',
-    'Access-Control-Max-Age': '86400',
+// Helper function to create responses with CORS headers
+function corsResponse(body: string | object | null, status = 200) {
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': '*',
   };
+
+  // For 204 No Content, don't include Content-Type or body
+  if (status === 204) {
+    return new Response(null, { status, headers });
+  }
+
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: {
+      ...headers,
+      'Content-Type': 'application/json',
+    },
+  });
 }
 
-serve(async (req) => {
-  const origin = req.headers.get('origin');
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: getCorsHeaders(origin) });
-  }
+Deno.serve(async (req) => {
   try {
-    const { user_id, activity } = await req.json();
+    if (req.method === 'OPTIONS') {
+      return corsResponse({}, 204);
+    }
+
+    if (req.method !== 'POST') {
+      return corsResponse({ error: 'Method not allowed' }, 405);
+    }
+
+    const { user_id, activity, game_id, blog_id, platform, score, duration } = await req.json();
+    
     if (!user_id || !COIN_VALUES[activity]) {
-      return new Response(JSON.stringify({ error: 'Invalid input' }), { status: 400, headers: getCorsHeaders(origin) });
+      return corsResponse({ error: 'Invalid input' }, 400);
     }
 
     // Fetch user data
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('id, coins, last_visit_date, daily_coin_earnings')
+      .select('id, coins, fair_coins, daily_coin_earnings, last_login_date, login_streak, referral_code')
       .eq('id', user_id)
       .single();
+
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'User not found' }), { status: 404, headers: getCorsHeaders(origin) });
+      return corsResponse({ error: 'User not found' }, 404);
     }
 
-    // Get today's date (UTC)
     const today = new Date().toISOString().slice(0, 10);
-    let dailyEarnings = user.daily_coin_earnings;
-    let lastVisitDate = user.last_visit_date ? user.last_visit_date.slice(0, 10) : null;
-
-    // Reset daily earnings if last visit was not today
-    if (lastVisitDate !== today) {
-      dailyEarnings = 0;
-    }
-
-    // Activities that are subject to daily limit
-    const dailyLimited = ['visit', 'game', 'share'];
     const coinsToAward = COIN_VALUES[activity];
-    
-    // Check daily limit only for limited activities
-    if (dailyLimited.includes(activity)) {
-      if (dailyEarnings + coinsToAward > DAILY_LIMIT) {
-        return new Response(JSON.stringify({ error: 'Daily coin limit reached' }), { status: 403, headers: getCorsHeaders(origin) });
-      }
-    }
-
-    // If activity is 'visit', log the visit in user_visits (if not already logged for today)
-    if (activity === 'visit') {
-      const { data: visit, error: visitError } = await supabase
-        .from('user_visits')
-        .select('id')
-        .eq('user_id', user_id)
-        .eq('visit_date', today)
-        .maybeSingle();
-      if (!visit) {
-        await supabase.from('user_visits').insert({
-          user_id,
-          visit_date: today,
-        });
-      }
-    }
-
-    // Award coins and update user
-    const newCoinBalance = user.coins + coinsToAward;
-    const newDailyEarnings = dailyLimited.includes(activity)
-      ? dailyEarnings + coinsToAward
-      : dailyEarnings; // Don't count referral and fair-coin-redeem towards daily limit
-    
-    const updates: any = {
-      coins: newCoinBalance,
-      daily_coin_earnings: newDailyEarnings,
-      last_visit_date: today,
-    };
-
-    const { error: updateError } = await supabase
-      .from('users')
-      .update(updates)
-      .eq('id', user_id);
-    if (updateError) {
-      return new Response(JSON.stringify({ error: 'Failed to update user' }), { status: 500, headers: getCorsHeaders(origin) });
-    }
-
-    // Log transaction with proper descriptions
+    let newCoinBalance = user.coins;
+    let newDailyEarnings = user.daily_coin_earnings;
+    let newLoginStreak = user.login_streak;
+    let newLastLoginDate = user.last_login_date;
     let description = '';
+
+    // Handle different activities
     switch (activity) {
       case 'login':
-        description = 'Login reward';
+        // Check if already logged in today
+        if (user.last_login_date === today) {
+          return corsResponse({ error: 'Already logged in today' }, 400);
+        }
+
+        // Update login streak
+        if (user.last_login_date) {
+          const lastLogin = new Date(user.last_login_date);
+          const todayDate = new Date(today);
+          const diffTime = todayDate.getTime() - lastLogin.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            newLoginStreak = user.login_streak + 1;
+          } else if (diffDays > 1) {
+            newLoginStreak = 1;
+          }
+        } else {
+          newLoginStreak = 1;
+        }
+
+        newLastLoginDate = today;
+        description = 'Daily login reward';
         break;
+
       case 'game':
-        description = 'Game start reward';
+        if (!game_id) {
+          return corsResponse({ error: 'Game ID required' }, 400);
+        }
+
+        // Log game play
+        await supabase.from('game_plays').insert({
+          user_id,
+          game_id,
+          score: score || 0,
+          duration: duration || 0
+        });
+
+        description = 'Game completion reward';
         break;
-      case 'visit':
-        description = 'Daily visit reward';
+
+      case 'comment':
+        if (!blog_id) {
+          return corsResponse({ error: 'Blog ID required' }, 400);
+        }
+
+        description = 'Blog comment reward';
         break;
+
       case 'share':
-        description = 'Blog share reward';
+        if (!blog_id || !platform) {
+          return corsResponse({ error: 'Blog ID and platform required' }, 400);
+        }
+
+        // Check if already shared this blog on this platform today
+        const { data: existingShare } = await supabase
+          .from('blog_shares')
+          .select('id')
+          .eq('user_id', user_id)
+          .eq('blog_id', blog_id)
+          .eq('platform', platform)
+          .gte('created_at', today)
+          .single();
+
+        if (existingShare) {
+          return corsResponse({ error: 'Already shared this blog on this platform today' }, 400);
+        }
+
+        // Log share
+        await supabase.from('blog_shares').insert({
+          user_id,
+          blog_id,
+          platform
+        });
+
+        description = `Blog share reward (${platform})`;
         break;
+
       case 'referral':
         description = 'Referral reward';
         break;
-      case 'fair-coin-redeem':
-        description = 'Fair play coin redeemed for coins';
+
+      case 'fair_coin_redeem':
+        if (user.fair_coins < 1) {
+          return corsResponse({ error: 'Not enough fair coins' }, 400);
+        }
+        description = 'Fair coin redemption';
         break;
-      default:
-        description = `${activity} reward`;
     }
-    
+
+    // Check daily limit (referrals and fair coin redemption are exempt)
+    const dailyLimited = ['login', 'game', 'comment', 'share'];
+    if (dailyLimited.includes(activity)) {
+      if (newDailyEarnings + coinsToAward > DAILY_LIMIT) {
+        return corsResponse({ error: 'Daily coin limit reached' }, 403);
+      }
+      newDailyEarnings += coinsToAward;
+    }
+
+    // Update user
+    const updateData: any = {
+      coins: newCoinBalance + coinsToAward,
+      daily_coin_earnings: newDailyEarnings
+    };
+
+    if (activity === 'login') {
+      updateData.last_login_date = newLastLoginDate;
+      updateData.login_streak = newLoginStreak;
+    }
+
+    if (activity === 'fair_coin_redeem') {
+      updateData.fair_coins = user.fair_coins - 1;
+    }
+
+    const { error: updateError } = await supabase
+      .from('users')
+      .update(updateData)
+      .eq('id', user_id);
+
+    if (updateError) {
+      return corsResponse({ error: 'Failed to update user' }, 500);
+    }
+
+    // Log transaction
     await supabase.from('coin_transactions').insert({
       user_id,
       type: activity,
       amount: coinsToAward,
-      description,
+      description
     });
 
-    return new Response(JSON.stringify({ coins: newCoinBalance, daily_coin_earnings: newDailyEarnings }), { status: 200, headers: getCorsHeaders(origin) });
-  } catch (err) {
-    return new Response(JSON.stringify({ error: 'Server error', details: err.message }), { status: 500, headers: getCorsHeaders(origin) });
+    // Log visit for login
+    if (activity === 'login') {
+      await supabase.from('user_visits').insert({
+        user_id,
+        visit_date: today
+      });
+    }
+
+    return corsResponse({ 
+      coins: newCoinBalance + coinsToAward,
+      fair_coins: activity === 'fair_coin_redeem' ? user.fair_coins - 1 : user.fair_coins,
+      daily_coin_earnings: newDailyEarnings,
+      login_streak: newLoginStreak
+    });
+
+  } catch (error: any) {
+    console.error(`Award coins error: ${error.message}`);
+    return corsResponse({ error: 'Server error', details: error.message }, 500);
   }
-});
+}); 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 const dalgonaShapes = [
   { name: 'Circle', emoji: '⚪' },
@@ -30,7 +30,7 @@ const SquidGame: React.FC = () => {
   // Add state to track if loss was due to timer
   const [timedOut, setTimedOut] = useState(false);
 
-  useAwardGameCoins(status === 'won' || status === 'lost');
+
 
   // 1. Add a font style for Helvetica and clear instructions for each level
   const fontStyle = { fontFamily: 'Helvetica, Arial, sans-serif' };

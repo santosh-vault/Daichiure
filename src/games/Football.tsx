@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAwardGameCoins } from './coinAwarder';
 
 const GAME_WIDTH = 900;
 const GAME_HEIGHT = 500;
@@ -1105,8 +1104,6 @@ const Football: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
-
-  useAwardGameCoins(gameState.phase === 'end');
 
   if (!started) {
     return (

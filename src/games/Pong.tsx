@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 export const PongGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -200,7 +200,7 @@ export const PongGame: React.FC = () => {
     };
   }, [paused, gameOver, started]);
 
-  useAwardGameCoins(gameOver);
+
 
   const resetGame = () => {
     setScore({ player: 0, computer: 0 });

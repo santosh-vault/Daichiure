@@ -1,20 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseKey) {
+// Debug logging
+console.log('Supabase Configuration:', {
+  url: supabaseUrl,
+  hasAnonKey: !!supabaseAnonKey,
+  anonKeyLength: supabaseAnonKey?.length
+});
+
+if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-// Helper to get the Supabase Edge Functions base URL
-export function getSupabaseFunctionUrl(functionName: string) {
-  // supabaseUrl: https://<project-ref>.supabase.co
-  // Edge Functions: https://<project-ref>.supabase.co/functions/v1/<functionName>
-  if (!supabaseUrl) throw new Error('Missing Supabase URL');
-  const projectRef = supabaseUrl.replace('https://', '').split('.')[0];
+export function getSupabaseFunctionUrl(functionName: string): string {
+  if (!supabaseUrl) {
+    throw new Error('Missing VITE_SUPABASE_URL environment variable');
+  }
+  
+  // Extract project ref from URL
+  const urlParts = supabaseUrl.split('.');
+  const projectRef = urlParts[0].replace('https://', '');
+  
   return `https://${projectRef}.supabase.co/functions/v1/${functionName}`;
 }
 

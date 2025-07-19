@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { User as UserIcon } from 'lucide-react';
-import { getSupabaseFunctionUrl } from '../../lib/supabase';
-import { supabase } from '../../lib/supabase';
+import React from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface User {
   id: string;
@@ -14,57 +12,43 @@ interface UsersListProps {
   loading: boolean;
 }
 
-const UsersList: React.FC = () => {
-  const [users, setUsers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
+const UsersList: React.FC<UsersListProps> = ({ users, loading }) => {
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        const res = await fetch(getSupabaseFunctionUrl('get-all-rewards'), {
-          headers: {
-            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
-          },
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setUsers(data.users);
-        } else {
-          setUsers([]);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsers();
-  }, []);
+  if (!user || !['admin@playhub.com', 'developer@playhub.com'].includes(user.email || '')) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
+          <p className="text-gray-600">You don't have permission to view this page.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4">
-      <h2 className="text-2xl font-bold mb-6">All Users - Rewards</h2>
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      <h2 className="text-2xl font-bold mb-6">All Users</h2>
+      
       {loading ? (
-        <div>Loading...</div>
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading users...</p>
+        </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="min-w-full bg-gray-900 rounded-lg">
-            <thead>
+          <table className="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Coins</th>
-                <th className="px-4 py-2 text-left">Fair Play</th>
-                <th className="px-4 py-2 text-left">Transactions</th>
+                <th className="px-4 py-2 text-left">Created At</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user, idx) => (
-                <tr key={idx}>
+              {users.map((user) => (
+                <tr key={user.id} className="border-t border-gray-200 hover:bg-gray-50">
                   <td className="px-4 py-2">{user.email}</td>
-                  <td className="px-4 py-2">{user.coins}</td>
-                  <td className="px-4 py-2">{user.fair_play_coins}</td>
-                  <td className="px-4 py-2">{user.transaction_count}</td>
+                  <td className="px-4 py-2">{new Date(user.created_at).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -75,5 +59,4 @@ const UsersList: React.FC = () => {
   );
 };
 
-export default UsersList;
-export { UsersList }; 
+export default UsersList; 

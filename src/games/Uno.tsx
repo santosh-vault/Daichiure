@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 interface Card {
   id: string;
@@ -299,7 +299,7 @@ const Uno: React.FC = () => {
     }
   }, [currentPlayer, gameState, playAITurn]);
 
-  useAwardGameCoins(gameState === 'gameOver');
+
 
   // Enhanced card component
   const CardComponent = ({ card, onClick, isPlayable = false, isSelected = false, isSmall = false }: {

@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useGameCoins } from '../hooks/useGameCoins';
 import { gameThumbnails } from '../constants/gameThumbnails';
-import { useAwardGameCoins } from './coinAwarder';
+
 
 export default function App() {
   return (
@@ -16,6 +18,7 @@ export const SnakeGame: React.FC = () => {
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
   const [started, setStarted] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(0);
 
   // Game state variables managed by useRef to avoid re-renders on every game update
   const snakeRef = useRef([{ x: 10, y: 10 }]);
@@ -122,6 +125,14 @@ export const SnakeGame: React.FC = () => {
     }
   }, [paused, gameOver, boardSize]);
 
+  // Use the new game coins hook
+  useGameCoins({
+    gameId: 'snake',
+    trigger: gameOver,
+    score: score,
+    duration: Math.floor((Date.now() - gameStartTime) / 1000)
+  });
+
   // Facebook share
   const gameName = 'Snake Classic';
   const gameSlug = 'snake';
@@ -201,7 +212,7 @@ export const SnakeGame: React.FC = () => {
     };
   }, [update, draw, gameOver, paused]);
 
-  useAwardGameCoins(gameOver);
+
 
   // Initialize game state and event listeners on component mount
   useEffect(() => {
@@ -229,6 +240,7 @@ export const SnakeGame: React.FC = () => {
     setScore(0);
     setGameOver(false);
     setPaused(false);
+    setGameStartTime(Date.now()); // Reset game start time
 
     // Immediately re-draw to reflect reset state
     draw();
@@ -238,7 +250,10 @@ export const SnakeGame: React.FC = () => {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', minHeight: 600 }}>
         <button
-          onClick={() => setStarted(true)}
+          onClick={() => {
+            setStarted(true);
+            setGameStartTime(Date.now()); // Start game time when user clicks start
+          }}
           style={brandBtn}
         >
           Start

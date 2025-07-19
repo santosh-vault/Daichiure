@@ -51,6 +51,11 @@ END $$;
 -- Enable RLS on referrals table
 ALTER TABLE referrals ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Users can view their own referrals" ON referrals;
+DROP POLICY IF EXISTS "Users can insert referrals" ON referrals;
+DROP POLICY IF EXISTS "System can update referrals" ON referrals;
+
 -- Add policies for referrals
 CREATE POLICY "Users can view their own referrals"
   ON referrals
