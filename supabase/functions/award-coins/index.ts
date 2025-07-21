@@ -72,6 +72,11 @@ Deno.serve(async (req) => {
     let newLastLoginDate = user.last_login_date;
     let description = '';
 
+    // Check if a new day has started to reset daily earnings
+    if (user.last_login_date && user.last_login_date < today) {
+      newDailyEarnings = 0;
+    }
+
     // Handle different activities
     switch (activity) {
       case 'login':

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, X } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useGoogleAnalytics } from '../../hooks/useGoogleAnalytics';
 
@@ -45,15 +45,22 @@ export const Login: React.FC = () => {
     }
   };
 
+  // Slide-in popup styles
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 flex items-center justify-center px-4 sm:px-6 lg:px-8 font-inter">
-      {/* Container for the form with subtle background pattern */}
-      <div className="relative z-10 max-w-md w-full bg-gray-900 rounded-3xl shadow-2xl p-8 sm:p-10 border border-gray-800
-                  transform transition-all duration-500 ease-in-out hover:scale-[1.01] hover:shadow-[0_0_50px_rgba(255,215,0,0.4)]">
-        {/* Abstract background pattern for visual interest inside the card */}
-        <div className="absolute inset-0 z-0 opacity-5 rounded-3xl" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%239C92AC\' fill-opacity=\'0.1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0 20v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 46v-4H4v4H0v2h4v4h2v-4h4v-2H6zM36 0v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zM6 12v-4H4v4H0v2h4v4h2v-4h4v-2H6zM21 2l-2 2 4 4 2-2-4-4zm-4 10l-2 2 4 4 2-2-4-4zM36 48l-2 2 4 4 2-2-4-4zm-4 10l-2 2 4 4 2-2-4-4zM21 42l-2 2 4 4 2-2-4-4zm-4 10l-2 2 4 4 2-2-4-4zM48 2l-2 2 4 4 2-2-4-4zm-4 10l-2 2 4 4 2-2-4-4zM48 42l-2 2 4 4 2-2-4-4zm-4 10l-2 2 4 4 2-2-4-4zM0 0h60v60H0V0zm6 2v-2h2v2H6zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zm0 6h2v-2H6v2zM24 2v-2h2v2h-2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zM42 2v-2h2v2h-2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2zm0 6h2v-2h-2v2z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }}></div>
-
-        <div className="relative z-10"> {/* Content wrapper for z-index */}
+    <div className="fixed inset-0 z-50 flex items-center justify-end">
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => navigate(-1)} />
+      {/* Slide-in panel */}
+      <div className="relative h-full w-full max-w-md bg-gray-900 rounded-l-3xl shadow-2xl border-l border-gray-800 flex flex-col animate-slide-in-right">
+        {/* Close button */}
+        <button
+          className="absolute top-4 right-4 z-20 text-gray-400 hover:text-amber-400 bg-gray-800 rounded-full p-2 shadow-lg"
+          onClick={() => navigate(-1)}
+          aria-label="Close"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <div className="flex-1 flex flex-col justify-center px-6 py-10 sm:px-8">
           <div className="text-center mb-8">
             <h2 className="text-4xl font-bold font-bruno-ace text-amber-400 mb-2 drop-shadow-md">Welcome Back</h2>
             <p className="text-gray-400 text-lg">Sign in to continue playing</p>

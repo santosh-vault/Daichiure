@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, ArrowRight } from 'lucide-react';
+import { Play, ArrowRight, Sparkles, Users, Trophy, Zap } from 'lucide-react';
 import AdSense from '../components/AdSense';
 import { Helmet } from 'react-helmet-async';
 import { games } from '../data/games';
@@ -20,6 +20,12 @@ export const Home: React.FC = () => {
     .map(slug => games.find(g => g.slug === slug))
     .filter(Boolean);
 
+  const stats = [
+    { icon: Users, value: '1K+', label: 'Active Players' },
+    { icon: Trophy, value: '25+', label: 'Games Available' },
+    { icon: Zap, value: '24/7', label: 'Always Online' },
+  ];
+
   return (
     <>
       <Helmet>
@@ -30,58 +36,84 @@ export const Home: React.FC = () => {
         <meta property="og:description" content="Enjoy a huge collection of free Nepali and 2D games. Compete, have fun, and share with friends!" />
         <meta property="og:image" content="https://yourdomain.com/og-image.png" />
       </Helmet>
-      <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased">
-        {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-black to-gray-900 text-white overflow-hidden py-24 lg:py-36 rounded-b-3xl shadow-xl" aria-labelledby="hero-heading">
-          {/* Video game image background with opacity */}
-          <div
-            className="absolute inset-0 z-0 bg-cover bg-center"
-            style={{
-              backgroundImage: 'url("https://i.pinimg.com/736x/fb/5d/9a/fb5d9acca9f9e6c13430d5192f84fb57.jpg")', // Placeholder for video game image
-              opacity: 0.20, // Explicitly set opacity
-            }}
-          ></div>
-          <div className="absolute inset-0 bg-black/40 z-10"></div> {/* Dark overlay */}
+      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-950 font-inter text-gray-100 antialiased">
+        {/* Enhanced Hero Section */}
+        <section className="relative overflow-hidden py-8 md:py-12 lg:py-16" aria-labelledby="hero-heading">
+          {/* Animated Background */}
+          <div className="absolute inset-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-20"
+              style={{
+                backgroundImage: 'url("https://i.pinimg.com/736x/fb/5d/9a/fb5d9acca9f9e6c13430d5192f84fb57.jpg")',
+              }}
+            ></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/40 to-black/60"></div>
+            
+            {/* Animated Particles */}
+            <div className="absolute inset-0 overflow-hidden">
+              {[...Array(20)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-amber-400 rounded-full animate-pulse"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`,
+                  }}
+                ></div>
+              ))}
+            </div>
+          </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32 z-20">
-            <div className="text-center">
-              <h1 id="hero-heading" className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-6 leading-tight drop-shadow-lg">
+            <div className="text-center animate-fade-in-up">
+              {/* Sparkles Icon */}
+              <div className="flex justify-center mb-6">
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-full shadow-2xl animate-pulse-glow">
+                  <Sparkles className="h-8 w-8 text-gray-950" />
+                </div>
+              </div>
+              
+              <h1 id="hero-heading" className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-8 leading-tight">
                 Your Ultimate
-                <span className="bg-gradient-to-r from-amber-400 to-amber-600 bg-clip-text text-transparent">
-                  {' '}Gaming Hub
+                <span className="gradient-text block mt-2">
+                  Gaming Hub
                 </span>
               </h1>
-              <p className="text-xl sm:text-2xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed font-inter">
+              
+              <p className="text-xl sm:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-inter">
                 Discover hundreds of classic HTML5 games, from retro arcade favorites to modern puzzles.
                 Play instantly in your browser or unlock premium experiences.
               </p>
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch max-w-md mx-auto w-full">
+                <Link
+                  to="/register"
+                  onClick={() => trackEvent('cta_click', 'engagement', 'start_earning_home')}
+                  className="btn-primary text-lg px-8 py-4 hover-lift w-full sm:w-auto flex items-center justify-center font-bold shadow-lg animate-pulse-glow border-2 border-amber-400"
+                >
+                  <span>Start Earning</span>
+                  <ArrowRight className="h-6 w-6 ml-2" />
+                </Link>
                 <Link
                   to="/games"
                   onClick={() => trackEvent('cta_click', 'engagement', 'play_now_home')}
-                  className="bg-gradient-to-r from-amber-400 to-amber-600 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out flex items-center justify-center space-x-3 border-2 border-transparent hover:border-amber-700"
+                  className="btn-secondary text-lg px-8 py-4 hover-lift w-full sm:w-auto flex items-center justify-center"
                 >
-                  <Play className="h-6 w-6" />
+                  <Play className="h-6 w-6 mr-2" />
                   <span>Play Now</span>
-                </Link>
-                <Link
-                  to="/register"
-                  onClick={() => trackEvent('cta_click', 'engagement', 'join_free_home')}
-                  className="border-2 border-amber-400 text-amber-400 px-10 py-4 rounded-full font-bold text-lg hover:bg-amber-400 hover:text-gray-900 transition-all duration-300 ease-in-out flex items-center justify-center space-x-3 hover:shadow-[0_0_25px_rgba(255,215,0,0.5)]"
-                >
-                  <span>Join Free</span>
-                  <ArrowRight className="h-6 w-6" />
                 </Link>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Featured Games Section */}
-        <section className="py-20 bg-gray-950" aria-labelledby="featured-heading">
+        {/* Enhanced Featured Games Section */}
+        <section className="py-24 bg-gradient-to-br from-gray-950/50 to-black/50" aria-labelledby="featured-heading">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 id="featured-heading" className="text-4xl sm:text-5xl font-bruno-ace text-amber-400 mb-6 drop-shadow-md">
+            <div className="text-center mb-20 animate-fade-in-up">
+              <h2 id="featured-heading" className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-8">
                 Featured Games
               </h2>
               <p className="text-xl text-gray-400 max-w-3xl mx-auto font-inter leading-relaxed">
@@ -90,81 +122,92 @@ export const Home: React.FC = () => {
             </div>
 
             {/* AdSense Banner - Top of Games Section */}
-            <AdSense 
-              adSlot="1234567890" 
-              className="mb-8"
-              style={{ minHeight: '90px' }}
-            />
+            <div className="mb-12">
+              <AdSense 
+                adSlot="1234567890" 
+                className="mb-8"
+                style={{ minHeight: '90px' }}
+              />
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-              {orderedGames.map((game) => {
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {orderedGames.map((game, index) => {
                 if (!game) return null;
                 return (
-                  <Link
+                  <div
                     key={game.slug}
-                    to={`/games/${game.slug}`}
-                    className="block group"
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.1}s` }}
                   >
-                    <GameCard game={game} />
-                  </Link>
+                    <Link to={`/games/${game.slug}`} className="block">
+                      <GameCard game={game} />
+                    </Link>
+                  </div>
                 );
               })}
             </div>
 
             {/* AdSense Banner - Middle of Games Section */}
-            <AdSense 
-              adSlot="0987654321" 
-              className="my-8"
-              style={{ minHeight: '90px' }}
-            />
+            <div className="my-12">
+              <AdSense 
+                adSlot="0987654321" 
+                className="my-8"
+                style={{ minHeight: '90px' }}
+              />
+            </div>
 
-            <div className="text-center mt-16">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  to="/games"
-                  onClick={() => trackEvent('cta_click', 'engagement', 'view_all_games')}
-                  className="inline-flex items-center space-x-3 bg-gradient-to-r from-amber-500 to-amber-700 text-gray-900 px-8 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-shadow transform hover:scale-105 ease-in-out"
-                >
-                  <span>View All Games</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-                <Link
-                  to="/categories"
-                  onClick={() => trackEvent('cta_click', 'engagement', 'browse_categories')}
-                  className="inline-flex items-center space-x-3 bg-gray-800 text-gray-300 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-700 hover:text-amber-400 transition-all duration-300 border border-gray-700"
-                >
-                  <span>Browse Categories</span>
-                  <ArrowRight className="h-5 w-5" />
-                </Link>
-              </div>
+         
+          </div>
+        </section>
+
+        {/* Stats Section moved below Featured Games */}
+        <section className="pb-12 bg-gradient-to-br from-gray-950/70 to-black/70" aria-labelledby="stats-heading">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+              {stats.map((stat, index) => (
+                <div key={index} className="glass rounded-2xl p-6 hover-lift">
+                  <div className="flex items-center justify-center mb-3">
+                    <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-full">
+                      <stat.icon className="h-6 w-6 text-gray-950" />
+                    </div>
+                  </div>
+                  <div className="text-2xl font-bold text-amber-400 mb-1">{stat.value}</div>
+                  <div className="text-gray-400 text-sm">{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-r from-gray-900 to-gray-800 text-white rounded-t-3xl shadow-xl" aria-labelledby="cta-heading">
+        {/* Enhanced CTA Section */}
+        <section className="py-24 bg-gradient-to-r from-gray-900/80 to-gray-800/80 glass-strong rounded-t-3xl" aria-labelledby="cta-heading">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 id="cta-heading" className="text-4xl sm:text-5xl font-bruno-ace mb-6 drop-shadow-md">
-              Ready to Start Gaming?
-            </h2>
-            <p className="text-xl text-gray-300 mb-10 font-inter">
-              Join thousands of players and unlock access to premium games and exclusive content.
-            </p>
-            
-            {/* AdSense Banner - Before CTA Button */}
-            <AdSense 
-              adSlot="1122334455" 
-              className="mb-8"
-              style={{ minHeight: '90px' }}
-            />
-            
-            <Link
-              to="/register"
-              onClick={() => trackEvent('cta_click', 'engagement', 'create_account_cta')}
-              className="bg-amber-400 text-gray-900 px-10 py-4 rounded-full font-bold text-lg hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transform hover:scale-105 transition-all duration-300 ease-in-out border-2 border-transparent hover:border-amber-700"
-            >
-              Create Free Account
-            </Link>
+            <div className="animate-fade-in-up">
+              <h2 id="cta-heading" className="text-4xl sm:text-5xl font-bruno-ace mb-8 gradient-text">
+                Ready to Start Gaming?
+              </h2>
+              <p className="text-xl text-gray-300 mb-12 font-inter leading-relaxed">
+                Join thousands of players and unlock access to premium games and exclusive content.
+              </p>
+              
+              {/* AdSense Banner - Before CTA Button */}
+              <div className="mb-12">
+                <AdSense 
+                  adSlot="1122334455" 
+                  className="mb-8"
+                  style={{ minHeight: '90px' }}
+                />
+              </div>
+              
+              <Link
+                to="/register"
+                onClick={() => trackEvent('cta_click', 'engagement', 'create_account_cta')}
+                className="btn-primary text-lg px-12 py-5 hover-lift inline-flex items-center space-x-3"
+              >
+                <Sparkles className="h-6 w-6" />
+                <span>Create Free Account</span>
+              </Link>
+            </div>
           </div>
         </section>
       </div>

@@ -31,6 +31,7 @@ import { AdminRouteGuard } from './components/AdminRouteGuard';
 import { supabase } from './lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import Rewards from './pages/Rewards';
+import { UIEnhancementDemo } from './components/UIEnhancementDemo';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -171,6 +172,7 @@ function App() {
                 <Route path="/blogs/:id" element={<BlogDetail />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/rewards" element={<Rewards />} />
+                <Route path="/ui-demo" element={<UIEnhancementDemo />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/contact" element={<Contact />} />

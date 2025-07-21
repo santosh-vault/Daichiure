@@ -1,7 +1,30 @@
 /* Import Google Fonts for a stylish gaming look */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Helvetica:wght@300;400;500;600;700&display=swap');
+
+/* Enhanced CSS Variables for consistent theming */
+:root {
+  --primary-gold: #FFD700;
+  --primary-gold-dark: #FFB300;
+  --primary-gold-light: #FFE55C;
+  --accent-blue: #3B82F6;
+  --accent-purple: #8B5CF6;
+  --bg-dark: #0A0A0A;
+  --bg-darker: #050505;
+  --bg-card: rgba(31, 41, 55, 0.8);
+  --bg-glass: rgba(255, 255, 255, 0.05);
+  --text-primary: #F9FAFB;
+  --text-secondary: #D1D5DB;
+  --text-muted: #9CA3AF;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  --shadow-glow: 0 0 20px rgba(255, 215, 0, 0.3);
+  --shadow-glow-strong: 0 0 30px rgba(255, 215, 0, 0.5);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
 
 /* Custom scrollbar for a killer look */
 ::-webkit-scrollbar {
@@ -10,82 +33,207 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1a1a; /* Dark track */
+  background: var(--bg-darker);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #FFD700; /* Golden thumb */
+  background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-dark));
   border-radius: 10px;
-  border: 3px solid #1a1a1a; /* Dark border to match track */
+  border: 3px solid var(--bg-darker);
+  transition: all 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #FFB300; /* Slightly darker golden on hover */
+  background: linear-gradient(135deg, var(--primary-gold-light), var(--primary-gold));
+  box-shadow: var(--shadow-glow);
 }
 
 /* For Firefox */
 html {
-  scrollbar-color: #FFD700 #1a1a1a; /* thumb and track color */
+  scrollbar-color: var(--primary-gold) var(--bg-darker);
   scrollbar-width: thin;
 }
 
-/* Apply global font styles. Note: In a React app, Tailwind classes are generally preferred
-   for direct styling, but these imports and scrollbar styles are global. */
-body {
-  font-family: 'Inter', sans-serif; /* Default body font */
+/* Enhanced global styles */
+* {
+  box-sizing: border-box;
 }
 
-/* You might define a custom class for the gaming font if you don't want to use inline Tailwind classes everywhere */
+body {
+  font-family: 'Helvetica', 'Inter', sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Enhanced font classes */
 .font-gaming {
   font-family: 'Orbitron', sans-serif;
+  letter-spacing: 0.05em;
 }
 
 .font-bruno-ace {
   font-family: 'Bruno Ace SC', sans-serif;
+  letter-spacing: 0.02em;
 }
 
-/* AdSense Styles */
-.adsense-container {
-  text-align: center;
-  margin: 20px 0;
-  min-height: 90px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 10px;
+.font-inter {
+  font-family: 'Inter', sans-serif;
 }
 
-.adsense-container ins {
-  display: block !important;
-  margin: 0 auto;
+/* Glassmorphism utility classes */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
 }
 
-/* Responsive AdSense */
-@media (max-width: 768px) {
-  .adsense-container {
-    margin: 15px 0;
-    padding: 8px;
-  }
+.glass-strong {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid var(--border-medium);
 }
 
-/* AdSense loading state */
-.adsense-container:empty::before {
-  content: "Loading advertisement...";
-  color: #666;
-  font-size: 14px;
-  font-style: italic;
+/* Enhanced gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-light), var(--accent-blue));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 3s ease-in-out infinite;
 }
 
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Enhanced button styles */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-gold), var(--primary-gold-dark));
+  color: var(--bg-dark);
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow-strong);
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-gold);
+  border: 2px solid var(--primary-gold);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-gold);
+  color: var(--bg-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Enhanced card styles */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-medium);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary-gold), var(--accent-blue), var(--primary-gold));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Enhanced input styles */
+.input-modern {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: var(--text-primary);
+  font-size: 16px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.input-modern:focus {
+  outline: none;
+  border-color: var(--primary-gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input-modern::placeholder {
+  color: var(--text-muted);
+}
+
+/* Enhanced loading animation */
 .loading-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: linear-gradient(135deg, #000 0%, #222 100%);
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -95,36 +243,38 @@ body {
 }
 
 .loading-spinner {
-  border: 8px solid #222;
-  border-top: 8px solid #FFD700;
-  border-right: 8px solid #FFC300;
-  border-bottom: 8px solid #FFB300;
-  border-left: 8px solid #FFD700;
-  border-radius: 50%;
   width: 80px;
   height: 80px;
-  box-shadow: 0 0 40px 8px #FFD70099, 0 0 80px 16px #FFD70044;
-  animation: spin 1s linear infinite, pulse 1.2s ease-in-out infinite;
-  background: conic-gradient(from 0deg, #FFD700, #FFC300, #FFB300, #FFD700);
+  position: relative;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, var(--primary-gold), var(--accent-blue), var(--primary-gold-light), var(--primary-gold));
+  animation: spin 1.5s linear infinite;
+  box-shadow: var(--shadow-glow-strong);
+}
+
+.loading-spinner::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  background: var(--bg-dark);
+  border-radius: 50%;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg) scale(1); }
-  100% { transform: rotate(360deg) scale(1); }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .loading-text {
-  margin-top: 28px;
-  color: #FFD700;
+  margin-top: 32px;
+  color: var(--primary-gold);
   font-size: 1.5rem;
-  font-family: 'Orbitron', 'Bruno Ace', Arial, sans-serif;
+  font-family: 'Orbitron', sans-serif;
   letter-spacing: 0.1em;
-  text-shadow: 0 2px 12px #FFD700, 0 0 8px #000;
+  text-shadow: 0 2px 12px var(--primary-gold);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -132,17 +282,17 @@ body {
 
 .loading-dots {
   display: inline-block;
-  margin-left: 6px;
+  margin-left: 8px;
 }
 
 .loading-dots span {
   display: inline-block;
-  width: 0.5em;
-  height: 0.5em;
-  margin: 0 1px;
-  background: #FFD700;
+  width: 6px;
+  height: 6px;
+  margin: 0 2px;
+  background: var(--primary-gold);
   border-radius: 50%;
-  opacity: 0.85;
+  opacity: 0.8;
   animation: bounce 1.2s infinite;
 }
 
@@ -154,26 +304,159 @@ body {
 }
 
 @keyframes bounce {
-  0%, 80%, 100% { transform: translateY(0); opacity: 0.85; }
-  40% { transform: translateY(-10px); opacity: 1; }
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.8; }
+  40% { transform: translateY(-12px); opacity: 1; }
 }
 
-@keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
-  100% { transform: translateX(0); }
-}
-.animate-shake {
-  animation: shake 0.3s;
+/* Enhanced animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-.animate-fadeIn {
-  animation: fadeIn 0.2s;
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Enhanced hover effects */
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  box-shadow: var(--shadow-glow);
+}
+
+/* Responsive enhancements */
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+    border-radius: 12px;
+  }
+  
+  .btn-primary,
+  .btn-secondary {
+    padding: 14px 20px;
+    font-size: 15px;
+  }
+  
+  .input-modern {
+    padding: 14px 16px;
+    font-size: 15px;
+  }
+}
+
+/* AdSense Styles - Enhanced */
+.adsense-container {
+  text-align: center;
+  margin: 24px 0;
+  min-height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-glass);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.adsense-container ins {
+  display: block !important;
+  margin: 0 auto;
+}
+
+/* Responsive AdSense */
+@media (max-width: 768px) {
+  .adsense-container {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: 8px;
+  }
+}
+
+/* AdSense loading state */
+.adsense-container:empty::before {
+  content: "Loading advertisement...";
+  color: var(--text-muted);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Enhanced focus states for accessibility */
+*:focus {
+  outline: 2px solid var(--primary-gold);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection styles */
+::selection {
+  background: var(--primary-gold);
+  color: var(--bg-dark);
+}
+
+::-moz-selection {
+  background: var(--primary-gold);
+  color: var(--bg-dark);
+}
+
+/* Remove default focus outline and box-shadow for nav links and buttons */
+a, button, .btn-primary, .btn-secondary, .group:focus, .group:active, .group:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Optional: Add a subtle custom focus style for accessibility */
+a:focus-visible, button:focus-visible {
+  outline: 2px solid #FFD70033;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px #FFD70022;
 }
