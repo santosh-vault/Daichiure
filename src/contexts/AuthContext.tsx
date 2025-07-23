@@ -81,6 +81,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         !!import.meta.env.VITE_SUPABASE_ANON_KEY
       );
 
+      // Determine the correct redirect URL based on environment
+      const isProduction = window.location.hostname !== "localhost";
+      const redirectTo = isProduction
+        ? "https://daichiure.vercel.app/login"
+        : "http://localhost:5173/login";
+
+      console.log("Using redirect URL:", redirectTo);
+
       const { error, data } = await supabase.auth.signUp({
         email,
         password,
@@ -88,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: redirectTo,
         },
       });
 

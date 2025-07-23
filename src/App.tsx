@@ -10,6 +10,7 @@ import { Games } from "./pages/Games";
 import { GamePlayer } from "./pages/GamePlayer";
 import { Login } from "./pages/Auth/Login";
 import { Register } from "./pages/Auth/Register";
+import EmailVerification from "./pages/Auth/EmailVerification";
 import { Dashboard } from "./pages/Dashboard/Dashboard";
 import { Success } from "./pages/Success";
 import { Debug } from "./pages/Debug";
@@ -168,6 +169,7 @@ function App() {
                 <Route path="/games/:slug" element={<GamePlayer />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<EmailVerification />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
                   path="/dashboard"
