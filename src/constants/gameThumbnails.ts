@@ -1,6 +1,5 @@
 export const gameThumbnails: Record<string, string> = {
   freefire: 'https://i.pinimg.com/736x/8d/bc/6e/8dbc6e3c498ccc0bd62a70a2a9d14704.jpg',
-  amongimposter: 'https://i.pinimg.com/736x/c2/4e/f5/c24ef5d2c3da14a76a59b6e8a418dde0.jpg',
   shooter: 'https://i.pinimg.com/736x/01/46/eb/0146eb83291fe469d97cd64dac60a232.jpg',
   snake: 'https://i.pinimg.com/736x/fe/52/04/fe52049819f6a4982a94c061b0c207b3.jpg',
   pong: 'https://i.pinimg.com/736x/f8/e2/f7/f8e2f73f5f50ce7cf76510bb7524d811.jpg',
@@ -11,10 +10,8 @@ export const gameThumbnails: Record<string, string> = {
   everest: 'https://i.pinimg.com/736x/9d/18/53/9d1853f8b7a02569a6cc09f92257bf92.jpg',
   kathmandu: 'https://i.pinimg.com/736x/53/82/f9/5382f9a986dcfaa514641789b930b70b.jpg',
   temple: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
-  runner: 'https://images.pexels.com/photos/1367192/pexels-photo-1367192.jpeg',
   football: 'https://i.pinimg.com/736x/87/4d/06/874d06261fc4ad205341e2d4cd9b8a88.jpg',
   fighter: 'https://i.pinimg.com/736x/97/f5/ef/97f5ef29d80e96974c09aa883773f0a6.jpg',
-  housebuilder: 'https://images.pexels.com/photos/3165335/pexels-photo-3165335.jpeg',
   allofaredead: 'https://i.pinimg.com/736x/fd/14/e0/fd14e009b62752a0b1def0179fe18288.jpg',
   towerstack: 'https://i.pinimg.com/736x/8b/4a/92/8b4a92e02330caa96c0a6df7c0287aea.jpg',
   uno: 'https://i.pinimg.com/736x/4c/65/e5/4c65e5d9cb574bfd846490ca7f947088.jpg',

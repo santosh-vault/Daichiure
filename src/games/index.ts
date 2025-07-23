@@ -7,13 +7,10 @@ import { RPGGame } from './RPG';
 
 import { KathmanduGame } from './Kathmandu';
 import { TempleGame } from './Temple';
-import Runner from './Runner';
 import Football from './Football';
 import Shooter from './Shooter';
 import Fighter from './Fighter';
-import HouseBuilder from './HouseBuilder';
 import FreeFireGame from './FreeFire';
-import AmongImposterGame from './AmongImposter';
 import AllOfUsAreDead from './AllOfUsAreDead';
 // @ts-ignore
 import TowerStackGame from './TowerStackGame';
@@ -29,7 +26,6 @@ import GameMonetize9PTV2PBY from './GameMonetize9PTV2PBY';
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
   'freefire': FreeFireGame,
-  'amongimposter': AmongImposterGame,
   'shooter': Shooter,
   'snake': SnakeGame,
   'pong': PongGame,
@@ -39,10 +35,8 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'rpg': RPGGame,
   'kathmandu': KathmanduGame,
   'temple': TempleGame,
-  'runner': Runner,
   'football': Football,
   'fighter': Fighter,
-  'housebuilder': HouseBuilder,
   'allofaredead': AllOfUsAreDead,
   'towerstack': TowerStackGame,
   'uno': Uno,
@@ -56,4 +50,4 @@ export const gameComponents: Record<string, React.ComponentType> = {
   '9ptv2pby': GameMonetize9PTV2PBY,
 };
 
-export { Fighter, Shooter, Football, Runner, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno }; 
+export { Fighter, Shooter, Football, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno }; 

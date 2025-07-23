@@ -32,14 +32,6 @@ export const games = [
     category: 'card',
   },
   {
-    slug: 'amongimposter',
-    title: 'imposter',
-    description: 'Complete all your tasks before the imposter finds you! Move with arrow keys, finish tasks, and avoid the imposter.',
-    is_premium: false,
-    price: null,
-    category: 'arcade',
-  },
-  {
     slug: 'snake',
     title: 'Snake Classic',
     description: 'The classic snake game. Eat food, grow longer, and avoid walls and your own tail. Use arrow keys or WASD.',
@@ -113,14 +105,6 @@ export const games = [
     category: 'puzzle',
   },
   {
-    slug: 'runner',
-    title: 'Nepali Runner',
-    description: 'Run, jump, and dodge obstacles in a vibrant Nepali landscape! Use Space or Up Arrow to jump. Avoid obstacles and score high!',
-    is_premium: false,
-    price: null,
-    category: 'arcade',
-  },
-  {
     slug: 'football',
     title: 'Football Frenzy',
     description: 'A fast-paced 2D football game! Move, dribble, and score against the AI. Use Arrow keys/WASD to move, Space to kick.',
@@ -135,14 +119,6 @@ export const games = [
     is_premium: false,
     price: null,
     category: 'action',
-  },
-  {
-    slug: 'housebuilder',
-    title: 'House Builder',
-    description: 'Build your dream house with blocks and materials. Use your creativity and skills to design and construct your home.',
-    is_premium: false,
-    price: null,
-    category: 'building',
   },
   {
     slug: 'allofaredead',
