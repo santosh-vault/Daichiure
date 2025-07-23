@@ -167,7 +167,7 @@ export const Home: React.FC = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
               {orderedGames.map((game, index) => {
                 if (!game) return null;
                 return (
@@ -201,7 +201,7 @@ export const Home: React.FC = () => {
           aria-labelledby="stats-heading"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center">
               {stats.map((stat, index) => (
                 <div key={index} className="glass rounded-2xl p-6 hover-lift">
                   <div className="flex items-center justify-center mb-3">

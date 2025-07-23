@@ -1,6 +1,6 @@
-import React from 'react';
-import { GameThumbnail } from './GameThumbnail';
-import { Play, Star, Crown } from 'lucide-react';
+import React from "react";
+import { GameThumbnail } from "./GameThumbnail";
+import { Play, Star, Crown } from "lucide-react";
 
 // Declare global gtag function
 declare global {
@@ -23,18 +23,18 @@ interface GameCardProps {
 export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => {
   const handleClick = () => {
     // Track game click
-    if (typeof window !== 'undefined' && window.gtag) {
-      window.gtag('event', 'game_click', {
-        event_category: 'engagement',
+    if (typeof window !== "undefined" && window.gtag) {
+      window.gtag("event", "game_click", {
+        event_category: "engagement",
         event_label: game.title,
-        value: game.is_premium ? 1 : 0
+        value: game.is_premium ? 1 : 0,
       });
     }
     if (onClick) onClick();
   };
 
   return (
-    <div 
+    <div
       className="group relative overflow-hidden rounded-2xl cursor-pointer animate-fade-in-scale hover-lift"
       onClick={handleClick}
     >
@@ -74,14 +74,14 @@ export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => {
           )}
         </div>
         {/* Card Content */}
-        <div className="p-3 flex flex-col items-start">
+        <div className="p-2 sm:p-3 flex flex-col items-start">
           {/* Title */}
-          <h3 className="text-base font-semibold text-white mb-1 group-hover:text-amber-400 transition-colors duration-300 truncate w-full">
+          <h3 className="text-sm sm:text-base font-semibold text-white mb-1 group-hover:text-amber-400 transition-colors duration-300 truncate w-full">
             {game.title}
           </h3>
           {/* Play Button */}
-          <button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 px-4 py-2 rounded-xl font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center space-x-2 shadow-lg group-hover:shadow-xl group-hover:shadow-amber-500/25 mt-1">
-            <Play className="h-4 w-4" />
+          <button className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl font-bold text-xs hover:from-amber-400 hover:to-amber-500 transition-all duration-300 transform group-hover:scale-105 flex items-center justify-center space-x-1 sm:space-x-2 shadow-lg group-hover:shadow-xl group-hover:shadow-amber-500/25 mt-1">
+            <Play className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Play Now</span>
           </button>
         </div>
@@ -90,4 +90,4 @@ export const GameCard: React.FC<GameCardProps> = ({ game, onClick }) => {
       <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-amber-400/20 transition-all duration-300"></div>
     </div>
   );
-}; 
+};

@@ -233,14 +233,14 @@ export const Register: React.FC = () => {
 
   // Slide-in popup styles
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end">
+    <div className="fixed inset-0 z-50 flex items-center justify-center sm:justify-end">
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
         onClick={() => navigate(-1)}
       />
       {/* Slide-in panel */}
-      <div className="relative h-full w-full max-w-md bg-gray-900 rounded-l-3xl shadow-2xl border-l border-gray-800 flex flex-col animate-slide-in-right">
+      <div className="relative h-full w-full max-w-md sm:max-w-lg bg-gray-900 sm:rounded-l-3xl shadow-2xl border-l border-gray-800 flex flex-col animate-slide-in-right overflow-y-auto">
         {/* Close button */}
         <button
           className="absolute top-4 right-4 z-20 text-gray-400 hover:text-amber-400 bg-gray-800 rounded-full p-2 shadow-lg"
@@ -249,19 +249,19 @@ export const Register: React.FC = () => {
         >
           <X className="w-6 h-6" />
         </button>
-        <div className="flex-1 flex flex-col justify-center px-6 py-10 sm:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-2 drop-shadow-md">
+        <div className="flex-1 flex flex-col justify-start sm:justify-center px-4 sm:px-6 py-8 sm:py-10">
+          <div className="text-center mb-6 sm:mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-2 drop-shadow-md">
               Join PlayHub
             </h2>
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-400 text-base sm:text-lg">
               Create your account to start playing
             </p>
           </div>
 
           {message && (
             <div
-              className={`p-3 rounded-lg mb-6 text-center text-lg font-medium ${
+              className={`p-3 rounded-lg mb-4 sm:mb-6 text-center text-sm sm:text-lg font-medium ${
                 message.type === "success"
                   ? "bg-green-600 text-white"
                   : "bg-red-600 text-white"
@@ -271,11 +271,11 @@ export const Register: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
               >
                 Full Name
               </label>
@@ -288,7 +288,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -297,7 +297,7 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
               >
                 Email Address <span className="text-red-400">*</span>
               </label>
@@ -310,7 +310,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 bg-gray-800 border text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${
+                  className={`w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-800 border text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm sm:text-base ${
                     emailError
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-700 focus:ring-amber-500"
@@ -336,7 +336,7 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
               >
                 Password
               </label>
@@ -349,7 +349,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-12 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   placeholder="Create a password"
                 />
                 <button
@@ -366,10 +366,12 @@ export const Register: React.FC = () => {
               </div>
               {/* Password requirements */}
               <div className="mt-2 text-xs text-gray-500">
-                <div className="mb-1">Password must contain:</div>
-                <div className="grid grid-cols-2 gap-1">
+                <div className="mb-1 text-xs sm:text-sm">
+                  Password must contain:
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   <div
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 text-xs ${
                       formData.password.length >= 8
                         ? "text-green-400"
                         : "text-gray-500"
@@ -379,7 +381,7 @@ export const Register: React.FC = () => {
                     <span>8+ characters</span>
                   </div>
                   <div
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 text-xs ${
                       /[a-z]/.test(formData.password)
                         ? "text-green-400"
                         : "text-gray-500"
@@ -389,7 +391,7 @@ export const Register: React.FC = () => {
                     <span>Lowercase letter</span>
                   </div>
                   <div
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 text-xs ${
                       /[A-Z]/.test(formData.password)
                         ? "text-green-400"
                         : "text-gray-500"
@@ -399,7 +401,7 @@ export const Register: React.FC = () => {
                     <span>Uppercase letter</span>
                   </div>
                   <div
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 text-xs ${
                       /[0-9]/.test(formData.password)
                         ? "text-green-400"
                         : "text-gray-500"
@@ -427,7 +429,7 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-300 mb-2"
+                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
               >
                 Confirm Password
               </label>
@@ -440,7 +442,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
+                  className="w-full pl-10 pr-12 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
                   placeholder="Confirm your password"
                 />
                 <button
@@ -479,7 +481,7 @@ export const Register: React.FC = () => {
                 !formData.confirmPassword ||
                 !formData.fullName
               }
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 py-3 rounded-lg font-bold text-lg
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg
                          hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-all duration-300 ease-in-out transform hover:scale-105
                          disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100"
             >
@@ -487,8 +489,8 @@ export const Register: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-8 text-center">
-            <p className="text-gray-400">
+          <div className="mt-6 sm:mt-8 text-center">
+            <p className="text-gray-400 text-sm sm:text-base">
               Already have an account?{" "}
               <Link
                 to="/login"
