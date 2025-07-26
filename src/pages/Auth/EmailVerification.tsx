@@ -38,7 +38,7 @@ export const EmailVerification: React.FC = () => {
           } else {
             console.log("Email verification successful:", data);
             setVerified(true);
-            toast.success("Email verified successfully! Welcome to PlayHub!");
+            toast.success("Email verified successfully! Welcome to Daichiure!");
 
             // Redirect to games page after a short delay
             setTimeout(() => {

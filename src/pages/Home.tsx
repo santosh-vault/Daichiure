@@ -92,32 +92,107 @@ export const Home: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>Play Free Nepali & 2D Games Online | YourSiteName</title>
+        <title>Play Free Games Online & Earn Real Money | Daichiure</title>
         <meta
           name="description"
-          content="Play the best free Nepali games and 2D games online. Action, puzzle, and more. No download required!"
+          content="Play the best free games online and earn real money. Turn your gaming skills into cash rewards at Daichiure gaming platform!"
         />
         <meta
           name="keywords"
-          content="Nepali games, free 2D games, online games, play Nepali games, Nepali puzzle games, Nepali action games, browser games, Kathmandu games, Everest games, Nepali temple, Nepali football, Nepali arcade"
+          content="Daichiure, earn money gaming, free online games, gaming rewards, play to earn, online gaming platform, cash rewards, gaming hub"
         />
         <meta
           property="og:title"
-          content="Play Free Nepali & 2D Games Online"
+          content="Play Free Games Online & Earn Real Money | Daichiure"
         />
         <meta
           property="og:description"
-          content="Enjoy a huge collection of free Nepali and 2D games. Compete, have fun, and share with friends!"
+          content="Turn your gaming skills into real cash rewards! Join Daichiure and start earning money while playing your favorite games."
         />
-        <meta
-          property="og:image"
-          content="https://yourdomain.com/og-image.png"
-        />
+        <meta property="og:image" content="/logo.png" />
       </Helmet>
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-950 font-inter text-gray-100 antialiased">
+
+      {/* Add custom styles for ultra-smooth scrolling */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          * {
+            scroll-behavior: smooth;
+          }
+          
+          body {
+            overflow-x: hidden;
+          }
+          
+          .smooth-section {
+            position: relative;
+            z-index: 1;
+            transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+          }
+          
+          .hero-sticky {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            z-index: 1;
+          }
+          
+          .content-layer {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, rgba(3, 7, 18, 0.95), rgba(0, 0, 0, 0.9));
+            border-radius: 2rem 2rem 0 0;
+            margin-top: -10vh;
+            box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.5);
+          }
+          
+          .overlap-section {
+            position: relative;
+            z-index: 3;
+            background: linear-gradient(135deg, rgba(3, 7, 18, 0.98), rgba(17, 24, 39, 0.95));
+            border-radius: 2rem 2rem 0 0;
+            margin-top: -8vh;
+            box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.6);
+          }
+          
+          .final-section {
+            position: relative;
+            z-index: 4;
+            background: linear-gradient(135deg, rgba(3, 7, 18, 0.9), rgba(0, 0, 0, 0.95));
+            border-radius: 2rem 2rem 0 0;
+            margin-top: -6vh;
+            box-shadow: 0 -20px 40px rgba(0, 0, 0, 0.7);
+          }
+          
+          @media (prefers-reduced-motion: reduce) {
+            * {
+              scroll-behavior: auto !important;
+              transition: none !important;
+              animation: none !important;
+            }
+          }
+          
+          /* Smooth entrance animations */
+          .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease-out forwards;
+          }
+          
+          @keyframes fadeInUp {
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `,
+        }}
+      />
+
+      <div className="relative bg-gradient-to-br from-gray-950 via-black to-gray-950 font-inter text-gray-100 antialiased">
         {/* Enhanced Hero Section */}
         <section
-          className="relative overflow-hidden h-screen"
+          className="hero-sticky overflow-hidden"
           aria-labelledby="hero-heading"
         >
           {/* Animated Background */}
@@ -165,7 +240,7 @@ export const Home: React.FC = () => {
                 <span className="gradient-text block mt-2">Gaming Hub</span>
               </h1>
 
-              <p className="text-xl sm:text-xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed font-inter">
+              <p className="text-lg sm:text-xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed font-inter">
                 Turn your gaming skills into real cash by playing exciting Games
                 — join Daichiure today and start earning while you play!
               </p>
@@ -198,11 +273,11 @@ export const Home: React.FC = () => {
 
         {/* Enhanced Featured Games Section */}
         <section
-          className="py-24 bg-gradient-to-br from-gray-950/50 to-black/50"
+          className="content-layer py-24 smooth-section"
           aria-labelledby="featured-heading"
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-20 animate-fade-in-up">
+            <div className="text-center mb-20 fade-in-up">
               <h2
                 id="featured-heading"
                 className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-8"
@@ -230,7 +305,7 @@ export const Home: React.FC = () => {
                 return (
                   <div
                     key={game.slug}
-                    className="animate-fade-in-up"
+                    className="fade-in-up"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <Link to={`/games/${game.slug}`} className="block">
@@ -254,7 +329,7 @@ export const Home: React.FC = () => {
 
         {/* QNA Section - How to Earn Money */}
         <section
-          className="relative py-20 bg-gradient-to-br from-gray-950/95 via-black/90 to-gray-900/95 overflow-hidden"
+          className="overlap-section py-20 overflow-hidden smooth-section"
           aria-labelledby="faq-heading"
         >
           {/* Fancy Background Elements */}
@@ -291,7 +366,7 @@ export const Home: React.FC = () => {
           </div>
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
-            <div className="text-center mb-16 animate-fade-in-up">
+            <div className="text-center mb-16 fade-in-up">
               <h2
                 id="faq-heading"
                 className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-6"
@@ -308,7 +383,7 @@ export const Home: React.FC = () => {
               {faqs.map((faq, index) => (
                 <div
                   key={index}
-                  className="glass rounded-xl overflow-hidden hover-lift animate-fade-in-up"
+                  className="glass rounded-xl overflow-hidden hover-lift fade-in-up"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <button
@@ -353,11 +428,11 @@ export const Home: React.FC = () => {
 
         {/* Stats Section - Final Section */}
         <section
-          className="py-24 bg-gradient-to-br from-gray-950/70 to-black/70 rounded-t-3xl"
+          className="final-section py-24 smooth-section"
           aria-labelledby="stats-heading"
         >
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16 animate-fade-in-up">
+            <div className="text-center mb-16 fade-in-up">
               <h2
                 id="stats-heading"
                 className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-8"
@@ -374,7 +449,7 @@ export const Home: React.FC = () => {
               {stats.map((stat, index) => (
                 <div
                   key={index}
-                  className="glass rounded-2xl p-8 hover-lift animate-fade-in-up"
+                  className="glass rounded-2xl p-8 hover-lift fade-in-up"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   <div className="flex items-center justify-center mb-4">
@@ -391,7 +466,7 @@ export const Home: React.FC = () => {
             </div>
 
             {/* Final Call to Action */}
-            <div className="text-center glass rounded-3xl p-8 animate-fade-in-up">
+            <div className="text-center glass rounded-3xl p-8 fade-in-up">
               <h3 className="text-2xl font-bruno-ace text-amber-400 mb-4">
                 Ready to Start Your Gaming Journey?
               </h3>

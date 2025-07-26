@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import { getSupabaseFunctionUrl } from "../lib/supabase";
 
 // Admin user emails - should match Header.tsx
-const ADMIN_EMAILS = ["admin@playhub.com", "developer@playhub.com"];
+const ADMIN_EMAILS = ["admin@daichiure.com", "developer@daichiure.com"];
 
 interface AuthState {
   user: User | null;
@@ -125,7 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         );
       } else if (data.user && data.session) {
         // User is immediately signed in (email confirmation disabled)
-        toast.success("Account created successfully! Welcome to PlayHub!");
+        toast.success("Account created successfully! Welcome to Daichiure!");
       } else {
         toast.success("Account created successfully!");
       }

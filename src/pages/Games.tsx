@@ -92,7 +92,7 @@ export const Games: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>All Games | PlayHub</title>
+        <title>All Games | Daichiure</title>
         <meta
           name="description"
           content="Browse and play a huge collection of free Nepali and 2D games online. Action, puzzle, sports, and more!"

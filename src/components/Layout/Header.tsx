@@ -14,7 +14,7 @@ import {
 import { useRewards } from "../../hooks/useRewards";
 
 // Admin user emails - should match Dashboard.tsx
-const ADMIN_EMAILS = ["admin@playhub.com", "developer@playhub.com"];
+const ADMIN_EMAILS = ["admin@daichiure.com", "developer@daichiure.com"];
 
 export const Header: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -80,14 +80,13 @@ export const Header: React.FC = () => {
             to="/"
             className="flex items-center space-x-1 sm:space-x-2 group animate-fade-in-scale min-w-fit"
           >
-            <div className="relative">
-              <div className="bg-gradient-to-r from-amber-500 to-amber-700 p-1.5 sm:p-2 rounded-lg shadow-lg group-hover:shadow-2xl transition-all duration-300 ease-in-out transform group-hover:scale-105 group-hover:rotate-3">
-                <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 text-gray-950" />
-              </div>
-              <div className="absolute -inset-1 bg-gradient-to-r from-amber-400 to-amber-600 rounded-lg blur opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
-            </div>
+            <img
+              src="/logo.png"
+              alt="Daichiure Logo"
+              className="h-6 w-6 sm:h-8 sm:w-8 object-contain transition-transform duration-300 ease-in-out group-hover:scale-105"
+            />
             <span className="text-lg sm:text-xl font-bold font-bruno-ace gradient-text drop-shadow-md">
-              PlayHub
+              Daichiure
             </span>
           </Link>
 
@@ -185,9 +184,9 @@ export const Header: React.FC = () => {
                 <div className="flex items-center min-w-fit">
                   <Link
                     to="/register"
-                    className="btn-primary hover-lift px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm"
+                    className="btn-primary hover-lift px-3 lg:px-4 py-1.5 lg:py-2 text-xs lg:text-sm rounded-md"
                   >
-                    Login
+                    Earn Money
                   </Link>
                 </div>
               </>
@@ -339,9 +338,9 @@ export const Header: React.FC = () => {
                   <Link
                     to="/register"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="btn-primary text-center mt-4 py-3"
+                    className="btn-primary text-center mt-4 py-3 rounded-md"
                   >
-                    Login
+                    Earn Money
                   </Link>
                 </>
               )}

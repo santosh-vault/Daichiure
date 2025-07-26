@@ -252,7 +252,7 @@ export const Register: React.FC = () => {
         <div className="flex-1 flex flex-col justify-start px-4 sm:px-6 py-4 sm:py-6">
           <div className="text-center mb-4 sm:mb-6">
             <h2 className="text-2xl sm:text-3xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-1 drop-shadow-md">
-              Join PlayHub
+              Join Daichiure
             </h2>
             <p className="text-gray-400 text-sm sm:text-base">
               Create your account to start playing

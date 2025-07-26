@@ -199,7 +199,7 @@ export const GamePlayer: React.FC = () => {
     url: canonicalUrl,
     author: {
       "@type": "Organization",
-      name: "PlayHub",
+      name: "Daichiure",
     },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -223,7 +223,7 @@ export const GamePlayer: React.FC = () => {
   const seoContent = (
     <>
       <Helmet>
-        <title>{game.title} | PlayHub</title>
+        <title>{game.title} | Daichiure</title>
         <meta name="description" content={game.description} />
         <meta
           name="keywords"
@@ -240,7 +240,7 @@ export const GamePlayer: React.FC = () => {
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${game.title} | PlayHub`} />
+        <meta name="twitter:title" content={`${game.title} | Daichiure`} />
         <meta name="twitter:description" content={game.description} />
         <meta name="twitter:image" content={ogImage} />
         <meta name="robots" content="index, follow" />
