@@ -51,7 +51,7 @@ export const Home: React.FC = () => {
       icon: DollarSign,
       question: "How can I earn real money on this platform?",
       answer:
-        "You can earn money by accumulating coins through various activities: playing games daily, maintaining login streaks, completing challenges, and referring friends. Once you reach 1,000,000 coins, you can exchange them for $9 USD real money.",
+        "You can earn money by accumulating coins through various activities: playing games daily, maintaining login streaks, completing challenges, and referring friends. Once you reach 1,000,000 coins, you can exchange them for real money.",
     },
     {
       icon: Gift,
@@ -69,7 +69,7 @@ export const Home: React.FC = () => {
       icon: Target,
       question: "When can i withdraw?",
       answer:
-        "The minimum withdrawal is 1,00,000 Coins. This ensures fair value exchange and covers transaction costs. We process withdrawals within 24 hours of request.",
+        "The minimum withdrawal is 1,000,000 Coins. This ensures fair value exchange and covers transaction costs. We process withdrawals within 24 hours of request.",
     },
     {
       icon: Users,
@@ -245,7 +245,7 @@ export const Home: React.FC = () => {
                 — join Daichiure today and start earning while you play!
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch max-w-md mx-auto w-full">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto w-full">
                 <Link
                   to="/register"
                   onClick={() =>
@@ -479,7 +479,7 @@ export const Home: React.FC = () => {
                   onClick={() =>
                     trackEvent("cta_click", "engagement", "join_community")
                   }
-                  className="btn-primary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-3"
+                  className="btn-primary text-lg px-8 py-4 hover-lift flex items-center space-x-3"
                 >
                   <Sparkles className="h-6 w-6" />
                   <span>Join Now</span>
@@ -489,7 +489,7 @@ export const Home: React.FC = () => {
                   onClick={() =>
                     trackEvent("cta_click", "engagement", "explore_games_final")
                   }
-                  className="btn-secondary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-3"
+                  className="btn-secondary text-lg px-8 py-4 hover-lift flex items-center space-x-3"
                 >
                   <Trophy className="h-6 w-6" />
                   <span>Explore Games</span>
