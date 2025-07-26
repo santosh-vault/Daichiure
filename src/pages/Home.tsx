@@ -1,6 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Sparkles, Users, Trophy, Zap } from "lucide-react";
+import {
+  Sparkles,
+  Users,
+  Trophy,
+  Zap,
+  ChevronDown,
+  DollarSign,
+  Gift,
+  Calendar,
+  Target,
+} from "lucide-react";
 import AdSense from "../components/AdSense";
 import { Helmet } from "react-helmet-async";
 import { games } from "../data/games";
@@ -10,6 +20,9 @@ import "../App.css";
 
 export const Home: React.FC = () => {
   const { trackEvent } = useGoogleAnalytics();
+
+  // FAQ state for accordion
+  const [openFaq, setOpenFaq] = React.useState<number | null>(null);
 
   // Custom order for the first 8 games (2 rows of 4)
   const customOrder = [
@@ -31,6 +44,50 @@ export const Home: React.FC = () => {
     { icon: Trophy, value: "25+", label: "Games Available" },
     { icon: Zap, value: "24/7", label: "Always Online" },
   ];
+
+  // FAQ data about earning money
+  const faqs = [
+    {
+      icon: DollarSign,
+      question: "How can I earn real money on this platform?",
+      answer:
+        "You can earn money by accumulating coins through various activities: playing games daily, maintaining login streaks, completing challenges, and referring friends. Once you reach 1,000,000 coins, you can exchange them for $9 USD real money.",
+    },
+    {
+      icon: Gift,
+      question: "What are Fair Coins and how do they help me earn?",
+      answer:
+        "Fair Coins are premium currency earned through weekly login streaks (1 Fair Coin every 7 consecutive days). Fair Coins can be redeemed for 100 regular coins each, helping you reach the 1M coin threshold faster for money withdrawal.",
+    },
+    {
+      icon: Calendar,
+      question: "How do login streaks work for earning?",
+      answer:
+        "Maintain daily login streaks to earn bonus coins and Fair Coins. Every 7 consecutive days, you automatically receive 1 Fair Coin. The longer your streak, the more you earn over time!",
+    },
+    {
+      icon: Target,
+      question: "When can i withdraw?",
+      answer:
+        "The minimum withdrawal is 1,00,000 Coins. This ensures fair value exchange and covers transaction costs. We process withdrawals within 24 hours of request.",
+    },
+    {
+      icon: Users,
+      question: "How does the referral system help me earn more?",
+      answer:
+        "Invite friends using your unique referral code! Both you and your friend receive bonus coins when they sign up and start playing. More referrals = more bonus coins = faster path to withdrawal!",
+    },
+    {
+      icon: Trophy,
+      question: "Do different games give different coin rewards?",
+      answer:
+        "Yes! Each game has specific coin rewards based on performance, time played, and achievements. Focus on games you're good at to maximize your daily coin earnings within the daily limit.",
+    },
+  ];
+
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
 
   return (
     <>
@@ -195,67 +252,174 @@ export const Home: React.FC = () => {
           </div>
         </section>
 
-        {/* Stats Section moved below Featured Games */}
+        {/* QNA Section - How to Earn Money */}
         <section
-          className="pb-12 bg-gradient-to-br from-gray-950/70 to-black/70"
-          aria-labelledby="stats-heading"
+          className="relative py-20 bg-gradient-to-br from-gray-950/95 via-black/90 to-gray-900/95 overflow-hidden"
+          aria-labelledby="faq-heading"
         >
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center">
-              {stats.map((stat, index) => (
-                <div key={index} className="glass rounded-2xl p-6 hover-lift">
-                  <div className="flex items-center justify-center mb-3">
-                    <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-3 rounded-full">
-                      <stat.icon className="h-6 w-6 text-gray-950" />
+          {/* Fancy Background Elements */}
+          <div className="absolute inset-0">
+            {/* Gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-950/80 via-black/70 to-gray-900/80"></div>
+
+            {/* Animated circles */}
+            <div className="absolute top-10 left-10 w-32 h-32 bg-amber-500/10 rounded-full blur-xl animate-pulse"></div>
+            <div
+              className="absolute bottom-20 right-20 w-40 h-40 bg-amber-600/10 rounded-full blur-xl animate-pulse"
+              style={{ animationDelay: "1s" }}
+            ></div>
+            <div
+              className="absolute top-1/2 left-1/4 w-24 h-24 bg-amber-400/10 rounded-full blur-xl animate-pulse"
+              style={{ animationDelay: "2s" }}
+            ></div>
+
+            {/* Animated dots pattern */}
+            <div className="absolute inset-0 opacity-30">
+              {[...Array(15)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute w-1 h-1 bg-amber-400/50 rounded-full animate-pulse"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`,
+                  }}
+                ></div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 z-10">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2
+                id="faq-heading"
+                className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-6"
+              >
+                How to Earn Money
+              </h2>
+              <p className="text-lg text-gray-400 max-w-2xl mx-auto font-inter leading-relaxed">
+                Everything you need to know about turning your gaming time into
+                real cash rewards.
+              </p>
+            </div>
+
+            <div className="space-y-4 mb-12 max-w-4xl mx-auto">
+              {faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  className="glass rounded-xl overflow-hidden hover-lift animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <button
+                    onClick={() => toggleFaq(index)}
+                    className="w-full p-5 text-left focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-2.5 rounded-full flex-shrink-0">
+                          <faq.icon className="h-5 w-5 text-gray-950" />
+                        </div>
+                        <h3 className="text-base font-semibold text-white font-inter">
+                          {faq.question}
+                        </h3>
+                      </div>
+                      <ChevronDown
+                        className={`h-5 w-5 text-amber-400 transition-transform duration-200 flex-shrink-0 ${
+                          openFaq === index ? "transform rotate-180" : ""
+                        }`}
+                      />
+                    </div>
+                  </button>
+
+                  <div
+                    className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                      openFaq === index
+                        ? "max-h-96 opacity-100"
+                        : "max-h-0 opacity-0"
+                    }`}
+                  >
+                    <div className="px-5 pb-5">
+                      <div className="ml-12 text-gray-300 font-inter leading-relaxed text-sm">
+                        {faq.answer}
+                      </div>
                     </div>
                   </div>
-                  <div className="text-2xl font-bold text-amber-400 mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-gray-400 text-sm">{stat.label}</div>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Enhanced CTA Section */}
+        {/* Stats Section - Final Section */}
         <section
-          className="py-24 bg-gradient-to-r from-gray-900/80 to-gray-800/80 glass-strong rounded-t-3xl"
-          aria-labelledby="cta-heading"
+          className="py-24 bg-gradient-to-br from-gray-950/70 to-black/70 rounded-t-3xl"
+          aria-labelledby="stats-heading"
         >
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="animate-fade-in-up">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 animate-fade-in-up">
               <h2
-                id="cta-heading"
-                className="text-4xl sm:text-5xl font-bruno-ace mb-8 gradient-text"
+                id="stats-heading"
+                className="text-4xl sm:text-5xl font-bruno-ace gradient-text mb-8"
               >
-                Ready to Start Gaming?
+                Join the Community
               </h2>
-              <p className="text-xl text-gray-300 mb-12 font-inter leading-relaxed">
-                Join thousands of players and unlock access to premium games and
-                exclusive content.
+              <p className="text-xl text-gray-400 max-w-3xl mx-auto font-inter leading-relaxed">
+                Be part of our growing gaming community and start your earning
+                journey today!
               </p>
+            </div>
 
-              {/* AdSense Banner - Before CTA Button */}
-              <div className="mb-12">
-                <AdSense
-                  adSlot="1122334455"
-                  className="mb-8"
-                  style={{ minHeight: "90px" }}
-                />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-center mb-16">
+              {stats.map((stat, index) => (
+                <div
+                  key={index}
+                  className="glass rounded-2xl p-8 hover-lift animate-fade-in-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-full">
+                      <stat.icon className="h-8 w-8 text-gray-950" />
+                    </div>
+                  </div>
+                  <div className="text-3xl font-bold text-amber-400 mb-2 font-bruno-ace">
+                    {stat.value}
+                  </div>
+                  <div className="text-gray-400 font-inter">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Final Call to Action */}
+            <div className="text-center glass rounded-3xl p-8 animate-fade-in-up">
+              <h3 className="text-2xl font-bruno-ace text-amber-400 mb-4">
+                Ready to Start Your Gaming Journey?
+              </h3>
+              <p className="text-gray-300 mb-6 font-inter">
+                Join now and turn your gaming passion into real rewards!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  to="/register"
+                  onClick={() =>
+                    trackEvent("cta_click", "engagement", "join_community")
+                  }
+                  className="btn-primary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-3"
+                >
+                  <Sparkles className="h-6 w-6" />
+                  <span>Join Now</span>
+                </Link>
+                <Link
+                  to="/games"
+                  onClick={() =>
+                    trackEvent("cta_click", "engagement", "explore_games_final")
+                  }
+                  className="btn-secondary text-lg px-8 py-4 hover-lift inline-flex items-center space-x-3"
+                >
+                  <Trophy className="h-6 w-6" />
+                  <span>Explore Games</span>
+                </Link>
               </div>
-
-              <Link
-                to="/register"
-                onClick={() =>
-                  trackEvent("cta_click", "engagement", "create_account_cta")
-                }
-                className="btn-primary text-lg px-12 py-5 hover-lift inline-flex items-center space-x-3"
-              >
-                <Sparkles className="h-6 w-6" />
-                <span>Create Free Account</span>
-              </Link>
             </div>
           </div>
         </section>

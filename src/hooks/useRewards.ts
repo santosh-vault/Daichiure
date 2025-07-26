@@ -30,6 +30,7 @@ interface UseRewardsReturn {
   error: string | null;
   awardCoins: (activity: string, options?: any) => Promise<void>;
   redeemFairCoin: () => Promise<void>;
+  awardWeeklyFairCoin: () => Promise<void>;
   processReferral: (referralCode: string) => Promise<void>;
   refreshData: () => Promise<void>;
 }
@@ -99,6 +100,8 @@ export function useRewards(): UseRewardsReturn {
   const awardCoins = async (activity: string, options: any = {}) => {
     if (!user) return;
     
+    console.log(`🎯 awardCoins called with activity: ${activity}`);
+    
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const accessToken = session?.access_token;
@@ -112,20 +115,25 @@ export function useRewards(): UseRewardsReturn {
         throw new Error('Rewards system not available');
       }
       
+      const requestBody = {
+        user_id: user.id,
+        activity,
+        ...options
+      };
+      
+      console.log('📤 Request body:', requestBody);
+      
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(accessToken && { 'Authorization': `Bearer ${accessToken}` }),
         },
-        body: JSON.stringify({
-          user_id: user.id,
-          activity,
-          ...options
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await response.json();
+      console.log('📥 Response:', { status: response.status, data });
       
       if (response.ok) {
         // Update local state with new data
@@ -140,6 +148,7 @@ export function useRewards(): UseRewardsReturn {
         throw new Error(data.error || 'Failed to award coins');
       }
     } catch (err) {
+      console.error('❌ awardCoins error:', err);
       throw err;
     }
   };
@@ -150,6 +159,24 @@ export function useRewards(): UseRewardsReturn {
     try {
       await awardCoins('fair_coin_redeem');
     } catch (err) {
+      throw err;
+    }
+  };
+
+  const awardWeeklyFairCoin = async () => {
+    if (!user) {
+      console.error("❌ No user found for weekly fair coin award");
+      return;
+    }
+    
+    console.log("🎯 Starting awardWeeklyFairCoin...");
+    console.log("👤 User ID:", user.id);
+    
+    try {
+      await awardCoins('weekly_fair_coin');
+      console.log("✅ awardCoins('weekly_fair_coin') completed successfully");
+    } catch (err) {
+      console.error("❌ awardCoins('weekly_fair_coin') failed:", err);
       throw err;
     }
   };
@@ -209,6 +236,7 @@ export function useRewards(): UseRewardsReturn {
     error,
     awardCoins,
     redeemFairCoin,
+    awardWeeklyFairCoin,
     processReferral,
     refreshData
   };

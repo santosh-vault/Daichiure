@@ -10,7 +10,8 @@ const COIN_VALUES = {
   comment: 5,
   share: 5,
   referral: 1000,
-  fair_coin_redeem: 100
+  fair_coin_redeem: 100,
+  weekly_fair_coin: 0  // Special case: adds fair coin instead of regular coins
 };
 
 const DAILY_LIMIT = 1200;
@@ -56,7 +57,7 @@ Deno.serve(async (req) => {
     // Fetch user data
     const { data: user, error: userError } = await supabase
       .from('users')
-      .select('id, coins, fair_coins, daily_coin_earnings, last_login_date, login_streak, referral_code')
+      .select('id, coins, fair_coins, daily_coin_earnings, last_login_date, login_streak, referral_code, last_fair_coin_awarded')
       .eq('id', user_id)
       .single();
 
@@ -168,9 +169,30 @@ Deno.serve(async (req) => {
         }
         description = 'Fair coin redemption';
         break;
+
+      case 'weekly_fair_coin':
+        // Check if user has 7+ day streak and hasn't been awarded fair coin for this streak
+        if (user.login_streak < 7) {
+          return corsResponse({ error: 'Login streak less than 7 days' }, 400);
+        }
+        
+        // Check if already awarded fair coin within the last 7 days
+        if (user.last_fair_coin_awarded) {
+          const lastAwarded = new Date(user.last_fair_coin_awarded);
+          const today = new Date();
+          const diffTime = today.getTime() - lastAwarded.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays < 7) {
+            return corsResponse({ error: 'Fair coin already awarded within the last 7 days' }, 400);
+          }
+        }
+        
+        description = 'Weekly login streak fair coin reward';
+        break;
     }
 
-    // Check daily limit (referrals and fair coin redemption are exempt)
+    // Check daily limit (referrals, fair coin redemption, and weekly fair coins are exempt)
     const dailyLimited = ['login', 'game', 'comment', 'share'];
     if (dailyLimited.includes(activity)) {
       if (newDailyEarnings + coinsToAward > DAILY_LIMIT) {
@@ -194,6 +216,13 @@ Deno.serve(async (req) => {
       updateData.fair_coins = user.fair_coins - 1;
     }
 
+    if (activity === 'weekly_fair_coin') {
+      // Award fair coin instead of regular coins
+      updateData.fair_coins = user.fair_coins + 1;
+      updateData.coins = newCoinBalance; // Don't add regular coins for this activity
+      updateData.last_fair_coin_awarded = today; // Track when fair coin was awarded
+    }
+
     const { error: updateError } = await supabase
       .from('users')
       .update(updateData)
@@ -207,7 +236,7 @@ Deno.serve(async (req) => {
     await supabase.from('coin_transactions').insert({
       user_id,
       type: activity,
-      amount: coinsToAward,
+      amount: activity === 'weekly_fair_coin' ? 1 : coinsToAward, // Log fair coin as 1, regular coins as coinsToAward
       description
     });
 
@@ -220,8 +249,9 @@ Deno.serve(async (req) => {
     }
 
     return corsResponse({ 
-      coins: newCoinBalance + coinsToAward,
-      fair_coins: activity === 'fair_coin_redeem' ? user.fair_coins - 1 : user.fair_coins,
+      coins: activity === 'weekly_fair_coin' ? newCoinBalance : newCoinBalance + coinsToAward,
+      fair_coins: activity === 'fair_coin_redeem' ? user.fair_coins - 1 : 
+                  activity === 'weekly_fair_coin' ? user.fair_coins + 1 : user.fair_coins,
       daily_coin_earnings: newDailyEarnings,
       login_streak: newLoginStreak
     });

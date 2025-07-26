@@ -243,25 +243,25 @@ export const Register: React.FC = () => {
       <div className="relative h-full w-full max-w-md sm:max-w-lg bg-gray-900 sm:rounded-l-3xl shadow-2xl border-l border-gray-800 flex flex-col animate-slide-in-right overflow-y-auto">
         {/* Close button */}
         <button
-          className="absolute top-4 right-4 z-20 text-gray-400 hover:text-amber-400 bg-gray-800 rounded-full p-2 shadow-lg"
+          className="absolute top-3 right-3 z-20 text-gray-400 hover:text-amber-400 bg-gray-800 rounded-full p-1.5 shadow-lg"
           onClick={() => navigate(-1)}
           aria-label="Close"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5" />
         </button>
-        <div className="flex-1 flex flex-col justify-start sm:justify-center px-4 sm:px-6 py-8 sm:py-10">
-          <div className="text-center mb-6 sm:mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-2 drop-shadow-md">
+        <div className="flex-1 flex flex-col justify-start px-4 sm:px-6 py-4 sm:py-6">
+          <div className="text-center mb-4 sm:mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold font-['Bruno_Ace_SC'] text-amber-400 mb-1 drop-shadow-md">
               Join PlayHub
             </h2>
-            <p className="text-gray-400 text-base sm:text-lg">
+            <p className="text-gray-400 text-sm sm:text-base">
               Create your account to start playing
             </p>
           </div>
 
           {message && (
             <div
-              className={`p-3 rounded-lg mb-4 sm:mb-6 text-center text-sm sm:text-lg font-medium ${
+              className={`p-2.5 rounded-lg mb-3 sm:mb-4 text-center text-sm font-medium ${
                 message.type === "success"
                   ? "bg-green-600 text-white"
                   : "bg-red-600 text-white"
@@ -271,16 +271,16 @@ export const Register: React.FC = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>
               <label
                 htmlFor="fullName"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Full Name
               </label>
               <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <input
                   id="fullName"
                   name="fullName"
@@ -288,7 +288,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.fullName}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                  className="w-full pl-9 pr-3 py-2 sm:py-2.5 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -297,12 +297,12 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Email Address <span className="text-red-400">*</span>
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <input
                   id="email"
                   name="email"
@@ -310,7 +310,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-2.5 sm:py-3 bg-gray-800 border text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm sm:text-base ${
+                  className={`w-full pl-9 pr-3 py-2 sm:py-2.5 bg-gray-800 border text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 text-sm ${
                     emailError
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-700 focus:ring-amber-500"
@@ -318,16 +318,16 @@ export const Register: React.FC = () => {
                   placeholder="Enter your email (e.g., user@gmail.com)"
                 />
                 {emailError && (
-                  <AlertTriangle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-5 w-5" />
+                  <AlertTriangle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 h-4 w-4" />
                 )}
               </div>
               {emailError && (
-                <div className="mt-2 flex items-center gap-2 text-red-400 text-sm">
-                  <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                <div className="mt-1 flex items-center gap-2 text-red-400 text-xs">
+                  <AlertTriangle className="h-3 w-3 flex-shrink-0" />
                   <span>{emailError}</span>
                 </div>
               )}
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-1 text-xs text-gray-500">
                 Please use a permanent email address. Temporary emails are not
                 allowed.
               </div>
@@ -336,12 +336,12 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <input
                   id="password"
                   name="password"
@@ -349,7 +349,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.password}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                  className="w-full pl-9 pr-10 py-2 sm:py-2.5 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm"
                   placeholder="Create a password"
                 />
                 <button
@@ -358,17 +358,15 @@ export const Register: React.FC = () => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-amber-400 transition-colors duration-200"
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
               {/* Password requirements */}
-              <div className="mt-2 text-xs text-gray-500">
-                <div className="mb-1 text-xs sm:text-sm">
-                  Password must contain:
-                </div>
+              <div className="mt-1 text-xs text-gray-500">
+                <div className="mb-1">Password must contain:</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                   <div
                     className={`flex items-center gap-1 text-xs ${
@@ -377,7 +375,7 @@ export const Register: React.FC = () => {
                         : "text-gray-500"
                     }`}
                   >
-                    <span className="text-xs">✓</span>
+                    <span>✓</span>
                     <span>8+ characters</span>
                   </div>
                   <div
@@ -387,7 +385,7 @@ export const Register: React.FC = () => {
                         : "text-gray-500"
                     }`}
                   >
-                    <span className="text-xs">✓</span>
+                    <span>✓</span>
                     <span>Lowercase letter</span>
                   </div>
                   <div
@@ -397,7 +395,7 @@ export const Register: React.FC = () => {
                         : "text-gray-500"
                     }`}
                   >
-                    <span className="text-xs">✓</span>
+                    <span>✓</span>
                     <span>Uppercase letter</span>
                   </div>
                   <div
@@ -407,11 +405,11 @@ export const Register: React.FC = () => {
                         : "text-gray-500"
                     }`}
                   >
-                    <span className="text-xs">✓</span>
+                    <span>✓</span>
                     <span>Number</span>
                   </div>
                   <div
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 text-xs ${
                       /[!@#$%^&*()_+\-=\[\]{};':"\\|<>?,.\/`~]/.test(
                         formData.password
                       )
@@ -419,7 +417,7 @@ export const Register: React.FC = () => {
                         : "text-gray-500"
                     }`}
                   >
-                    <span className="text-xs">✓</span>
+                    <span>✓</span>
                     <span>Special character</span>
                   </div>
                 </div>
@@ -429,12 +427,12 @@ export const Register: React.FC = () => {
             <div>
               <label
                 htmlFor="confirmPassword"
-                className="block text-xs sm:text-sm font-medium text-gray-300 mb-1 sm:mb-2"
+                className="block text-sm font-medium text-gray-300 mb-1"
               >
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -442,7 +440,7 @@ export const Register: React.FC = () => {
                   required={true}
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-2.5 sm:py-3 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm sm:text-base"
+                  className="w-full pl-9 pr-10 py-2 sm:py-2.5 bg-gray-800 border border-gray-700 text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200 text-sm"
                   placeholder="Confirm your password"
                 />
                 <button
@@ -451,16 +449,16 @@ export const Register: React.FC = () => {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-amber-400 transition-colors duration-200"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-5 w-5" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </button>
               </div>
               {formData.password &&
                 formData.confirmPassword &&
                 formData.password !== formData.confirmPassword && (
-                  <p className="mt-2 text-sm text-red-500">
+                  <p className="mt-1 text-xs text-red-500">
                     Passwords do not match
                   </p>
                 )}
@@ -481,7 +479,7 @@ export const Register: React.FC = () => {
                 !formData.confirmPassword ||
                 !formData.fullName
               }
-              className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 py-2.5 sm:py-3 rounded-lg font-bold text-base sm:text-lg
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-700 text-gray-950 py-2.5 rounded-lg font-bold text-base
                          hover:shadow-[0_0_25px_rgba(255,215,0,0.7)] transition-all duration-300 ease-in-out transform hover:scale-105
                          disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:scale-100"
             >
@@ -489,8 +487,8 @@ export const Register: React.FC = () => {
             </button>
           </form>
 
-          <div className="mt-6 sm:mt-8 text-center">
-            <p className="text-gray-400 text-sm sm:text-base">
+          <div className="mt-4 sm:mt-6 text-center">
+            <p className="text-gray-400 text-sm">
               Already have an account?{" "}
               <Link
                 to="/login"

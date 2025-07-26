@@ -15,14 +15,21 @@ import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function UserDashboard() {
-  const { rewardData, loading, error, processReferral, refreshData } =
-    useRewards();
+  const {
+    rewardData,
+    loading,
+    error,
+    processReferral,
+    refreshData,
+    awardWeeklyFairCoin,
+  } = useRewards();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [isClaimingMoney, setIsClaimingMoney] = useState(false);
   const [activeSection, setActiveSection] = useState("rewards");
   const [referralCode, setReferralCode] = useState("");
   const [isApplyingReferral, setIsApplyingReferral] = useState(false);
+  const [weeklyClaimLoading, setWeeklyClaimLoading] = useState(false);
 
   // Debug logging
   console.log("🔍 UserDashboard Debug:", {
@@ -39,6 +46,128 @@ export default function UserDashboard() {
     { id: "profile", label: "Profile", icon: UserCircle },
     { id: "settings", label: "Settings", icon: SettingsIcon },
   ];
+
+  // Auto-add fair coin when weekly streak is completed
+  React.useEffect(() => {
+    if (
+      rewardData?.login_streak &&
+      rewardData.login_streak >= 7 &&
+      rewardData.login_streak % 7 === 0
+    ) {
+      // Weekly streak completed, check if we should auto-award fair coin
+      console.log(
+        `🎯 Weekly streak completed! Streak: ${rewardData.login_streak} days`
+      );
+
+      // Only auto-award once per 7-day cycle to prevent spam
+      const hasRecentWeeklyReward = localStorage.getItem(
+        `weekly_reward_${rewardData.login_streak}`
+      );
+
+      if (!hasRecentWeeklyReward) {
+        console.log("💰 Auto-awarding weekly fair coin...");
+        handleWeeklyStreakReward();
+        localStorage.setItem(
+          `weekly_reward_${rewardData.login_streak}`,
+          "true"
+        );
+      } else {
+        console.log("⏭️ Weekly reward already claimed for this streak level");
+      }
+    }
+  }, [rewardData?.login_streak]);
+
+  const handleWeeklyStreakReward = async () => {
+    try {
+      console.log("🎮 Processing weekly streak reward...");
+      console.log("📊 Current reward data:", rewardData);
+      console.log("🔑 User info:", user);
+
+      // Auto-award fair coin for weekly streak completion
+      await awardWeeklyFairCoin();
+      console.log("✅ awardWeeklyFairCoin completed successfully");
+
+      await refreshData();
+      console.log("🔄 Data refreshed");
+
+      // Show a success notification for auto-rewards
+      toast.success(
+        "🎉 Weekly streak completed! +1 Fair Coin automatically added!",
+        {
+          duration: 4000,
+          icon: "🏆",
+        }
+      );
+      console.log("✅ Weekly streak reward successfully processed!");
+    } catch (error: any) {
+      // Show errors for auto-rewards but make them less intrusive
+      console.error("❌ Auto weekly streak reward failed:", error);
+      console.error("❌ Error details:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+
+      if (error.message?.includes("already awarded")) {
+        console.log("ℹ️ Fair coin already awarded for this week");
+      } else {
+        toast.error(
+          "Failed to auto-award weekly fair coin. You can claim manually.",
+          {
+            duration: 3000,
+          }
+        );
+      }
+    }
+  };
+
+  const handleClaimWeeklyFairCoin = async () => {
+    if (!rewardData?.login_streak || rewardData.login_streak < 7) {
+      console.log("❌ Cannot claim: login streak requirement not met", {
+        loginStreak: rewardData?.login_streak,
+        required: 7,
+      });
+      return;
+    }
+
+    console.log("🎯 Starting manual weekly fair coin claim...");
+    console.log("📊 Current state:", {
+      loginStreak: rewardData.login_streak,
+      fairCoins: rewardData.fair_coins,
+      coins: rewardData.coins,
+    });
+
+    setWeeklyClaimLoading(true);
+    try {
+      // Award a fair coin for the weekly streak
+      await awardWeeklyFairCoin();
+      console.log("✅ Manual award completed");
+
+      await refreshData();
+      console.log("🔄 Data refreshed after manual claim");
+
+      toast.success(
+        "Weekly fair coin claimed successfully! +1 Fair Coin added to your balance."
+      );
+    } catch (error: any) {
+      const errorMessage = error.message || "Failed to claim weekly fair coin";
+      console.error("❌ Manual claim failed:", {
+        error: errorMessage,
+        fullError: error,
+      });
+
+      if (errorMessage.includes("already awarded")) {
+        toast.error(
+          "You've already claimed your weekly fair coin for this streak. Keep your streak going for the next reward!"
+        );
+      } else {
+        toast.error("Failed to claim weekly fair coin. Please try again.");
+      }
+      console.error("Weekly claim error:", error);
+    } finally {
+      setWeeklyClaimLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -95,26 +224,6 @@ export default function UserDashboard() {
       <div className="max-w-7xl mx-auto flex gap-6">
         {/* Main Content */}
         <div className="flex-1 space-y-8">
-          {/* Heading */}
-          <h1 className="text-3xl font-bold mb-2 text-center text-[#FFD700]">
-            User Dashboard
-          </h1>
-          <div className="text-center text-neutral-400 mb-6">
-            Welcome, {user?.email?.split("@")[0] || "User"}!
-          </div>
-
-          {/* Breadcrumbs */}
-          <div className="flex items-center text-sm text-neutral-400 mb-6">
-            <button
-              onClick={() => navigate("/")}
-              className="hover:text-amber-400 transition-colors"
-            >
-              Home
-            </button>
-            <span className="mx-2">/</span>
-            <span className="text-amber-400">Dashboard</span>
-          </div>
-
           {/* Mobile Section Navigation */}
           <div className="lg:hidden bg-neutral-900 rounded-xl p-4 mb-6 shadow-lg">
             <h3 className="text-lg font-semibold mb-3 text-amber-400">
@@ -173,7 +282,7 @@ export default function UserDashboard() {
               </div>
             ) : rewardData ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                   <StatCard
                     label="Coins"
                     value={rewardData.coins ?? 0}
@@ -189,48 +298,66 @@ export default function UserDashboard() {
                     value={rewardData.login_streak ?? 0}
                     icon={<BarChart2 className="text-[#FFD700]" />}
                   />
+                  <StatCard
+                    label="Total Value"
+                    value={`$${((rewardData.coins / 1000000) * 9).toFixed(2)}`}
+                    icon={<DollarSign className="text-[#FFD700]" />}
+                  />
                 </div>
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1">
-                    <span>Daily Progress</span>
-                    <span>
-                      {Math.round((rewardData.daily_progress ?? 0) * 100)}%
+
+                {/* Weekly Fair Coin Claim Section */}
+                <div className="mb-4 p-4 bg-neutral-800 rounded-lg border border-amber-400/20">
+                  <h3 className="text-lg font-semibold mb-3 text-[#FFD700] flex items-center gap-2">
+                    <Gift size={20} /> Weekly Streak Reward
+                  </h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-neutral-300">Current Streak:</span>
+                    <span className="text-[#FFD700] font-bold">
+                      {rewardData?.login_streak ?? 0} days
                     </span>
                   </div>
-                  <div className="w-full h-3 bg-neutral-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-3 bg-[#FFD700] rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.round(
-                          (rewardData.daily_progress ?? 0) * 100
-                        )}%`,
-                      }}
-                    />
+                  <div className="mb-3">
+                    <div className="flex justify-between text-sm text-neutral-400 mb-2">
+                      <span>Progress to next Fair Coin:</span>
+                      <span className="text-[#FFD700]">
+                        {(rewardData?.login_streak ?? 0) % 7} / 7 days
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-neutral-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full transition-all duration-300"
+                        style={{
+                          width: `${
+                            (((rewardData?.login_streak ?? 0) % 7) / 7) * 100
+                          }%`,
+                        }}
+                      />
+                    </div>
                   </div>
-                </div>
-                <div className="mb-4">
-                  <div className="flex justify-between mb-1">
-                    <span>Weekly Streak</span>
-                    <span>
-                      {Math.round((rewardData.weekly_progress ?? 0) * 100)}%
-                    </span>
-                  </div>
-                  <div className="w-full h-3 bg-neutral-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-3 bg-[#FFD700] rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.round(
-                          (rewardData.weekly_progress ?? 0) * 100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="mb-4">
-                  Total Value:{" "}
-                  <span className="text-[#FFD700]">
-                    NPR {rewardData.total_value_npr?.toFixed(2)}
-                  </span>
+                  {rewardData?.login_streak && rewardData.login_streak >= 7 ? (
+                    <button
+                      onClick={handleClaimWeeklyFairCoin}
+                      disabled={weeklyClaimLoading}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {weeklyClaimLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Gift size={18} />
+                          Claim Weekly Fair Coin
+                        </>
+                      )}
+                    </button>
+                  ) : (
+                    <div className="w-full px-4 py-3 rounded-lg bg-neutral-700 text-neutral-400 text-center text-sm">
+                      {7 - ((rewardData?.login_streak ?? 0) % 7)} more days to
+                      earn a Fair Coin
+                    </div>
+                  )}
                 </div>
                 <div className="mb-4">
                   Daily Remaining:{" "}
@@ -287,7 +414,10 @@ export default function UserDashboard() {
                       ) : (
                         <>
                           <DollarSign size={18} />
-                          Claim NPR {(rewardData.coins * 0.001).toFixed(2)} Now!
+                          Claim ${((rewardData.coins / 1000000) * 9).toFixed(
+                            2
+                          )}{" "}
+                          USD Now!
                         </>
                       )}
                     </button>
@@ -540,7 +670,7 @@ function StatCard({
   icon,
 }: {
   label: string;
-  value: number;
+  value: number | string;
   icon: React.ReactNode;
 }) {
   return (
