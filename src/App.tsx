@@ -25,7 +25,7 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
 import Contact from "./pages/Contact";
-import UserDashboard from "./pages/UserDashboard";
+import UserDashboard from "./pages/Dashboard/UserDashboard";
 import { AddEditArticle } from "./pages/Dashboard/AddEditArticle";
 import { AdminRouteGuard } from "./components/AdminRouteGuard";
 import { supabase } from "./lib/supabase";

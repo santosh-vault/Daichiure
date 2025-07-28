@@ -1,3 +1,49 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom utilities for enhanced dashboard */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Opera */
+  }
+  
+  .glassmorphism {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  
+  .animation-delay-150 {
+    animation-delay: 150ms;
+  }
+  
+  .animation-delay-300 {
+    animation-delay: 300ms;
+  }
+  
+  .animation-delay-700 {
+    animation-delay: 700ms;
+  }
+  
+  /* Custom gradient text */
+  .gradient-text {
+    background: linear-gradient(to right, #f59e0b, #eab308);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Custom shadow effects */
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+  }
+  
+  .shadow-glow-hover:hover {
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.25);
+  }
+}

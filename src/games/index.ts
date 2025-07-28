@@ -23,6 +23,10 @@ import GameMonetize77B5MBMQ from './GameMonetize77B5MBMQ';
 import GameMonetizeRC0APTUU from './GameMonetizeRC0APTUU';
 import GameMonetizeQKQLHH9C from './GameMonetizeQKQLHH9C';
 import GameMonetize9PTV2PBY from './GameMonetize9PTV2PBY';
+import GameMonetizeC34ZURVG from './GameMonetizeC34ZURVG';
+import GameMonetizeWKOKJ30H from './GameMonetizeWKOKJ30H';
+import GameMonetizeD393RQDF from './GameMonetizeD393RQDF';
+import GameMonetizeWR4S1BKZ from './GameMonetizeWR4S1BKZ';
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
   'freefire': FreeFireGame,
@@ -48,6 +52,10 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'rc0aptuu': GameMonetizeRC0APTUU,
   'qkqlhh9c': GameMonetizeQKQLHH9C,
   '9ptv2pby': GameMonetize9PTV2PBY,
+  'c34zurvg': GameMonetizeC34ZURVG,
+  'wkokj30h': GameMonetizeWKOKJ30H,
+  'd393rqdf': GameMonetizeD393RQDF,
+  'wr4s1bkz': GameMonetizeWR4S1BKZ,
 };
 
-export { Fighter, Shooter, Football, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno }; 
+export { Fighter, Shooter, Football, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno, GameMonetizeC34ZURVG, GameMonetizeWKOKJ30H, GameMonetizeD393RQDF, GameMonetizeWR4S1BKZ }; 

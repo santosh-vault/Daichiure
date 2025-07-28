@@ -13,8 +13,10 @@ import {
   Loader2,
   Calendar,
   Target,
+  Star,
   Zap,
   BookOpen,
+  Gamepad2,
   Edit2,
   Save,
   X,
@@ -191,15 +193,15 @@ const UserDashboard: React.FC = () => {
   if (!user) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 flex items-center justify-center"
+        className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center"
         style={fontStyle}
       >
         <div className="text-center">
           <div className="relative">
-            <div className="animate-spin rounded-full h-20 w-20 border-4 border-amber-200 border-t-transparent mx-auto"></div>
-            <div className="absolute inset-0 rounded-full h-20 w-20 border-4 border-amber-400 border-r-transparent mx-auto animate-spin animation-delay-150"></div>
+            <div className="animate-spin rounded-full h-20 w-20 border-4 border-purple-200 border-t-transparent mx-auto"></div>
+            <div className="absolute inset-0 rounded-full h-20 w-20 border-4 border-purple-400 border-r-transparent mx-auto animate-spin animation-delay-150"></div>
           </div>
-          <p className="mt-6 text-amber-200 text-lg font-medium">
+          <p className="mt-6 text-purple-200 text-lg font-medium">
             Loading your dashboard...
           </p>
         </div>
@@ -216,29 +218,29 @@ const UserDashboard: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 relative overflow-hidden"
+      className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden"
       style={fontStyle}
     >
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-br from-amber-400/15 via-yellow-400/8 to-orange-400/8 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-gradient-to-bl from-yellow-400/12 via-amber-400/8 to-orange-400/6 rounded-full blur-3xl animate-pulse animation-delay-300" />
-        <div className="absolute -bottom-40 left-1/3 w-72 h-72 bg-gradient-to-tr from-orange-400/10 via-amber-400/6 to-yellow-400/8 rounded-full blur-3xl animate-pulse animation-delay-700" />
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-br from-purple-400/20 via-pink-400/10 to-blue-400/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-40 w-96 h-96 bg-gradient-to-bl from-blue-400/15 via-purple-400/10 to-green-400/10 rounded-full blur-3xl animate-pulse animation-delay-300" />
+        <div className="absolute -bottom-40 left-1/3 w-72 h-72 bg-gradient-to-tr from-green-400/15 via-purple-400/10 to-yellow-400/10 rounded-full blur-3xl animate-pulse animation-delay-700" />
       </div>
 
       {/* Mobile header */}
-      <div className="lg:hidden sticky top-0 bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/50 z-50 px-4 py-4">
+      <div className="lg:hidden sticky top-0 bg-slate-900/95 backdrop-blur-xl border-b border-slate-700/50 z-50 px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center">
-              <Trophy size={18} className="text-black" />
+            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+              <Trophy size={18} className="text-white" />
             </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               Dashboard
             </h1>
           </div>
           <button
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={handleSignOut}
           >
             <LogOut size={16} />
@@ -247,20 +249,32 @@ const UserDashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* Desktop logout button */}
+      <div className="hidden lg:block fixed top-6 right-6 z-50">
+        <button
+          className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white font-semibold shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105 border border-purple-400/20"
+          onClick={handleSignOut}
+        >
+          <LogOut size={20} />
+          <span>Logout</span>
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-purple-400/20 to-pink-400/20 blur opacity-50"></div>
+        </button>
+      </div>
+
       <div className="flex flex-col lg:flex-row min-h-screen relative z-10">
         {/* Sidebar */}
-        <aside className="lg:w-80 w-full lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:ml-8">
+        <aside className="lg:w-80 w-full lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
           <div className="p-4 lg:p-6">
             {/* Desktop sidebar */}
-            <nav className="hidden lg:block bg-gradient-to-br from-gray-800/90 via-gray-900/90 to-black/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-700/50 p-6">
+            <nav className="hidden lg:block bg-gradient-to-br from-slate-800/90 via-slate-900/90 to-purple-900/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-6">
               <div className="mb-8 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-2xl mb-4 shadow-lg">
-                  <Sparkles size={28} className="text-black" />
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl mb-4 shadow-lg">
+                  <Sparkles size={28} className="text-white" />
                 </div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent mb-2">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
                   Dashboard
                 </h2>
-                <p className="text-gray-400 text-sm">
+                <p className="text-slate-400 text-sm">
                   Manage your rewards & progress
                 </p>
               </div>
@@ -270,8 +284,8 @@ const UserDashboard: React.FC = () => {
                     key={section.id}
                     className={`group flex items-center gap-4 px-6 py-4 w-full text-left font-medium text-base rounded-2xl transition-all duration-300 ${
                       activeSection === section.id
-                        ? "bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 shadow-lg border border-amber-500/30"
-                        : "text-gray-300 hover:text-amber-300 hover:bg-gray-800/50 border border-transparent hover:border-amber-500/20"
+                        ? "bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 shadow-lg border border-purple-500/30"
+                        : "text-slate-300 hover:text-purple-300 hover:bg-slate-800/50 border border-transparent hover:border-purple-500/20"
                     }`}
                     onClick={() => setActiveSection(section.id)}
                   >
@@ -280,36 +294,23 @@ const UserDashboard: React.FC = () => {
                     </span>
                     <span>{section.label}</span>
                     {activeSection === section.id && (
-                      <div className="ml-auto w-2 h-2 bg-gradient-to-r from-amber-400 to-yellow-400 rounded-full"></div>
+                      <div className="ml-auto w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"></div>
                     )}
                   </button>
                 ))}
               </div>
-
-              {/* Logout Button */}
-              <div className="mt-8 pt-6 border-t border-gray-700/50">
-                <button
-                  className="group flex items-center gap-4 px-6 py-4 w-full text-left font-medium text-base rounded-2xl transition-all duration-300 text-red-300 hover:text-red-200 hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
-                  onClick={handleSignOut}
-                >
-                  <span className="text-xl group-hover:scale-110 transition-transform duration-200">
-                    <LogOut className="w-5 h-5" />
-                  </span>
-                  <span>Logout</span>
-                </button>
-              </div>
             </nav>
 
             {/* Mobile horizontal scroll navigation */}
-            <nav className="lg:hidden bg-gradient-to-r from-gray-800/95 via-gray-900/95 to-black/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-700/50 p-3">
+            <nav className="lg:hidden bg-gradient-to-r from-slate-800/95 via-slate-900/95 to-purple-900/95 backdrop-blur-xl rounded-2xl shadow-xl border border-slate-700/50 p-3">
               <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
                 {SECTIONS.map((section) => (
                   <button
                     key={section.id}
                     className={`flex flex-col items-center gap-2 px-4 py-3 min-w-[80px] font-medium text-xs rounded-xl transition-all duration-200 whitespace-nowrap ${
                       activeSection === section.id
-                        ? "bg-gradient-to-b from-amber-500/20 to-yellow-500/20 text-amber-300 shadow-lg border border-amber-500/30"
-                        : "text-gray-300 hover:text-amber-300 hover:bg-gray-800/50"
+                        ? "bg-gradient-to-b from-purple-500/20 to-pink-500/20 text-purple-300 shadow-lg border border-purple-500/30"
+                        : "text-slate-300 hover:text-purple-300 hover:bg-slate-800/50"
                     }`}
                     onClick={() => setActiveSection(section.id)}
                   >
@@ -327,24 +328,24 @@ const UserDashboard: React.FC = () => {
           <div className="max-w-7xl mx-auto space-y-6">
             {/* Profile Section */}
             {activeSection === "profile" && (
-              <section className="relative bg-gradient-to-br from-gray-800/80 via-gray-900/80 to-black/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-2xl border border-gray-700/50 overflow-hidden">
+              <section className="relative bg-gradient-to-br from-slate-800/80 via-slate-900/80 to-purple-900/80 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-2xl border border-slate-700/50 overflow-hidden">
                 {/* Decorative background elements */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-amber-500/20 via-yellow-500/10 to-orange-500/10 rounded-full blur-2xl" />
-                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-orange-500/15 via-amber-500/10 to-yellow-500/10 rounded-full blur-2xl" />
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-purple-500/20 via-pink-500/10 to-blue-500/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-tr from-blue-500/15 via-purple-500/10 to-green-500/10 rounded-full blur-2xl" />
 
                 <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                   {/* Avatar section */}
                   <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
                     <div className="relative mb-6">
-                      <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-amber-500/30 via-yellow-500/20 to-orange-500/30 blur-lg"></div>
-                      <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-gradient-to-r from-amber-500 to-yellow-500 shadow-2xl">
+                      <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-purple-500/30 via-pink-500/20 to-blue-500/30 blur-lg"></div>
+                      <div className="relative w-32 h-32 lg:w-40 lg:h-40 rounded-full overflow-hidden border-4 border-gradient-to-r from-purple-500 to-pink-500 shadow-2xl">
                         <img
                           src={avatarUrl}
                           alt="avatar"
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-4 border-gray-900 flex items-center justify-center">
+                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full border-4 border-slate-900 flex items-center justify-center">
                         <div className="w-3 h-3 bg-white rounded-full"></div>
                       </div>
                     </div>
@@ -358,7 +359,7 @@ const UserDashboard: React.FC = () => {
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="flex-1 px-4 py-3 rounded-xl bg-gray-800/80 text-white border border-gray-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 outline-none transition"
+                            className="flex-1 px-4 py-3 rounded-xl bg-slate-800/80 text-white border border-slate-600 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 outline-none transition"
                             disabled={nameLoading}
                             placeholder="Enter your name"
                           />
@@ -372,19 +373,19 @@ const UserDashboard: React.FC = () => {
                           <button
                             onClick={handleCancelEditName}
                             disabled={nameLoading}
-                            className="px-4 py-3 rounded-xl bg-gray-700 text-white hover:bg-gray-600 transition"
+                            className="px-4 py-3 rounded-xl bg-slate-700 text-white hover:bg-slate-600 transition"
                           >
                             <X className="w-5 h-5" />
                           </button>
                         </div>
                       ) : (
                         <div className="flex items-center gap-3 mb-4">
-                          <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                          <h1 className="text-2xl lg:text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                             {name || "Welcome User"}
                           </h1>
                           <button
                             onClick={handleEditName}
-                            className="p-2 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 text-black hover:shadow-lg transition-all duration-200 hover:scale-105"
+                            className="p-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg transition-all duration-200 hover:scale-105"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -395,9 +396,9 @@ const UserDashboard: React.FC = () => {
 
                   {/* User info */}
                   <div className="space-y-4">
-                    <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
-                      <div className="flex items-center gap-3 text-gray-300 mb-2">
-                        <User className="w-5 h-5 text-amber-400" />
+                    <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
+                      <div className="flex items-center gap-3 text-slate-300 mb-2">
+                        <User className="w-5 h-5 text-purple-400" />
                         <span className="font-medium">Email</span>
                       </div>
                       <p className="text-white font-mono text-sm break-all">
@@ -405,17 +406,17 @@ const UserDashboard: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
-                      <div className="flex items-center gap-3 text-gray-300 mb-2">
-                        <Calendar className="w-5 h-5 text-amber-400" />
+                    <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
+                      <div className="flex items-center gap-3 text-slate-300 mb-2">
+                        <Calendar className="w-5 h-5 text-purple-400" />
                         <span className="font-medium">Member Since</span>
                       </div>
                       <p className="text-white">{joinDate}</p>
                     </div>
 
-                    <div className="bg-gray-800/50 rounded-2xl p-4 border border-gray-700/50">
-                      <div className="flex items-center gap-3 text-gray-300 mb-2">
-                        <Target className="w-5 h-5 text-amber-400" />
+                    <div className="bg-slate-800/50 rounded-2xl p-4 border border-slate-700/50">
+                      <div className="flex items-center gap-3 text-slate-300 mb-2">
+                        <Target className="w-5 h-5 text-purple-400" />
                         <span className="font-medium">User ID</span>
                       </div>
                       <p className="text-white font-mono text-xs break-all">
@@ -471,26 +472,26 @@ const UserDashboard: React.FC = () => {
 
                 {/* Detailed Stats */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                  <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
                     <h3 className="text-xl font-semibold text-yellow-400 mb-4 flex items-center gap-2">
                       <TrendingUp className="w-5 h-5" />
                       Daily Statistics
                     </h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Earnings Today</span>
+                        <span className="text-slate-300">Earnings Today</span>
                         <span className="font-bold text-yellow-400">
                           {rewardData?.daily_coin_earnings ?? 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Daily Limit</span>
+                        <span className="text-slate-300">Daily Limit</span>
                         <span className="font-bold text-blue-400">
                           {rewardData?.daily_limit ?? 0}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Remaining</span>
+                        <span className="text-slate-300">Remaining</span>
                         <span className="font-bold text-green-400">
                           {rewardData?.daily_remaining ?? 0}
                         </span>
@@ -498,20 +499,20 @@ const UserDashboard: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
-                    <h3 className="text-xl font-semibold text-amber-400 mb-4 flex items-center gap-2">
+                  <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+                    <h3 className="text-xl font-semibold text-purple-400 mb-4 flex items-center gap-2">
                       <Award className="w-5 h-5" />
                       Streak Progress
                     </h3>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Login Streak</span>
-                        <span className="font-bold text-amber-400">
+                        <span className="text-slate-300">Login Streak</span>
+                        <span className="font-bold text-purple-400">
                           {rewardData?.login_streak ?? 0} days
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-300">Next Fair Coin</span>
+                        <span className="text-slate-300">Next Fair Coin</span>
                         <span className="font-bold text-blue-400">
                           {rewardData?.days_to_next_fair_coin ?? 0} days
                         </span>
@@ -563,7 +564,7 @@ const UserDashboard: React.FC = () => {
                 </div>
 
                 {/* Fair Coin Redemption */}
-                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
                   <h3 className="text-xl font-semibold text-blue-400 mb-4 flex items-center gap-2">
                     <Gift className="w-5 h-5" />
                     Fair Coin Management
@@ -572,7 +573,7 @@ const UserDashboard: React.FC = () => {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-300">
+                        <span className="text-slate-300">
                           Available Fair Coins
                         </span>
                         <span className="text-2xl font-bold text-blue-400">
@@ -584,7 +585,7 @@ const UserDashboard: React.FC = () => {
                         className={`w-full px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
                           rewardData?.fair_coins && rewardData.fair_coins > 0
                             ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:shadow-lg hover:scale-105"
-                            : "bg-gray-700 text-gray-400 cursor-not-allowed"
+                            : "bg-slate-700 text-slate-400 cursor-not-allowed"
                         }`}
                         onClick={handleRedeemFairCoin}
                         disabled={
@@ -603,15 +604,15 @@ const UserDashboard: React.FC = () => {
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-gray-300">Weekly Progress</span>
-                        <span className="text-sm font-medium text-amber-400">
+                        <span className="text-slate-300">Weekly Progress</span>
+                        <span className="text-sm font-medium text-purple-400">
                           {rewardData?.login_streak ?? 0} / 7 days
                         </span>
                       </div>
 
-                      <div className="w-full bg-gray-700 rounded-full h-3">
+                      <div className="w-full bg-slate-700 rounded-full h-3">
                         <div
-                          className="bg-gradient-to-r from-amber-500 to-yellow-500 h-3 rounded-full transition-all duration-500"
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full transition-all duration-500"
                           style={{
                             width: `${Math.min(
                               100,
@@ -626,7 +627,7 @@ const UserDashboard: React.FC = () => {
                           rewardData?.login_streak &&
                           rewardData.login_streak >= 7
                             ? "bg-green-500/20 text-green-400 border border-green-500/30"
-                            : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                            : "bg-purple-500/20 text-purple-400 border border-purple-500/30"
                         }`}
                       >
                         {rewardData?.login_streak &&
@@ -646,29 +647,29 @@ const UserDashboard: React.FC = () => {
             {activeSection === "referrals" && (
               <section className="space-y-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-xl flex items-center justify-center">
-                    <Users className="w-6 h-6 text-black" />
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                    <Users className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-400 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                     Referral Program
                   </h2>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
-                  <h3 className="text-xl font-semibold text-amber-400 mb-6">
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+                  <h3 className="text-xl font-semibold text-purple-400 mb-6">
                     Your Referral Code
                   </h3>
 
                   <div className="flex flex-col md:flex-row gap-4 mb-6">
                     <div className="flex-1">
-                      <div className="bg-gray-900/80 rounded-xl p-4 border border-gray-600">
+                      <div className="bg-slate-900/80 rounded-xl p-4 border border-slate-600">
                         <div className="flex items-center justify-between">
-                          <span className="text-2xl font-mono font-bold text-amber-400">
+                          <span className="text-2xl font-mono font-bold text-purple-400">
                             {rewardData?.referral_code || "Loading..."}
                           </span>
                           <button
                             onClick={handleCopyReferral}
-                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 text-black hover:bg-amber-600 transition"
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
                           >
                             <Copy className="w-4 h-4" />
                             {copied ? "Copied!" : "Copy"}
@@ -679,7 +680,7 @@ const UserDashboard: React.FC = () => {
                   </div>
 
                   <form onSubmit={handleProcessReferral} className="space-y-4">
-                    <h4 className="text-lg font-semibold text-gray-300">
+                    <h4 className="text-lg font-semibold text-slate-300">
                       Enter a Referral Code
                     </h4>
                     <div className="flex gap-3">
@@ -688,12 +689,12 @@ const UserDashboard: React.FC = () => {
                         value={referralInput}
                         onChange={(e) => setReferralInput(e.target.value)}
                         placeholder="Enter referral code"
-                        className="flex-1 px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-600 focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 outline-none transition"
+                        className="flex-1 px-4 py-3 rounded-xl bg-slate-800 text-white border border-slate-600 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 outline-none transition"
                         disabled={referralLoading}
                       />
                       <button
                         type="submit"
-                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105 disabled:opacity-50"
+                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105 disabled:opacity-50"
                         disabled={referralLoading}
                       >
                         {referralLoading ? (
@@ -720,10 +721,10 @@ const UserDashboard: React.FC = () => {
                   </h2>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
                   {rewardsLoading ? (
                     <div className="flex justify-center items-center py-12">
-                      <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
+                      <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
                     </div>
                   ) : rewardData?.transactions &&
                     rewardData.transactions.length > 0 ? (
@@ -731,7 +732,7 @@ const UserDashboard: React.FC = () => {
                       {rewardData.transactions.slice(0, 10).map((tx, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-4 bg-gray-800/50 rounded-xl border border-gray-700/30 hover:bg-gray-700/50 transition"
+                          className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/30 hover:bg-slate-700/50 transition"
                         >
                           <div className="flex items-center gap-4">
                             <div
@@ -751,7 +752,7 @@ const UserDashboard: React.FC = () => {
                               <p className="text-white font-medium">
                                 {tx.description}
                               </p>
-                              <p className="text-gray-400 text-sm">
+                              <p className="text-slate-400 text-sm">
                                 {new Date(tx.created_at).toLocaleDateString()}
                               </p>
                             </div>
@@ -769,11 +770,11 @@ const UserDashboard: React.FC = () => {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <BookOpen className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                      <p className="text-gray-300 text-lg">
+                      <BookOpen className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                      <p className="text-slate-300 text-lg">
                         No transactions yet
                       </p>
-                      <p className="text-gray-500">
+                      <p className="text-slate-500">
                         Start earning coins to see your transaction history!
                       </p>
                     </div>
@@ -786,21 +787,21 @@ const UserDashboard: React.FC = () => {
             {activeSection === "settings" && (
               <section className="space-y-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-gradient-to-r from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-r from-gray-500 to-slate-500 rounded-xl flex items-center justify-center">
                     <SettingsIcon className="w-6 h-6 text-white" />
                   </div>
-                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-400 to-gray-300 bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-400 to-slate-400 bg-clip-text text-transparent">
                     Settings
                   </h2>
                 </div>
 
-                <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+                <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
                   <div className="text-center py-12">
-                    <SettingsIcon className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                    <p className="text-gray-300 text-lg">
+                    <SettingsIcon className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                    <p className="text-slate-300 text-lg">
                       Settings Coming Soon
                     </p>
-                    <p className="text-gray-500">
+                    <p className="text-slate-500">
                       We're working on adding more customization options!
                     </p>
                   </div>
@@ -817,6 +818,7 @@ const UserDashboard: React.FC = () => {
 // Helper: gravatar md5 function
 function md5(str: string) {
   // Simple JS implementation for gravatar hash
+  var xl;
   var rotateLeft = function (lValue: number, iShiftBits: number) {
     return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));
   };
@@ -1064,14 +1066,14 @@ function StatCard({
 }) {
   return (
     <div
-      className={`relative bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50 overflow-hidden group hover:scale-105 transition-all duration-300`}
+      className={`relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 overflow-hidden group hover:scale-105 transition-all duration-300`}
     >
       <div
         className={`absolute inset-0 bg-gradient-to-br ${bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
       ></div>
       <div className="relative flex items-center justify-between">
         <div>
-          <p className="text-gray-400 text-sm font-medium mb-1">{label}</p>
+          <p className="text-slate-400 text-sm font-medium mb-1">{label}</p>
           <p className="text-2xl font-bold text-white">{value}</p>
         </div>
         <div className={`p-3 rounded-xl bg-gradient-to-r ${color}`}>{icon}</div>
@@ -1099,26 +1101,26 @@ function ProgressCard({
   const percentage = Math.min(100, (value / maxValue) * 100);
 
   return (
-    <div className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-xl rounded-2xl p-6 border border-gray-700/50">
+    <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-200">{title}</h3>
+        <h3 className="text-lg font-semibold text-slate-200">{title}</h3>
         <div className={`p-2 rounded-lg bg-gradient-to-r ${color}`}>{icon}</div>
       </div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-white">{value}</span>
-          <span className="text-gray-400 text-sm">{unit}</span>
+          <span className="text-slate-400 text-sm">{unit}</span>
         </div>
 
-        <div className="w-full bg-gray-700 rounded-full h-2">
+        <div className="w-full bg-slate-700 rounded-full h-2">
           <div
             className={`bg-gradient-to-r ${color} h-2 rounded-full transition-all duration-500`}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
 
-        <div className="flex justify-between text-sm text-gray-400">
+        <div className="flex justify-between text-sm text-slate-400">
           <span>Progress</span>
           <span>{percentage.toFixed(1)}%</span>
         </div>

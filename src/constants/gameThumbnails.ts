@@ -23,4 +23,8 @@ export const gameThumbnails: Record<string, string> = {
   'rc0aptuu': 'https://img.gamemonetize.com/rc0aptuuleju6xnlpeds38lisqpz1hzu/512x384.jpg',
   'qkqlhh9c': 'https://img.gamemonetize.com/qkqlhh9cdmommm6c3ilugfwfk4k1kal1/512x384.jpg',
   '9ptv2pby': 'https://img.gamemonetize.com/9ptv2pbyrhiv9e9jlcj91vj9cwdwd3mw/512x384.jpg',
+  'c34zurvg': 'https://img.gamemonetize.com/c34zurvgw1w01fkf4n07idbggc6vvkbq/512x384.jpg',
+  'wkokj30h': 'https://img.gamemonetize.com/wkokj30hsjf5iwczg486ovsv1w8tc6xc/512x384.jpg',
+  'd393rqdf': 'https://img.gamemonetize.com/d393rqdfe4h6h9zk25nzv2459pnqeelq/512x384.jpg',
+  'wr4s1bkz': 'https://img.gamemonetize.com/wr4s1bkz7u57su3t7he5rs9otce1o6ft/512x384.jpg',
 };
