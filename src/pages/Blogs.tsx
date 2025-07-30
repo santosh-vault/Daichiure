@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { Link } from "react-router-dom";
+import AdSense from "../components/AdSense";
 
 // Using Inter font for a modern and readable look
 const fontStyle = { fontFamily: '"Inter", sans-serif' };
@@ -70,6 +71,16 @@ const Blogs: React.FC = () => {
         </div>
       ) : (
         <>
+          {/* AdSense Banner */}
+          <div className="max-w-7xl mx-auto mb-12 sm:mb-16 flex justify-center">
+            <AdSense
+              adSlot="1234567890"
+              adFormat="auto"
+              style={{ minHeight: "250px" }}
+              className="max-w-4xl w-full"
+            />
+          </div>
+
           {/* Top Section: Featured + 2 Highlights */}
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-12 sm:mb-16">
             {/* Featured Article (Big Card, 2/3 width) */}

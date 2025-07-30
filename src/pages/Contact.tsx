@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet-async";
-import { Mail, Clock, MessageCircle, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Clock, MessageCircle, Send } from "lucide-react";
+import AdSense from "../components/AdSense";
 
 const Contact: React.FC = () => {
   const [form, setForm] = useState({
@@ -65,6 +66,16 @@ const Contact: React.FC = () => {
               Our dedicated support team is ready to assist you with any
               inquiries.
             </p>
+          </div>
+
+          {/* AdSense Banner */}
+          <div className="my-12 flex justify-center">
+            <AdSense
+              adSlot="1234567890"
+              adFormat="auto"
+              style={{ minHeight: "250px" }}
+              className="max-w-4xl w-full"
+            />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8 mb-12">

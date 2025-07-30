@@ -5,6 +5,7 @@ import { supabase } from "../../lib/supabase";
 import { useCallback } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { User } from "@supabase/supabase-js";
+import AdSense from "../../components/AdSense";
 
 // Consider using Google Fonts for a wider range of modern and appealing typefaces.
 // For example, you could import 'Inter' or 'Montserrat' for a clean, professional look.
@@ -282,6 +283,16 @@ const BlogDetail: React.FC = () => {
                     {line}
                   </p>
                 ))}
+              </div>
+
+              {/* AdSense Banner */}
+              <div className="my-8">
+                <AdSense
+                  adSlot="1234567890"
+                  adFormat="auto"
+                  style={{ minHeight: "250px" }}
+                  className="w-full"
+                />
               </div>
 
               {/* Comments Section */}

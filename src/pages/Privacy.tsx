@@ -1,5 +1,6 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
+import AdSense from "../components/AdSense";
 
 const Privacy: React.FC = () => (
   <>
@@ -23,6 +24,16 @@ const Privacy: React.FC = () => (
             <br />
             <strong>Effective Date:</strong> July 30, 2025
           </p>
+        </div>
+
+        {/* AdSense Banner */}
+        <div className="mb-8 flex justify-center">
+          <AdSense
+            adSlot="1234567890"
+            adFormat="auto"
+            style={{ minHeight: "250px" }}
+            className="max-w-4xl w-full"
+          />
         </div>
 
         <div className="space-y-8">

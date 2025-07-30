@@ -1,6 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 import { Gamepad2, Shield, Trophy, Users, Zap, Target } from "lucide-react";
+import AdSense from "../components/AdSense";
 
 const About: React.FC = () => (
   <>
@@ -67,6 +68,16 @@ const About: React.FC = () => (
               thrive.
             </p>
           </div>
+        </div>
+
+        {/* AdSense Banner */}
+        <div className="my-12 flex justify-center">
+          <AdSense
+            adSlot="1234567890"
+            adFormat="auto"
+            style={{ minHeight: "250px" }}
+            className="max-w-4xl w-full"
+          />
         </div>
 
         <div className="mb-16">

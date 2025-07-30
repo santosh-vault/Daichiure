@@ -17,6 +17,7 @@ import { PremiumGameGate } from "../components/PremiumGameGate";
 import { Helmet } from "react-helmet-async";
 import { useGoogleAnalytics } from "../hooks/useGoogleAnalytics";
 import FullscreenSuggestDialog from "../components/FullscreenSuggestDialog";
+import AdSense from "../components/AdSense";
 
 interface GameData {
   id: number;
@@ -471,17 +472,58 @@ const GameContent: React.FC<GameContentProps> = ({
             className={`${
               isFullscreen
                 ? "w-full h-full flex items-center justify-center"
-                : "w-full h-full"
+                : "w-full h-full max-w-full max-h-full"
             }`}
           >
             <div
               className={`${
                 isFullscreen
                   ? "max-w-[100vw] max-h-[100vh] w-full h-full"
-                  : "w-full h-full"
-              } flex items-center justify-center`}
+                  : "w-full h-full max-w-full max-h-full overflow-hidden"
+              } flex items-center justify-center relative`}
+              style={{
+                maxWidth: isFullscreen ? "100vw" : "100%",
+                maxHeight: isFullscreen ? "100vh" : "100%",
+              }}
             >
-              <GameComponent />
+              {/* Game canvas responsive container */}
+              <div
+                className="responsive-game-container w-full h-full flex items-center justify-center"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                }}
+              >
+                <style
+                  dangerouslySetInnerHTML={{
+                    __html: `
+                    .responsive-game-container canvas {
+                      max-width: 100% !important;
+                      max-height: 100% !important;
+                      width: auto !important;
+                      height: auto !important;
+                      object-fit: contain !important;
+                      display: block !important;
+                    }
+                    
+                    @media (max-width: 768px) {
+                      .responsive-game-container canvas {
+                        max-width: calc(100vw - 2rem) !important;
+                        max-height: calc(100vh - 10rem) !important;
+                      }
+                    }
+                    
+                    @media (max-width: 480px) {
+                      .responsive-game-container canvas {
+                        max-width: calc(100vw - 1rem) !important;
+                        max-height: calc(100vh - 8rem) !important;
+                      }
+                    }
+                  `,
+                  }}
+                />
+                <GameComponent />
+              </div>
             </div>
           </div>
         </div>
@@ -617,9 +659,15 @@ const GameContent: React.FC<GameContentProps> = ({
                   ${
                     isFullscreen
                       ? "h-full w-full bg-black flex items-center justify-center"
-                      : "bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl aspect-video"
+                      : "bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl w-full" +
+                        " aspect-video max-w-full" +
+                        " sm:aspect-video md:aspect-video lg:aspect-video" +
+                        " min-h-[200px] sm:min-h-[300px] md:min-h-[400px]"
                   }
                 `}
+                style={{
+                  maxHeight: isFullscreen ? "100vh" : "calc(100vh - 8rem)",
+                }}
               >
                 {/* Fullscreen Toggle Button */}
                 <button
@@ -680,6 +728,16 @@ const GameContent: React.FC<GameContentProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* AdSense Banner */}
+            <div className="xl:col-span-4 my-6">
+              <AdSense
+                adSlot="1234567890"
+                adFormat="auto"
+                style={{ minHeight: "200px" }}
+                className="w-full"
+              />
             </div>
 
             {/* Sidebar - only show when not fullscreen */}

@@ -5,33 +5,6 @@
       "destination": "/index.html"
     }
   ],
-  "redirects": [
-    {
-      "source": "/login",
-      "destination": "/index.html",
-      "permanent": false
-    },
-    {
-      "source": "/register",
-      "destination": "/index.html",
-      "permanent": false
-    },
-    {
-      "source": "/games",
-      "destination": "/index.html",
-      "permanent": false
-    },
-    {
-      "source": "/categories",
-      "destination": "/index.html",
-      "permanent": false
-    },
-    {
-      "source": "/dashboard",
-      "destination": "/index.html",
-      "permanent": false
-    }
-  ],
   "headers": [
     {
       "source": "/sitemap.xml",
