@@ -64,7 +64,7 @@ export const GamePlayer: React.FC = () => {
           id: -1,
           title: localGame.title,
           description: localGame.description,
-          thumbnail_url: localGame.thumbnail_url || "/placeholder-game.jpg",
+          thumbnail_url: `/game-thumbnails/${slug}.jpg`,
           is_premium: localGame.is_premium,
           price: localGame.price,
           game_data: slug,
