@@ -1,5 +1,24 @@
 User-agent: *
 Allow: /
 
-# If you have a sitemap, uncomment and update the next line:
-Sitemap: https://www.daichiure.live/sitemap.xml 
+# Disallow admin and private areas
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /user-dashboard
+Disallow: /debug
+Disallow: /stripe-setup
+
+# Allow important pages
+Allow: /games/
+Allow: /blogs/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+Allow: /rewards
+
+# Sitemap location
+Sitemap: https://www.daichiure.live/sitemap.xml
+
+# Crawl-delay for better server performance
+Crawl-delay: 1 

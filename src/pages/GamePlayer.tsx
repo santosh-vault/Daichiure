@@ -186,9 +186,9 @@ export const GamePlayer: React.FC = () => {
   });
 
   // Helmet meta tags for the game page
-  const ogImage = game.thumbnail_url || "/placeholder-game.jpg";
-  const canonicalUrl = `${window.location.origin}/games/${slug}`;
-  const schema = {
+  const ogImage = game.thumbnail_url || "/logo.png";
+  const canonicalUrl = `https://www.daichiure.live/games/${slug}`;
+  const gameSchema = {
     "@context": "https://schema.org",
     "@type": "VideoGame",
     name: game.title,
@@ -200,12 +200,56 @@ export const GamePlayer: React.FC = () => {
     author: {
       "@type": "Organization",
       name: "Daichiure",
+      url: "https://www.daichiure.live",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Daichiure",
+      url: "https://www.daichiure.live",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://www.daichiure.live/logo.png",
+      },
     },
     aggregateRating: {
       "@type": "AggregateRating",
       ratingValue: "4.5",
       reviewCount: "120",
     },
+    offers: {
+      "@type": "Offer",
+      price: game.is_premium ? (game.price || 0).toString() : "0",
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    },
+    genre: game.category?.name || "Game",
+    playMode: "SinglePlayer",
+    gamePlatform: "Web Browser",
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://www.daichiure.live",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Games",
+        item: "https://www.daichiure.live/games",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: game.title,
+        item: canonicalUrl,
+      },
+    ],
   };
 
   const gameContent = (
@@ -245,7 +289,10 @@ export const GamePlayer: React.FC = () => {
         <meta name="twitter:image" content={ogImage} />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={canonicalUrl} />
-        <script type="application/ld+json">{JSON.stringify(schema)}</script>
+        <script type="application/ld+json">{JSON.stringify(gameSchema)}</script>
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
       </Helmet>
       {gameContent}
     </>

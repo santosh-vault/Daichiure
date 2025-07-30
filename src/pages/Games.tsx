@@ -92,27 +92,84 @@ export const Games: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>All Games | Daichiure</title>
+        <title>All Games | Free Online 2D Games | Daichiure</title>
         <meta
           name="description"
-          content="Browse and play a huge collection of free Nepali and 2D games online. Action, puzzle, sports, and more!"
+          content="Browse and play 100+ free Nepali and 2D games online. Action, puzzle, sports, arcade games and more! No downloads required, play instantly in your browser."
         />
         <meta
           name="keywords"
-          content="Nepali games, free games, 2D games, online games, play games, browser games, arcade, puzzle, action, sports"
+          content="free games, Nepali games, 2D games, online games, browser games, arcade games, puzzle games, action games, sports games, play games online"
         />
         <meta
           property="og:title"
-          content="Games | Play Free 2D Browser Games | Nepali Games"
+          content="All Games | Free Online 2D Games | Daichiure"
         />
         <meta
           property="og:description"
-          content="Browse and play a huge collection of free Nepali and 2D games online. Action, puzzle, sports, and more!"
+          content="Browse and play 100+ free Nepali and 2D games online. Action, puzzle, sports, arcade games and more!"
         />
         <meta
           property="og:image"
-          content="https://yourdomain.com/og-image.png"
+          content="https://www.daichiure.live/logo.png"
         />
+        <meta property="og:url" content="https://www.daichiure.live/games" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="All Games | Free Online 2D Games | Daichiure"
+        />
+        <meta
+          name="twitter:description"
+          content="Browse and play 100+ free Nepali and 2D games online. Action, puzzle, sports, arcade games and more!"
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.daichiure.live/logo.png"
+        />
+        <link rel="canonical" href="https://www.daichiure.live/games" />
+
+        {/* Games Collection Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            name: "Free Online Games Collection",
+            description: "Browse and play 100+ free 2D games online",
+            url: "https://www.daichiure.live/games",
+            mainEntity: {
+              "@type": "ItemList",
+              name: "Free Games",
+              numberOfItems: orderedGames.length,
+              itemListElement: orderedGames.slice(0, 10).map((game, index) => ({
+                "@type": "VideoGame",
+                position: index + 1,
+                name: game.title,
+                description: game.description,
+                url: `https://www.daichiure.live/games/${game.slug}`,
+                applicationCategory: "Game",
+              })),
+            },
+            breadcrumb: {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                {
+                  "@type": "ListItem",
+                  position: 1,
+                  name: "Home",
+                  item: "https://www.daichiure.live",
+                },
+                {
+                  "@type": "ListItem",
+                  position: 2,
+                  name: "Games",
+                  item: "https://www.daichiure.live/games",
+                },
+              ],
+            },
+          })}
+        </script>
       </Helmet>
       <div className="min-h-screen bg-gray-950 font-inter text-gray-100 antialiased py-8">
         <section

@@ -32,6 +32,7 @@ import { supabase } from "./lib/supabase";
 import { useNavigate } from "react-router-dom";
 import Rewards from "./pages/Rewards";
 import { UIEnhancementDemo } from "./components/UIEnhancementDemo";
+import NotFound from "./pages/NotFound";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -219,6 +220,8 @@ function App() {
                     </AdminRouteGuard>
                   }
                 />
+                {/* 404 Catch-all route */}
+                <Route path="*" element={<NotFound />} />
               </Routes>
             </Layout>
             <Toaster

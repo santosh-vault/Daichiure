@@ -95,11 +95,11 @@ export const Home: React.FC = () => {
         <title>Play Free Games Online & Earn Real Money | Daichiure</title>
         <meta
           name="description"
-          content="Play the best free games online and earn real money. Turn your gaming skills into cash rewards at Daichiure gaming platform!"
+          content="Play the best free 2D games online and earn real money. Join Daichiure gaming platform with 100+ games, rewards system, and instant cash payouts!"
         />
         <meta
           name="keywords"
-          content="Daichiure, earn money gaming, free online games, gaming rewards, play to earn, online gaming platform, cash rewards, gaming hub"
+          content="free online games, earn money gaming, 2D games, browser games, gaming rewards, play to earn, Nepali games, cash rewards, gaming platform, online gaming hub"
         />
         <meta
           property="og:title"
@@ -109,7 +109,72 @@ export const Home: React.FC = () => {
           property="og:description"
           content="Turn your gaming skills into real cash rewards! Join Daichiure and start earning money while playing your favorite games."
         />
-        <meta property="og:image" content="/logo.png" />
+        <meta
+          property="og:image"
+          content="https://www.daichiure.live/logo.png"
+        />
+        <meta property="og:url" content="https://www.daichiure.live/" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+          name="twitter:title"
+          content="Play Free Games Online & Earn Real Money | Daichiure"
+        />
+        <meta
+          name="twitter:description"
+          content="Turn your gaming skills into real cash rewards! Join Daichiure and start earning money while playing your favorite games."
+        />
+        <meta
+          name="twitter:image"
+          content="https://www.daichiure.live/logo.png"
+        />
+        <link rel="canonical" href="https://www.daichiure.live/" />
+
+        {/* Enhanced Schema.org structured data */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Daichiure",
+            url: "https://www.daichiure.live",
+            description:
+              "Play free 2D games online and earn real money with Daichiure gaming platform",
+            potentialAction: {
+              "@type": "SearchAction",
+              target:
+                "https://www.daichiure.live/games?search={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
+            publisher: {
+              "@type": "Organization",
+              name: "Daichiure",
+              logo: {
+                "@type": "ImageObject",
+                url: "https://www.daichiure.live/logo.png",
+              },
+            },
+          })}
+        </script>
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "GameServer",
+            name: "Daichiure Gaming Platform",
+            description: "Free online gaming platform with reward system",
+            url: "https://www.daichiure.live",
+            game: {
+              "@type": "VideoGameSeries",
+              name: "Free 2D Browser Games",
+              gameItem: [
+                { "@type": "VideoGame", name: "Snake Classic" },
+                { "@type": "VideoGame", name: "Tetris" },
+                { "@type": "VideoGame", name: "Pong Retro" },
+                { "@type": "VideoGame", name: "FreeFire 2D" },
+              ],
+            },
+          })}
+        </script>
       </Helmet>
 
       {/* Add custom styles for ultra-smooth scrolling */}
