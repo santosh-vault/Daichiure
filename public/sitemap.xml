@@ -1,70 +1,236 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main pages -->
   <url>
-    <loc>https://daichiure.vercel.com/</loc>
+    <loc>https://www.daichiure.live/</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games</loc>
+    <loc>https://www.daichiure.live/games</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/categories</loc>
+    <loc>https://www.daichiure.live/about</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/login</loc>
+    <loc>https://www.daichiure.live/contact</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/register</loc>
+    <loc>https://www.daichiure.live/blogs</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/dashboard</loc>
+    <loc>https://www.daichiure.live/privacy</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/success</loc>
-  </url>
-  <!-- Dynamic game pages -->
-  <url>
-    <loc>https://daichiure.vercel.com/games/freefire</loc>
-  </url>
-  <url>
-    <loc>https://daichiure.vercel.com/games/shooter</loc>
+    <loc>https://www.daichiure.live/terms</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/snake</loc>
+    <loc>https://www.daichiure.live/rewards</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- Auth pages -->
+  <url>
+    <loc>https://www.daichiure.live/login</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/pong</loc>
+    <loc>https://www.daichiure.live/register</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  
+  <!-- Game pages -->
+  <url>
+    <loc>https://www.daichiure.live/games/freefire</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/tetris</loc>
+    <loc>https://www.daichiure.live/games/shooter</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/breakout</loc>
+    <loc>https://www.daichiure.live/games/towerstack</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/memory</loc>
+    <loc>https://www.daichiure.live/games/uno</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/rpg</loc>
+    <loc>https://www.daichiure.live/games/snake</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/everest</loc>
+    <loc>https://www.daichiure.live/games/pong</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/kathmandu</loc>
+    <loc>https://www.daichiure.live/games/tetris</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/temple</loc>
+    <loc>https://www.daichiure.live/games/breakout</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/football</loc>
+    <loc>https://www.daichiure.live/games/memory</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/fighter</loc>
+    <loc>https://www.daichiure.live/games/rpg</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/allofaredead</loc>
+    <loc>https://www.daichiure.live/games/everest</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://daichiure.vercel.com/games/towerstack</loc>
+    <loc>https://www.daichiure.live/games/kathmandu</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/temple</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/football</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/fighter</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/allofaredead</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/squidgame</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/vcecgonb</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/zt2tti9k</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/fxzsxwyi</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/77b5mbmq</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/rc0aptuu</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/qkqlhh9c</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/9ptv2pby</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/c34zurvg</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/wkokj30h</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/d393rqdf</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.daichiure.live/games/wr4s1bkz</loc>
+    <lastmod>2025-07-30</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset> 

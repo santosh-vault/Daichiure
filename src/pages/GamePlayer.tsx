@@ -290,6 +290,41 @@ const GameContent: React.FC<GameContentProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showFullscreenDialog, setShowFullscreenDialog] = useState(false);
   const [gameError, setGameError] = useState<string | null>(null);
+  const [thumbnailSrc, setThumbnailSrc] = useState<string>("");
+  const [thumbnailError, setThumbnailError] = useState(false);
+  const [thumbnailLoading, setThumbnailLoading] = useState(true);
+
+  // Initialize thumbnail source with preloading
+  useEffect(() => {
+    const preloadImage = (url: string) => {
+      return new Promise<boolean>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+      });
+    };
+
+    const loadThumbnail = async () => {
+      setThumbnailLoading(true);
+      if (game.thumbnail_url) {
+        const loaded = await preloadImage(game.thumbnail_url);
+        if (loaded) {
+          setThumbnailSrc(game.thumbnail_url);
+          setThumbnailError(false);
+        } else {
+          setThumbnailSrc("/placeholder-game.jpg");
+          setThumbnailError(true);
+        }
+      } else {
+        setThumbnailSrc("/placeholder-game.jpg");
+        setThumbnailError(false);
+      }
+      setThumbnailLoading(false);
+    };
+
+    loadThumbnail();
+  }, [game.thumbnail_url]);
 
   // Fullscreen logic
   const handleFullscreen = useCallback(async () => {
@@ -380,8 +415,28 @@ const GameContent: React.FC<GameContentProps> = ({
       }
 
       return (
-        <div className="w-full h-full bg-black rounded-lg overflow-hidden">
-          <GameComponent />
+        <div
+          className={`w-full h-full bg-black overflow-hidden ${
+            isFullscreen ? "" : "rounded-lg"
+          } flex items-center justify-center`}
+        >
+          <div
+            className={`${
+              isFullscreen
+                ? "w-full h-full flex items-center justify-center"
+                : "w-full h-full"
+            }`}
+          >
+            <div
+              className={`${
+                isFullscreen
+                  ? "max-w-[100vw] max-h-[100vh] w-full h-full"
+                  : "w-full h-full"
+              } flex items-center justify-center`}
+            >
+              <GameComponent />
+            </div>
+          </div>
         </div>
       );
     } catch (error: any) {
@@ -407,6 +462,37 @@ const GameContent: React.FC<GameContentProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-black to-gray-900 font-inter">
+      {/* Fullscreen-specific styles */}
+      {isFullscreen && (
+        <style>
+          {`
+            body {
+              margin: 0 !important;
+              padding: 0 !important;
+              overflow: hidden !important;
+            }
+            *:fullscreen {
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              background: black !important;
+            }
+            *:-webkit-full-screen {
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              background: black !important;
+            }
+            *:-moz-full-screen {
+              display: flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              background: black !important;
+            }
+          `}
+        </style>
+      )}
+
       {/* Fullscreen suggestion dialog */}
       <FullscreenSuggestDialog
         open={showFullscreenDialog && !isFullscreen}
@@ -483,7 +569,7 @@ const GameContent: React.FC<GameContentProps> = ({
                   relative group
                   ${
                     isFullscreen
-                      ? "h-full w-full bg-black"
+                      ? "h-full w-full bg-black flex items-center justify-center"
                       : "bg-gray-900 rounded-xl border border-gray-800 overflow-hidden shadow-2xl aspect-video"
                   }
                 `}
@@ -516,7 +602,13 @@ const GameContent: React.FC<GameContentProps> = ({
                 </button>
 
                 {/* Game Content */}
-                <div className="w-full h-full">{renderGame()}</div>
+                <div
+                  className={`w-full h-full ${
+                    isFullscreen ? "flex items-center justify-center" : ""
+                  }`}
+                >
+                  {renderGame()}
+                </div>
               </div>
 
               {/* Mobile game info - show below game on mobile */}
@@ -548,16 +640,26 @@ const GameContent: React.FC<GameContentProps> = ({
               <aside className="space-y-6 hidden xl:block">
                 {/* Game Info Card */}
                 <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-xl">
-                  <div className="aspect-video bg-gray-800 rounded-lg mb-4 overflow-hidden">
-                    <img
-                      src={game.thumbnail_url || "/placeholder-game.jpg"}
-                      alt={game.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder-game.jpg";
-                      }}
-                    />
+                  <div className="aspect-video bg-gray-800 rounded-lg mb-4 overflow-hidden relative">
+                    {thumbnailLoading ? (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
+                        <div className="text-gray-600 text-4xl animate-pulse">
+                          🎮
+                        </div>
+                      </div>
+                    ) : (
+                      <img
+                        src={thumbnailSrc}
+                        alt={game.title}
+                        className="w-full h-full object-cover transition-opacity duration-200"
+                        onError={() => {
+                          if (!thumbnailError) {
+                            setThumbnailError(true);
+                            setThumbnailSrc("/placeholder-game.jpg");
+                          }
+                        }}
+                      />
+                    )}
                   </div>
 
                   <h2 className="text-lg font-bold font-bruno-ace text-amber-400 mb-2">
