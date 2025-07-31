@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback, memo } from "react";
 
 interface AdSenseProps {
   adSlot: string;
@@ -6,6 +6,8 @@ interface AdSenseProps {
   style?: React.CSSProperties;
   className?: string;
   fullWidthResponsive?: boolean;
+  lazy?: boolean;
+  testMode?: boolean;
 }
 
 declare global {
@@ -14,118 +16,214 @@ declare global {
   }
 }
 
-const AdSense: React.FC<AdSenseProps> = ({
-  adSlot,
-  adFormat = "auto",
-  style = {},
-  className = "",
-  fullWidthResponsive = true,
-}) => {
-  const adRef = useRef<HTMLDivElement>(null);
-  const [adStatus, setAdStatus] = useState<string>("Initializing...");
-  const [isClient, setIsClient] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+// AdSense configuration constants
+const ADSENSE_CONFIG = {
+  CLIENT_ID: "ca-pub-8134322068798634",
+  SCRIPT_URL: "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js",
+  MAX_RETRY_ATTEMPTS: 3,
+  RETRY_DELAY: 1000,
+  LOAD_TIMEOUT: 5000,
+} as const;
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+// Development environment check
+const isDevelopment = () => {
+  return (
+    process.env.NODE_ENV === "development" ||
+    (typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1" ||
+        window.location.protocol === "file:"))
+  );
+};
 
-  useEffect(() => {
-    if (!isClient) return;
+// Check if AdSense script is available
+const isAdSenseAvailable = (): boolean => {
+  return typeof window !== "undefined" && Array.isArray(window.adsbygoogle);
+};
 
-    const loadAd = async () => {
+// Wait for AdSense script to load with timeout
+const waitForAdSense = (
+  timeout = ADSENSE_CONFIG.LOAD_TIMEOUT
+): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (isAdSenseAvailable()) {
+      resolve(true);
+      return;
+    }
+
+    const startTime = Date.now();
+    const checkInterval = setInterval(() => {
+      if (isAdSenseAvailable()) {
+        clearInterval(checkInterval);
+        resolve(true);
+      } else if (Date.now() - startTime > timeout) {
+        clearInterval(checkInterval);
+        resolve(false);
+      }
+    }, 100);
+  });
+};
+
+const AdSense: React.FC<AdSenseProps> = memo(
+  ({
+    adSlot,
+    adFormat = "auto",
+    style = {},
+    className = "",
+    fullWidthResponsive = true,
+    lazy = false,
+    testMode = false,
+  }) => {
+    const adRef = useRef<HTMLDivElement>(null);
+    const [adState, setAdState] = useState({
+      status: "initializing",
+      error: null as string | null,
+      isLoaded: false,
+      retryCount: 0,
+    });
+    const [isVisible, setIsVisible] = useState(!lazy);
+
+    // Intersection Observer for lazy loading
+    useEffect(() => {
+      if (!lazy || isVisible) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setIsVisible(true);
+              observer.disconnect();
+            }
+          });
+        },
+        { threshold: 0.1, rootMargin: "100px" }
+      );
+
+      if (adRef.current) {
+        observer.observe(adRef.current);
+      }
+
+      return () => observer.disconnect();
+    }, [lazy, isVisible]);
+
+    // Load and initialize ad
+    const loadAd = useCallback(async () => {
       try {
-        // Skip ads in development or localhost
-        if (
-          process.env.NODE_ENV === "development" ||
-          window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1" ||
-          window.location.protocol === "file:"
-        ) {
-          setAdStatus("Development Mode - Ads Disabled");
+        setAdState((prev) => ({ ...prev, status: "loading", error: null }));
+
+        // Skip ads in development unless test mode is enabled
+        if (isDevelopment() && !testMode) {
+          setAdState((prev) => ({
+            ...prev,
+            status: "development",
+            isLoaded: false,
+          }));
           return;
         }
 
         // Validate ad slot
-        if (!adSlot) {
-          throw new Error("Ad slot is required");
+        if (!adSlot || typeof adSlot !== "string") {
+          throw new Error("Invalid ad slot provided");
         }
 
-        if (adSlot === "1234567890" || adSlot.includes("placeholder")) {
-          setAdStatus("⚠️ Using placeholder ad slot!");
-          console.warn("Placeholder ad slot detected:", adSlot);
-          return;
+        if (adSlot.includes("placeholder") || adSlot === "1234567890") {
+          throw new Error("Placeholder ad slot detected");
         }
 
-        // Wait for AdSense script to load
-        let attempts = 0;
-        const maxAttempts = 10;
-
-        while (!window.adsbygoogle && attempts < maxAttempts) {
-          await new Promise((resolve) => setTimeout(resolve, 200));
-          attempts++;
+        // Wait for AdSense script
+        const scriptLoaded = await waitForAdSense();
+        if (!scriptLoaded) {
+          throw new Error("AdSense script failed to load within timeout");
         }
 
-        if (!window.adsbygoogle) {
-          throw new Error("AdSense script failed to load after 2 seconds");
-        }
+        // Initialize AdSense ad
+        if (window.adsbygoogle && adRef.current) {
+          const adElements = adRef.current.querySelectorAll(".adsbygoogle");
 
-        // Initialize AdSense
-        try {
-          window.adsbygoogle = window.adsbygoogle || [];
-          window.adsbygoogle.push({});
-          setIsLoaded(true);
-          setAdStatus(`Ad loaded - Slot: ${adSlot}`);
-
-          console.log("✅ AdSense ad initialized:", {
-            adSlot,
-            adFormat,
-            client: "ca-pub-8134322068798634",
-            timestamp: new Date().toISOString(),
+          // Clear any existing ads
+          adElements.forEach((el) => {
+            if (el.getAttribute("data-adsbygoogle-status")) {
+              el.removeAttribute("data-adsbygoogle-status");
+            }
           });
-        } catch (pushError) {
-          throw new Error(`AdSense push failed: ${pushError}`);
+
+          // Push to AdSense queue
+          window.adsbygoogle.push({});
+
+          setAdState((prev) => ({
+            ...prev,
+            status: "loaded",
+            isLoaded: true,
+            error: null,
+          }));
+
+          // Log success in development
+          if (isDevelopment()) {
+            console.log("✅ AdSense ad loaded:", {
+              adSlot,
+              adFormat,
+              client: ADSENSE_CONFIG.CLIENT_ID,
+              timestamp: new Date().toISOString(),
+            });
+          }
         }
       } catch (error) {
-        console.error("AdSense loading error:", error);
-        setHasError(true);
-        setAdStatus(
-          `Error: ${error instanceof Error ? error.message : String(error)}`
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error("AdSense loading error:", errorMessage);
+
+        setAdState((prev) => ({
+          ...prev,
+          status: "error",
+          error: errorMessage,
+          retryCount: prev.retryCount + 1,
+        }));
+      }
+    }, [adSlot, adFormat, testMode]);
+
+    // Retry mechanism
+    const retryLoad = useCallback(() => {
+      if (adState.retryCount < ADSENSE_CONFIG.MAX_RETRY_ATTEMPTS) {
+        setTimeout(
+          loadAd,
+          ADSENSE_CONFIG.RETRY_DELAY * (adState.retryCount + 1)
         );
       }
-    };
+    }, [loadAd, adState.retryCount]);
 
-    const timer = setTimeout(loadAd, 300);
-    return () => clearTimeout(timer);
-  }, [adSlot, isClient, adFormat]);
+    // Load ad when visible
+    useEffect(() => {
+      if (isVisible && adState.status === "initializing") {
+        loadAd();
+      }
+    }, [isVisible, adState.status, loadAd]);
 
-  // Server-side rendering guard
-  if (!isClient) {
-    return null;
-  }
+    // Auto-retry on error
+    useEffect(() => {
+      if (
+        adState.status === "error" &&
+        adState.retryCount < ADSENSE_CONFIG.MAX_RETRY_ATTEMPTS
+      ) {
+        retryLoad();
+      }
+    }, [adState.status, adState.retryCount, retryLoad]);
 
-  // Development/localhost placeholder
-  if (
-    process.env.NODE_ENV === "development" ||
-    window.location.hostname === "localhost" ||
-    window.location.hostname === "127.0.0.1" ||
-    window.location.protocol === "file:"
-  ) {
-    return (
+    // Render development placeholder
+    const renderDevelopmentPlaceholder = () => (
       <div
         className={`adsense-placeholder ${className}`}
         style={{
           ...style,
           minHeight: "90px",
-          backgroundColor: "#1f2937",
-          border: "2px dashed #374151",
+          backgroundColor: "#0f172a",
+          border: "2px dashed #334155",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
           borderRadius: "8px",
           padding: "16px",
+          position: "relative",
         }}
       >
         <div
@@ -133,14 +231,14 @@ const AdSense: React.FC<AdSenseProps> = ({
             color: "#10b981",
             fontSize: "16px",
             marginBottom: "8px",
-            fontWeight: "bold",
+            fontWeight: "600",
           }}
         >
           🎯 AdSense Development Mode
         </div>
         <div
           style={{
-            color: "#9ca3af",
+            color: "#94a3b8",
             fontSize: "14px",
             marginBottom: "4px",
             textAlign: "center",
@@ -150,20 +248,35 @@ const AdSense: React.FC<AdSenseProps> = ({
         </div>
         <div
           style={{
-            color: "#6b7280",
+            color: "#64748b",
             fontSize: "12px",
             textAlign: "center",
           }}
         >
-          Status: {adStatus}
+          Format: {adFormat} | Responsive: {fullWidthResponsive ? "Yes" : "No"}
         </div>
+        {testMode && (
+          <button
+            onClick={loadAd}
+            style={{
+              marginTop: "8px",
+              padding: "4px 8px",
+              backgroundColor: "#3b82f6",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "12px",
+              cursor: "pointer",
+            }}
+          >
+            Test Load Ad
+          </button>
+        )}
       </div>
     );
-  }
 
-  // Error state
-  if (hasError) {
-    return (
+    // Render error state
+    const renderErrorState = () => (
       <div
         className={`adsense-error ${className}`}
         style={{
@@ -183,8 +296,9 @@ const AdSense: React.FC<AdSenseProps> = ({
           style={{
             color: "#dc2626",
             fontSize: "14px",
-            marginBottom: "4px",
+            marginBottom: "8px",
             textAlign: "center",
+            fontWeight: "600",
           }}
         >
           ⚠️ Ad Failed to Load
@@ -194,63 +308,158 @@ const AdSense: React.FC<AdSenseProps> = ({
             color: "#991b1b",
             fontSize: "12px",
             textAlign: "center",
+            marginBottom: "8px",
           }}
         >
-          {adStatus}
+          {adState.error}
         </div>
+        {adState.retryCount < ADSENSE_CONFIG.MAX_RETRY_ATTEMPTS && (
+          <div
+            style={{
+              color: "#f59e0b",
+              fontSize: "11px",
+              textAlign: "center",
+            }}
+          >
+            Retrying... ({adState.retryCount}/
+            {ADSENSE_CONFIG.MAX_RETRY_ATTEMPTS})
+          </div>
+        )}
+        {adState.retryCount >= ADSENSE_CONFIG.MAX_RETRY_ATTEMPTS && (
+          <button
+            onClick={() => {
+              setAdState((prev) => ({ ...prev, retryCount: 0 }));
+              loadAd();
+            }}
+            style={{
+              padding: "4px 8px",
+              backgroundColor: "#dc2626",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              fontSize: "11px",
+              cursor: "pointer",
+            }}
+          >
+            Retry Manually
+          </button>
+        )}
+      </div>
+    );
+
+    // Render loading state
+    const renderLoadingState = () => (
+      <div
+        className={`adsense-loading ${className}`}
+        style={{
+          ...style,
+          minHeight: "90px",
+          backgroundColor: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: "8px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+        }}
+      >
+        <div
+          style={{
+            color: "#64748b",
+            fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <div
+            style={{
+              width: "16px",
+              height: "16px",
+              border: "2px solid #e2e8f0",
+              borderTop: "2px solid #3b82f6",
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          Loading advertisement...
+        </div>
+        <style>
+          {`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}
+        </style>
+      </div>
+    );
+
+    // Early returns for special states
+    if (adState.status === "development") {
+      return renderDevelopmentPlaceholder();
+    }
+
+    if (adState.status === "error") {
+      return renderErrorState();
+    }
+
+    if (adState.status === "loading" || adState.status === "initializing") {
+      return renderLoadingState();
+    }
+
+    // Main ad container
+    return (
+      <div
+        ref={adRef}
+        className={`adsense-container ${className}`}
+        style={{
+          minHeight: "90px",
+          width: "100%",
+          position: "relative",
+          ...style,
+        }}
+      >
+        <ins
+          className="adsbygoogle"
+          style={{
+            display: "block",
+            minHeight: "90px",
+            width: "100%",
+          }}
+          data-ad-client={ADSENSE_CONFIG.CLIENT_ID}
+          data-ad-slot={adSlot}
+          data-ad-format={adFormat}
+          data-full-width-responsive={fullWidthResponsive.toString()}
+        />
+
+        {/* Debug overlay for development */}
+        {isDevelopment() && adState.isLoaded && (
+          <div
+            style={{
+              position: "absolute",
+              top: "4px",
+              right: "4px",
+              fontSize: "10px",
+              background: "rgba(16, 185, 129, 0.9)",
+              color: "white",
+              padding: "4px 8px",
+              borderRadius: "4px",
+              fontFamily: "monospace",
+              pointerEvents: "none",
+              zIndex: 1000,
+              maxWidth: "200px",
+              textAlign: "center",
+            }}
+          >
+            ✅ Ad Loaded: {adSlot}
+          </div>
+        )}
       </div>
     );
   }
+);
 
-  return (
-    <div
-      ref={adRef}
-      className={`adsense-container ${className}`}
-      style={{
-        minHeight: "90px",
-        width: "100%",
-        position: "relative",
-        ...style,
-      }}
-    >
-      <ins
-        className="adsbygoogle"
-        style={{
-          display: "block",
-          minHeight: "90px",
-        }}
-        data-ad-client="ca-pub-8134322068798634"
-        data-ad-slot={adSlot}
-        data-ad-format={adFormat}
-        data-full-width-responsive={fullWidthResponsive.toString()}
-      />
-
-      {/* Status indicator for debugging */}
-      {(process.env.NODE_ENV === "development" || !isLoaded) && (
-        <div
-          style={{
-            position: "absolute",
-            top: "4px",
-            right: "4px",
-            fontSize: "10px",
-            background: isLoaded
-              ? "rgba(16, 185, 129, 0.9)"
-              : "rgba(245, 158, 11, 0.9)",
-            color: "white",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            fontFamily: "monospace",
-            pointerEvents: "none",
-            zIndex: 1000,
-            maxWidth: "200px",
-            textAlign: "center",
-          }}
-        >
-          {adStatus}
-        </div>
-      )}
-    </div>
-  );
-};
+AdSense.displayName = "AdSense";
 
 export default AdSense;
