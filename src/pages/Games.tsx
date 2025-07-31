@@ -194,7 +194,7 @@ export const Games: React.FC = () => {
               <>
                 {/* AdSense Banner - Top of Games Grid */}
                 <AdSense
-                  adSlot="5566778899"
+                  adSlot="5989385709"
                   className="mb-8"
                   style={{ minHeight: "90px" }}
                 />
