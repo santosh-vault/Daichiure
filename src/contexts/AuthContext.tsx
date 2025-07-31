@@ -43,29 +43,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthState({
-        user: session?.user ?? null,
-        session,
-        loading: false,
+    // Get initial session with error handling
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setAuthState({
+          user: session?.user ?? null,
+          session,
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        console.error("Error getting session:", error);
+        setAuthState({
+          user: null,
+          session: null,
+          loading: false,
+        });
       });
-    });
 
-    // Listen for auth changes
+    // Listen for auth changes with error handling
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setAuthState({
-        user: session?.user ?? null,
-        session,
-        loading: false,
-      });
+      try {
+        setAuthState({
+          user: session?.user ?? null,
+          session,
+          loading: false,
+        });
 
-      if (event === "SIGNED_IN") {
-        toast.success("Welcome back!");
-      } else if (event === "SIGNED_OUT") {
-        toast.success("See you later!");
+        if (event === "SIGNED_IN") {
+          toast.success("Welcome back!");
+        } else if (event === "SIGNED_OUT") {
+          toast.success("See you later!");
+        }
+      } catch (error) {
+        console.error("Error in auth state change:", error);
+        setAuthState({
+          user: null,
+          session: null,
+          loading: false,
+        });
       }
     });
 

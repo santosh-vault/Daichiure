@@ -20,10 +20,13 @@ export default defineConfig({
           'router-vendor': ['react-router-dom'],
           'ui-vendor': ['lucide-react'],
           'supabase-vendor': ['@supabase/supabase-js'],
+          'game-vendor': ['kaboom'],
+          'editor-vendor': ['react-quill'],
+          'utils-vendor': ['react-hot-toast', 'react-helmet-async']
         },
       },
     },
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 600,
   },
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
