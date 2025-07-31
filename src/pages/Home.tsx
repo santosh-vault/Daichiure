@@ -290,13 +290,6 @@ export const Home: React.FC = () => {
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8  z-20 h-full flex items-center justify-center">
             <div className="text-center animate-fade-in-up">
-              {/* Sparkles Icon */}
-              <div className="flex justify-center mb-6">
-                <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 rounded-full shadow-2xl animate-pulse-glow">
-                  <Sparkles className="h-8 w-8 text-gray-950" />
-                </div>
-              </div>
-
               <h1
                 id="hero-heading"
                 className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-8 leading-tight"
