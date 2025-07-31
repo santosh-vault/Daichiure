@@ -2,6 +2,8 @@
   "version": 2,
   "name": "daichiure",
   "alias": ["daichiure.live", "www.daichiure.live"],
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "build": {
     "env": {
       "NODE_ENV": "production"
