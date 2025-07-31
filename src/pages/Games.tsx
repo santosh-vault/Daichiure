@@ -40,7 +40,6 @@ export const Games: React.FC = () => {
     "tetris",
     "breakout", // 2nd row
     // Third row: recently added games
-    // Removed: '100balls',
     "vcecgonb",
     "zt2tti9k",
     "fxzsxwyi",
@@ -60,7 +59,7 @@ export const Games: React.FC = () => {
 
   // Listen for header searchbar events
   useEffect(() => {
-    const handler = (e: any) => {
+    const handler = (e: CustomEvent<string>) => {
       if (typeof e.detail === "string") {
         setSearchTerm(e.detail);
         if (searchInputRef.current) {
@@ -68,8 +67,8 @@ export const Games: React.FC = () => {
         }
       }
     };
-    window.addEventListener("games-search", handler);
-    return () => window.removeEventListener("games-search", handler);
+    window.addEventListener("games-search", handler as EventListener);
+    return () => window.removeEventListener("games-search", handler as EventListener);
   }, []);
 
   const filteredGames = games.filter((game) => {
@@ -85,7 +84,7 @@ export const Games: React.FC = () => {
   const orderedGames = [
     ...(customOrder
       .map((slug) => filteredGames.find((g) => g.slug === slug))
-      .filter(Boolean) as typeof games),
+      .filter((game): game is NonNullable<typeof game> => Boolean(game))),
     ...filteredGames.filter((game) => !customOrder.includes(game.slug)),
   ];
 
@@ -183,7 +182,7 @@ export const Games: React.FC = () => {
                 <div className="text-gray-600 mb-4 sm:mb-6">
                   <Search className="h-12 w-12 sm:h-20 sm:w-20 mx-auto text-gray-700" />
                 </div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-['Orbitron'] text-amber-400 mb-4">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold font-orbitron text-amber-400 mb-4">
                   No games found
                 </h2>
                 <p className="text-lg sm:text-xl text-gray-400 px-4">
