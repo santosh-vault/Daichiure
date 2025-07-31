@@ -14,7 +14,8 @@ const categories = [
 export const Sidebar: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
-  const selected = params.get("category");
+  const selected =
+    location.pathname === "/games" ? params.get("category") : null;
   const [expanded, setExpanded] = useState(false); // default to collapsed
 
   const handleMouseEnter = () => {
@@ -47,7 +48,7 @@ export const Sidebar: React.FC = () => {
           {categories.map((cat) => (
             <Link
               key={cat.slug}
-              to={`/categories?category=${cat.slug}`}
+              to={`/games?category=${cat.slug}`}
               className={`flex items-center gap-3 px-2 py-2 rounded-lg transition-all font-medium text-gray-300 hover:text-amber-400 hover:bg-gray-800/60 ${
                 selected === cat.slug
                   ? "bg-gray-800/80 text-amber-400 font-bold border-l-4 border-amber-400"

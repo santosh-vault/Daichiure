@@ -57,6 +57,12 @@ export const Games: React.FC = () => {
     setSearchTerm(search);
   }, [searchParams]);
 
+  // Sync selectedCategory with ?category= param
+  useEffect(() => {
+    const category = searchParams.get("category") || "";
+    setSelectedCategory(category);
+  }, [searchParams]);
+
   // Listen for header searchbar events
   useEffect(() => {
     const handler = (e: CustomEvent<string>) => {
@@ -68,7 +74,8 @@ export const Games: React.FC = () => {
       }
     };
     window.addEventListener("games-search", handler as EventListener);
-    return () => window.removeEventListener("games-search", handler as EventListener);
+    return () =>
+      window.removeEventListener("games-search", handler as EventListener);
   }, []);
 
   const filteredGames = games.filter((game) => {
@@ -82,9 +89,9 @@ export const Games: React.FC = () => {
 
   // Reorder games: custom order first, then the rest
   const orderedGames = [
-    ...(customOrder
+    ...customOrder
       .map((slug) => filteredGames.find((g) => g.slug === slug))
-      .filter((game): game is NonNullable<typeof game> => Boolean(game))),
+      .filter((game): game is NonNullable<typeof game> => Boolean(game)),
     ...filteredGames.filter((game) => !customOrder.includes(game.slug)),
   ];
 
