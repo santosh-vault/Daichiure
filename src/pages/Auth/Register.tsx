@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff, X, AlertTriangle } from "lucide-react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useGoogleAnalytics } from "../../hooks/useGoogleAnalytics";
+import EmailVerificationPrompt from "../../components/EmailVerificationPrompt";
 
 // List of common fake/temporary email domains to block
 const BLOCKED_DOMAINS = [
@@ -96,6 +97,8 @@ export const Register: React.FC = () => {
     text: string;
   } | null>(null);
   const [emailError, setEmailError] = useState<string>("");
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const { signUp } = useAuth();
   const navigate = useNavigate();
   const { trackEvent } = useGoogleAnalytics();
@@ -180,12 +183,9 @@ export const Register: React.FC = () => {
       // Track successful registration
       trackEvent("signup", "authentication", "success");
 
-      // Show success message but don't navigate immediately
-      // Let the user see the success message, then they can navigate manually
-      setMessage({
-        type: "success",
-        text: "Account created successfully! You can now close this window and sign in.",
-      });
+      // Show email verification prompt instead of generic success message
+      setRegisteredEmail(formData.email);
+      setShowVerificationPrompt(true);
 
       // Clear the form
       setFormData({
@@ -500,6 +500,21 @@ export const Register: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Email Verification Prompt */}
+      {showVerificationPrompt && (
+        <EmailVerificationPrompt
+          email={registeredEmail}
+          onClose={() => {
+            setShowVerificationPrompt(false);
+            navigate("/login");
+          }}
+          onResendSuccess={() => {
+            // Optionally track resend events
+            trackEvent("email_verification", "authentication", "resend");
+          }}
+        />
+      )}
     </div>
   );
 };

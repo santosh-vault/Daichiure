@@ -103,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Determine the correct redirect URL based on environment
       const isProduction = window.location.hostname !== "localhost";
       const redirectTo = isProduction
-        ? "https://daichiure.vercel.app/login"
-        : "http://localhost:5173/login";
+        ? `${window.location.origin}/login?verified=true`
+        : "http://localhost:5173/login?verified=true";
 
       console.log("Using redirect URL:", redirectTo);
 
@@ -139,14 +139,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         !data.user.email_confirmed_at &&
         data.user.confirmation_sent_at
       ) {
-        toast.success(
-          "Account created! Please check your email to confirm your account before signing in."
-        );
+        // Don't show toast here - let the component handle the UI
+        console.log("Email verification required for:", data.user.email);
       } else if (data.user && data.session) {
         // User is immediately signed in (email confirmation disabled)
         toast.success("Account created successfully! Welcome to Daichiure!");
       } else {
-        toast.success("Account created successfully!");
+        // Account created but no immediate session
+        console.log("Account created, waiting for email verification");
       }
     } catch (error: any) {
       console.error("Signup error:", error);

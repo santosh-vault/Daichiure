@@ -27,13 +27,15 @@ const ADSENSE_CONFIG = {
 
 // Development environment check
 const isDevelopment = () => {
-  return (
-    process.env.NODE_ENV === "development" ||
-    (typeof window !== "undefined" &&
-      (window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1" ||
-        window.location.protocol === "file:"))
-  );
+  if (typeof window === "undefined") return false;
+
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    window.location.hostname.includes("netlify.app") ||
+    window.location.hostname.includes("daichiure") ||
+    !window.location.hostname.includes("localhost");
+
+  return !isProduction;
 };
 
 // Check if AdSense script is available

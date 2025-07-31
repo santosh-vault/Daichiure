@@ -45,13 +45,15 @@ export const useAdSense = (options: UseAdSenseOptions = {}) => {
   const loadScript = useCallback(() => {
     if (typeof window === "undefined") return;
 
+    // Check if we're in a production environment
+    const isProduction = process.env.NODE_ENV === "production" || 
+      window.location.hostname.includes("netlify.app") ||
+      window.location.hostname.includes("daichiure") ||
+      !window.location.hostname.includes("localhost");
+
     // Skip in development unless test mode is enabled
-    if (
-      process.env.NODE_ENV === "development" &&
-      !testMode &&
-      (window.location.hostname === "localhost" ||
-       window.location.hostname === "127.0.0.1")
-    ) {
+    if (!isProduction && !testMode) {
+      console.log("🔄 AdSense disabled in development mode");
       setState(prev => ({ ...prev, isScriptLoaded: true, isInitialized: true }));
       return;
     }

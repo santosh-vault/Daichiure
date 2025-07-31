@@ -48,12 +48,27 @@ export const Login: React.FC = () => {
       setTimeout(() => {
         navigate("/games");
       }, 1500);
-    } catch (error) {
+    } catch (error: any) {
       // Track failed login
       trackEvent("login", "authentication", "failed");
+
+      let errorMessage = "Invalid email or password. Please try again.";
+
+      // Check for specific error types
+      if (error?.message?.includes("Email not confirmed")) {
+        errorMessage =
+          "Please verify your email address before signing in. Check your inbox for the verification link.";
+      } else if (error?.message?.includes("Invalid login credentials")) {
+        errorMessage =
+          "Invalid email or password. Please check your credentials and try again.";
+      } else if (error?.message?.includes("Email not verified")) {
+        errorMessage =
+          "Please verify your email address before signing in. Check your inbox for the verification link.";
+      }
+
       setMessage({
         type: "error",
-        text: "Invalid email or password. Please try again.",
+        text: errorMessage,
       });
     } finally {
       setLoading(false);
