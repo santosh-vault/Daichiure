@@ -193,11 +193,13 @@ export const Games: React.FC = () => {
             ) : (
               <>
                 {/* AdSense Banner - Top of Games Grid */}
-                <AdSense
-                  adSlot="5989385709"
-                  className="mb-8"
-                  style={{ minHeight: "90px" }}
-                />
+                <div className="mb-8">
+                  <AdSense
+                    adSlot="5989385709"
+                    className="w-full"
+                    style={{ minHeight: "90px" }}
+                  />
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 sm:gap-6">
                   {orderedGames.map((game) => (
                     <Link
