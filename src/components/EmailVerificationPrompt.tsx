@@ -27,7 +27,7 @@ export const EmailVerificationPrompt: React.FC<
         type: "signup",
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/login`,
+          emailRedirectTo: `${window.location.origin}/login?verified=true`,
         },
       });
 

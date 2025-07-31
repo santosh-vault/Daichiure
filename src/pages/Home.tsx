@@ -294,7 +294,7 @@ export const Home: React.FC = () => {
                 id="hero-heading"
                 className="text-5xl sm:text-6xl lg:text-7xl font-bruno-ace mb-8 leading-tight"
               >
-                Your Ultimate
+                Your Unlimited
                 <span className="gradient-text block mt-2">Gaming Hub</span>
               </h1>
 
@@ -354,6 +354,7 @@ export const Home: React.FC = () => {
                 adSlot="1234567890"
                 className="mb-8"
                 style={{ minHeight: "90px" }}
+                testMode={true}
               />
             </div>
 
@@ -380,6 +381,7 @@ export const Home: React.FC = () => {
                 adSlot="0987654321"
                 className="my-8"
                 style={{ minHeight: "90px" }}
+                testMode={true}
               />
             </div>
           </div>

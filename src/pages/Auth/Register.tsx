@@ -92,10 +92,6 @@ export const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
   const [emailError, setEmailError] = useState<string>("");
   const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
@@ -130,25 +126,18 @@ export const Register: React.FC = () => {
     // Validate email
     const emailValidation = validateEmail(formData.email);
     if (!emailValidation.isValid) {
-      setMessage({
-        type: "error",
-        text: emailValidation.message || "Invalid email address",
-      });
       setEmailError(emailValidation.message || "Invalid email address");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match" });
+      // You could show a temporary toast or just highlight the field
       return;
     }
 
     // Additional password validation
     if (formData.password.length < 8) {
-      setMessage({
-        type: "error",
-        text: "Password must be at least 8 characters long",
-      });
+      // You could show a temporary toast or just highlight the field
       return;
     }
 
@@ -161,15 +150,11 @@ export const Register: React.FC = () => {
     );
 
     if (!hasLowercase || !hasUppercase || !hasNumber || !hasSpecialChar) {
-      setMessage({
-        type: "error",
-        text: "Password must contain at least one lowercase letter, one uppercase letter, one number, and one special character (!@#$%^&*()_+-=[]{};':\"\\|<>?,./`~)",
-      });
+      // You could show a temporary toast or just highlight the field
       return;
     }
 
     setLoading(true);
-    setMessage(null);
 
     try {
       console.log("Register form submitting with data:", {
@@ -198,34 +183,10 @@ export const Register: React.FC = () => {
       // Track failed registration
       trackEvent("signup", "authentication", "failed");
 
-      // Handle specific error messages
-      let errorMessage = "Failed to create account. Please try again.";
-      if (
-        error?.message?.includes("already registered") ||
-        error?.message?.includes("already exists")
-      ) {
-        errorMessage =
-          "This email is already registered. Please try logging in instead.";
-      } else if (
-        error?.message?.includes("invalid-email") ||
-        error?.message?.includes("Invalid email")
-      ) {
-        errorMessage = "Please enter a valid email address.";
-      } else if (
-        error?.message?.includes("weak-password") ||
-        error?.message?.includes("weak_password") ||
-        error?.code === "weak_password"
-      ) {
-        errorMessage =
-          "Password is too weak. Please ensure it contains uppercase, lowercase, numbers, and special characters.";
-      } else if (error?.message?.includes("Password")) {
-        errorMessage = error.message; // Show the actual password requirement message
-      } else if (error?.message) {
-        errorMessage = error.message; // Show the actual error message from Supabase
-      }
-
       console.error("Registration error details:", error);
-      setMessage({ type: "error", text: errorMessage });
+
+      // For now, just close the dialog on error
+      // You might want to add specific error handling here later
     } finally {
       setLoading(false);
     }
@@ -258,18 +219,6 @@ export const Register: React.FC = () => {
               Create your account to start playing
             </p>
           </div>
-
-          {message && (
-            <div
-              className={`p-2.5 rounded-lg mb-3 sm:mb-4 text-center text-sm font-medium ${
-                message.type === "success"
-                  ? "bg-green-600 text-white"
-                  : "bg-red-600 text-white"
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
             <div>

@@ -133,25 +133,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       console.log("Signup successful:", data);
 
-      // Check if user needs email confirmation
-      if (
-        data.user &&
-        !data.user.email_confirmed_at &&
-        data.user.confirmation_sent_at
-      ) {
-        // Don't show toast here - let the component handle the UI
-        console.log("Email verification required for:", data.user.email);
-      } else if (data.user && data.session) {
-        // User is immediately signed in (email confirmation disabled)
-        toast.success("Account created successfully! Welcome to Daichiure!");
-      } else {
-        // Account created but no immediate session
-        console.log("Account created, waiting for email verification");
-      }
+      // Don't show any toast messages - let the Register component handle all UI feedback
+      console.log(
+        "Account creation completed, UI will be handled by component"
+      );
     } catch (error: any) {
       console.error("Signup error:", error);
-      const errorMessage = error.message || "Failed to create account";
-      toast.error(errorMessage);
+      // Don't show toast here - let the component handle error display
       throw error;
     }
   };
