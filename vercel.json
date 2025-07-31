@@ -2,15 +2,6 @@
   "version": 2,
   "name": "daichiure",
   "alias": ["daichiure.live", "www.daichiure.live"],
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    }
-  ],
   "build": {
     "env": {
       "NODE_ENV": "production"

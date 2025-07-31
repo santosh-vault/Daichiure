@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:vercel": "vite build --mode production",
-    "vercel-build": "vite build",
+    "build": "vite build --logLevel info",
+    "build:vercel": "vite build --mode production --logLevel info",
+    "vercel-build": "vite build --logLevel info",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
