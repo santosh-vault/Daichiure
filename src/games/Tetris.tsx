@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight, ArrowDown, RotateCw } from 'lucide-react';
-
+import React, { useState, useEffect, useCallback } from "react";
+import { ArrowLeft, ArrowRight, ArrowDown, RotateCw } from "lucide-react";
+import { useGameCoins } from "../hooks/useGameCoins";
 
 interface TetrisPiece {
   shape: number[][];
@@ -8,13 +8,49 @@ interface TetrisPiece {
 }
 
 const TETROMINOES: TetrisPiece[] = [
-  { shape: [[1, 1, 1, 1]], color: 'bg-cyan-500' }, // I
-  { shape: [[1, 1], [1, 1]], color: 'bg-yellow-500' }, // O
-  { shape: [[1, 1, 1], [0, 1, 0]], color: 'bg-purple-500' }, // T
-  { shape: [[1, 1, 1], [1, 0, 0]], color: 'bg-blue-500' }, // L
-  { shape: [[1, 1, 1], [0, 0, 1]], color: 'bg-orange-500' }, // J
-  { shape: [[1, 1, 0], [0, 1, 1]], color: 'bg-green-500' }, // S
-  { shape: [[0, 1, 1], [1, 1, 0]], color: 'bg-red-500' }, // Z
+  { shape: [[1, 1, 1, 1]], color: "bg-cyan-500" }, // I
+  {
+    shape: [
+      [1, 1],
+      [1, 1],
+    ],
+    color: "bg-yellow-500",
+  }, // O
+  {
+    shape: [
+      [1, 1, 1],
+      [0, 1, 0],
+    ],
+    color: "bg-purple-500",
+  }, // T
+  {
+    shape: [
+      [1, 1, 1],
+      [1, 0, 0],
+    ],
+    color: "bg-blue-500",
+  }, // L
+  {
+    shape: [
+      [1, 1, 1],
+      [0, 0, 1],
+    ],
+    color: "bg-orange-500",
+  }, // J
+  {
+    shape: [
+      [1, 1, 0],
+      [0, 1, 1],
+    ],
+    color: "bg-green-500",
+  }, // S
+  {
+    shape: [
+      [0, 1, 1],
+      [1, 1, 0],
+    ],
+    color: "bg-red-500",
+  }, // Z
 ];
 
 export const TetrisGame: React.FC = () => {
@@ -27,12 +63,15 @@ export const TetrisGame: React.FC = () => {
   const [gameOver, setGameOver] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [started, setStarted] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(0);
 
   const BOARD_WIDTH = 10;
   const BOARD_HEIGHT = 20;
 
   const initializeBoard = useCallback(() => {
-    const newBoard = Array(BOARD_HEIGHT).fill(null).map(() => Array(BOARD_WIDTH).fill(0));
+    const newBoard = Array(BOARD_HEIGHT)
+      .fill(null)
+      .map(() => Array(BOARD_WIDTH).fill(0));
     setBoard(newBoard);
   }, []);
 
@@ -43,34 +82,40 @@ export const TetrisGame: React.FC = () => {
   const spawnPiece = useCallback(() => {
     const newPiece = getRandomPiece();
     setCurrentPiece(newPiece);
-    setPiecePosition({ x: Math.floor(BOARD_WIDTH / 2) - Math.floor(newPiece.shape[0].length / 2), y: 0 });
+    setPiecePosition({
+      x: Math.floor(BOARD_WIDTH / 2) - Math.floor(newPiece.shape[0].length / 2),
+      y: 0,
+    });
   }, [getRandomPiece]);
 
-  const isValidMove = useCallback((piece: TetrisPiece, x: number, y: number): boolean => {
-    for (let row = 0; row < piece.shape.length; row++) {
-      for (let col = 0; col < piece.shape[row].length; col++) {
-        if (piece.shape[row][col]) {
-          const newX = x + col;
-          const newY = y + row;
-          
-          if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) {
-            return false;
-          }
-          
-          if (newY >= 0 && board[newY][newX]) {
-            return false;
+  const isValidMove = useCallback(
+    (piece: TetrisPiece, x: number, y: number): boolean => {
+      for (let row = 0; row < piece.shape.length; row++) {
+        for (let col = 0; col < piece.shape[row].length; col++) {
+          if (piece.shape[row][col]) {
+            const newX = x + col;
+            const newY = y + row;
+
+            if (newX < 0 || newX >= BOARD_WIDTH || newY >= BOARD_HEIGHT) {
+              return false;
+            }
+
+            if (newY >= 0 && board[newY][newX]) {
+              return false;
+            }
           }
         }
       }
-    }
-    return true;
-  }, [board]);
+      return true;
+    },
+    [board]
+  );
 
   const placePiece = useCallback(() => {
     if (!currentPiece) return;
 
-    const newBoard = board.map(row => [...row]);
-    
+    const newBoard = board.map((row) => [...row]);
+
     for (let row = 0; row < currentPiece.shape.length; row++) {
       for (let col = 0; col < currentPiece.shape[row].length; col++) {
         if (currentPiece.shape[row][col]) {
@@ -87,82 +132,88 @@ export const TetrisGame: React.FC = () => {
     spawnPiece();
   }, [currentPiece, piecePosition, board, spawnPiece]);
 
-  const movePiece = useCallback((dx: number, dy: number) => {
-    if (!currentPiece || gameOver || isPaused) return;
+  const movePiece = useCallback(
+    (dx: number, dy: number) => {
+      if (!currentPiece || gameOver || isPaused) return;
 
-    const newX = piecePosition.x + dx;
-    const newY = piecePosition.y + dy;
+      const newX = piecePosition.x + dx;
+      const newY = piecePosition.y + dy;
 
-    if (isValidMove(currentPiece, newX, newY)) {
-      setPiecePosition({ x: newX, y: newY });
-    } else if (dy > 0) {
-      placePiece();
-    }
-  }, [currentPiece, piecePosition, gameOver, isPaused, isValidMove, placePiece]);
+      if (isValidMove(currentPiece, newX, newY)) {
+        setPiecePosition({ x: newX, y: newY });
+      } else if (dy > 0) {
+        placePiece();
+      }
+    },
+    [currentPiece, piecePosition, gameOver, isPaused, isValidMove, placePiece]
+  );
 
   const rotatePiece = useCallback(() => {
     if (!currentPiece || gameOver || isPaused) return;
 
-    const rotated = currentPiece.shape[0].map((_, i) => 
-      currentPiece.shape.map(row => row[i]).reverse()
+    const rotated = currentPiece.shape[0].map((_, i) =>
+      currentPiece.shape.map((row) => row[i]).reverse()
     );
-    
+
     const rotatedPiece = { ...currentPiece, shape: rotated };
-    
+
     if (isValidMove(rotatedPiece, piecePosition.x, piecePosition.y)) {
       setCurrentPiece(rotatedPiece);
     }
   }, [currentPiece, piecePosition, gameOver, isPaused, isValidMove]);
 
   const clearLines = useCallback(() => {
-    const newBoard = board.filter(row => !row.every(cell => cell === 1));
+    const newBoard = board.filter((row) => !row.every((cell) => cell === 1));
     const linesCleared = board.length - newBoard.length;
-    
+
     if (linesCleared > 0) {
       const newLines = lines + linesCleared;
       const newLevel = Math.floor(newLines / 10) + 1;
-      const newScore = score + (linesCleared * 100 * level);
-      
+      const newScore = score + linesCleared * 100 * level;
+
       setLines(newLines);
       setLevel(newLevel);
       setScore(newScore);
-      
+
       // Add empty rows at the top
       while (newBoard.length < BOARD_HEIGHT) {
         newBoard.unshift(Array(BOARD_WIDTH).fill(0));
       }
-      
+
       setBoard(newBoard);
     }
   }, [board, lines, level, score]);
 
-  const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    if (gameOver) return;
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent) => {
+      if (gameOver) return;
 
-    switch (e.code) {
-      case 'ArrowLeft':
-        e.preventDefault();
-        movePiece(-1, 0);
-        break;
-      case 'ArrowRight':
-        e.preventDefault();
-        movePiece(1, 0);
-        break;
-      case 'ArrowDown':
-        e.preventDefault();
-        movePiece(0, 1);
-        break;
-      case 'ArrowUp':
-      case 'Space':
-        e.preventDefault();
-        rotatePiece();
-        break;
-      case 'KeyP':
-        e.preventDefault();
-        setIsPaused(!isPaused);
-        break;
-    }
-  }, [gameOver, movePiece, rotatePiece, isPaused]);
+      switch (e.code) {
+        case "ArrowLeft":
+          e.preventDefault();
+          movePiece(-1, 0);
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          movePiece(1, 0);
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          movePiece(0, 1);
+          break;
+        case "ArrowUp":
+        case "Space":
+          e.preventDefault();
+          rotatePiece();
+          break;
+        case "KeyP":
+          e.preventDefault();
+          setIsPaused(!isPaused);
+          break;
+      }
+    },
+    [gameOver, movePiece, rotatePiece, isPaused]
+  );
 
   useEffect(() => {
     initializeBoard();
@@ -170,16 +221,23 @@ export const TetrisGame: React.FC = () => {
   }, [initializeBoard, spawnPiece]);
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
   }, [handleKeyPress]);
+
+  // Set game start time when game begins
+  useEffect(() => {
+    if (started && gameStartTime === 0) {
+      setGameStartTime(Date.now());
+    }
+  }, [started, gameStartTime]);
 
   useEffect(() => {
     if (gameOver || isPaused) return;
 
     const interval = setInterval(() => {
       movePiece(0, 1);
-    }, Math.max(100, 1000 - (level * 50)));
+    }, Math.max(100, 1000 - level * 50));
 
     return () => clearInterval(interval);
   }, [movePiece, gameOver, isPaused, level]);
@@ -189,23 +247,38 @@ export const TetrisGame: React.FC = () => {
   }, [board, clearLines]);
 
   useEffect(() => {
-    if (currentPiece && !isValidMove(currentPiece, piecePosition.x, piecePosition.y)) {
+    if (
+      currentPiece &&
+      !isValidMove(currentPiece, piecePosition.x, piecePosition.y)
+    ) {
       setGameOver(true);
     }
   }, [currentPiece, piecePosition, isValidMove]);
 
-
+  // Coin earning system
+  useGameCoins({
+    gameId: "tetris",
+    trigger: gameOver,
+    score: score,
+    duration:
+      gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0,
+  });
 
   const renderBoard = () => {
-    const displayBoard = board.map(row => [...row]);
-    
+    const displayBoard = board.map((row) => [...row]);
+
     if (currentPiece && !gameOver) {
       for (let row = 0; row < currentPiece.shape.length; row++) {
         for (let col = 0; col < currentPiece.shape[row].length; col++) {
           if (currentPiece.shape[row][col]) {
             const boardY = piecePosition.y + row;
             const boardX = piecePosition.x + col;
-            if (boardY >= 0 && boardY < BOARD_HEIGHT && boardX >= 0 && boardX < BOARD_WIDTH) {
+            if (
+              boardY >= 0 &&
+              boardY < BOARD_HEIGHT &&
+              boardX >= 0 &&
+              boardX < BOARD_WIDTH
+            ) {
               displayBoard[boardY][boardX] = 1;
             }
           }
@@ -219,7 +292,7 @@ export const TetrisGame: React.FC = () => {
           <div
             key={colIndex}
             className={`w-6 h-6 border border-gray-700 ${
-              cell ? 'bg-amber-500' : 'bg-gray-800'
+              cell ? "bg-amber-500" : "bg-gray-800"
             }`}
           />
         ))}
@@ -239,14 +312,34 @@ export const TetrisGame: React.FC = () => {
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 600,
+        }}
+      >
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={{
+            padding: "16px 40px",
+            fontSize: 24,
+            borderRadius: 8,
+            background: "#00ff00",
+            color: "#222",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
         >
           Click to Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>The legendary puzzle game. Arrange falling blocks to clear lines and score points. Use arrow keys to move and rotate.</div>
+        <div style={{ color: "#fff", fontSize: 16 }}>
+          The legendary puzzle game. Arrange falling blocks to clear lines and
+          score points. Use arrow keys to move and rotate.
+        </div>
       </div>
     );
   }
@@ -255,7 +348,9 @@ export const TetrisGame: React.FC = () => {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-amber-400 mb-2">Tetris Classic</h1>
+          <h1 className="text-3xl font-bold text-amber-400 mb-2">
+            Tetris Classic
+          </h1>
           <div className="flex justify-center space-x-8 text-gray-300">
             <div>
               <div className="text-2xl font-bold text-amber-400">{score}</div>
@@ -280,7 +375,9 @@ export const TetrisGame: React.FC = () => {
 
         {gameOver && (
           <div className="text-center mb-6">
-            <div className="text-2xl font-bold text-red-400 mb-4">Game Over!</div>
+            <div className="text-2xl font-bold text-red-400 mb-4">
+              Game Over!
+            </div>
             <button
               onClick={resetGame}
               className="bg-amber-500 text-gray-900 px-6 py-3 rounded-lg font-bold hover:bg-amber-600 transition-colors"
@@ -335,4 +432,4 @@ export const TetrisGame: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

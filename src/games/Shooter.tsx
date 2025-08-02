@@ -1,5 +1,5 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-
+import React, { useRef, useEffect, useState, useCallback } from "react";
+import { useGameCoins } from "../hooks/useGameCoins";
 
 const GAME_WIDTH = 1200; // Increased map size
 const GAME_HEIGHT = 800; // Increased map size
@@ -8,7 +8,7 @@ const PLAYER_SPEED = 4.5;
 const BULLET_SPEED = 13;
 const ENEMY_RADIUS = 20;
 const ENEMY_SPEED = 2.2;
-const OBSTACLE_COLOR = '#444';
+const OBSTACLE_COLOR = "#444";
 const MAX_AMMO = 8;
 const RELOAD_TIME = 1200; // ms
 const PLAYER_MAX_HEALTH = 100;
@@ -22,17 +22,42 @@ const BULLET_DAMAGE = 20; // Damage per bullet (2 hits to kill enemy with 40 hea
 const DIFFICULTY_INCREASE_INTERVAL = 20; // Increase difficulty every 20 kills
 
 const CHALLENGES = [
-  { name: 'Clear All Enemies', description: 'Eliminate all enemies to win.' },
-  { name: 'Survive 60 Seconds', description: 'Survive for 60 seconds.' },
-  { name: 'No Reload', description: 'Clear all enemies without reloading.' },
+  { name: "Clear All Enemies", description: "Eliminate all enemies to win." },
+  { name: "Survive 60 Seconds", description: "Survive for 60 seconds." },
+  { name: "No Reload", description: "Clear all enemies without reloading." },
 ];
 
 // Types
-interface Vec2 { x: number; y: number; }
-interface Bullet { pos: Vec2; vel: Vec2; fromPlayer: boolean; alive: boolean; }
-interface Enemy { pos: Vec2; health: number; maxHealth: number; alive: boolean; cooldown: number; id: number; }
-interface Obstacle { x: number; y: number; w: number; h: number; }
-interface Pickup { pos: Vec2; type: 'ammo' | 'health'; alive: boolean; id: number; }
+interface Vec2 {
+  x: number;
+  y: number;
+}
+interface Bullet {
+  pos: Vec2;
+  vel: Vec2;
+  fromPlayer: boolean;
+  alive: boolean;
+}
+interface Enemy {
+  pos: Vec2;
+  health: number;
+  maxHealth: number;
+  alive: boolean;
+  cooldown: number;
+  id: number;
+}
+interface Obstacle {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+interface Pickup {
+  pos: Vec2;
+  type: "ammo" | "health";
+  alive: boolean;
+  id: number;
+}
 
 function distance(a: Vec2, b: Vec2) {
   return Math.hypot(a.x - b.x, a.y - b.y);
@@ -41,7 +66,9 @@ function clamp(val: number, min: number, max: number) {
   return Math.max(min, Math.min(max, val));
 }
 function rectsOverlap(a: Obstacle, b: Obstacle) {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  return (
+    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+  );
 }
 function pointInRect(p: Vec2, r: Obstacle) {
   return p.x > r.x && p.x < r.x + r.w && p.y > r.y && p.y < r.y + r.h;
@@ -49,7 +76,9 @@ function pointInRect(p: Vec2, r: Obstacle) {
 
 const Shooter: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [gameState, setGameState] = useState<'start' | 'playing' | 'win' | 'lose'>('start');
+  const [gameState, setGameState] = useState<
+    "start" | "playing" | "win" | "lose"
+  >("start");
   const [challenge, setChallenge] = useState(0);
   const [timer, setTimer] = useState(0);
   const [message, setMessage] = useState<string | null>(null);
@@ -57,6 +86,7 @@ const Shooter: React.FC = () => {
   const [score, setScore] = useState(0);
   const [enemiesKilled, setEnemiesKilled] = useState(0);
   const [difficultyLevel, setDifficultyLevel] = useState(1);
+  const [gameStartTime, setGameStartTime] = useState(0);
   const [player, setPlayer] = useState({
     pos: { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 80 },
     health: PLAYER_MAX_HEALTH,
@@ -69,9 +99,12 @@ const Shooter: React.FC = () => {
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [pickups, setPickups] = useState<Pickup[]>([]);
   const [cameraOffset, setCameraOffset] = useState({ x: 0, y: 0 });
-  
+
   const keys = useRef<{ [k: string]: boolean }>({});
-  const mouse = useRef<{ x: number; y: number }>({ x: GAME_WIDTH / 2, y: GAME_HEIGHT / 2 });
+  const mouse = useRef<{ x: number; y: number }>({
+    x: GAME_WIDTH / 2,
+    y: GAME_HEIGHT / 2,
+  });
   const lastTime = useRef<number>(0);
   const reloadTimeout = useRef<NodeJS.Timeout | null>(null);
   const surviveStart = useRef<number>(0);
@@ -86,11 +119,11 @@ const Shooter: React.FC = () => {
   const generateRandomObstacles = useCallback(() => {
     const newObstacles: Obstacle[] = [];
     const numObstacles = 15 + Math.floor(Math.random() * 10); // 15-25 obstacles
-    
+
     for (let i = 0; i < numObstacles; i++) {
       let attempts = 0;
       let obstacle: Obstacle;
-      
+
       do {
         obstacle = {
           x: Math.random() * (GAME_WIDTH - 100) + 50,
@@ -100,32 +133,33 @@ const Shooter: React.FC = () => {
         };
         attempts++;
       } while (
-        attempts < 50 && 
-        (
-          // Don't place obstacles too close to player spawn
-          distance(obstacle, { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 80 }) < 100 ||
+        attempts < 50 &&
+        // Don't place obstacles too close to player spawn
+        (distance(obstacle, { x: GAME_WIDTH / 2, y: GAME_HEIGHT - 80 }) < 100 ||
           // Don't overlap with existing obstacles
-          newObstacles.some(existing => rectsOverlap(obstacle, existing))
-        )
+          newObstacles.some((existing) => rectsOverlap(obstacle, existing)))
       );
-      
+
       if (attempts < 50) {
         newObstacles.push(obstacle);
       }
     }
-    
+
     setObstacles(newObstacles);
   }, []);
 
   // Check collision between player/enemy and obstacles
-  const checkObstacleCollision = useCallback((pos: Vec2, radius: number): boolean => {
-    return obstacles.some(obstacle => {
-      const closestX = clamp(pos.x, obstacle.x, obstacle.x + obstacle.w);
-      const closestY = clamp(pos.y, obstacle.y, obstacle.y + obstacle.h);
-      const distanceToObstacle = distance(pos, { x: closestX, y: closestY });
-      return distanceToObstacle < radius;
-    });
-  }, [obstacles]);
+  const checkObstacleCollision = useCallback(
+    (pos: Vec2, radius: number): boolean => {
+      return obstacles.some((obstacle) => {
+        const closestX = clamp(pos.x, obstacle.x, obstacle.x + obstacle.w);
+        const closestY = clamp(pos.y, obstacle.y, obstacle.y + obstacle.h);
+        const distanceToObstacle = distance(pos, { x: closestX, y: closestY });
+        return distanceToObstacle < radius;
+      });
+    },
+    [obstacles]
+  );
 
   // Setup level with random obstacles
   const setupLevel = useCallback(() => {
@@ -152,10 +186,10 @@ const Shooter: React.FC = () => {
     lastAmmoSpawn.current = 0;
     lastHealthSpawn.current = 0;
     setCameraOffset({ x: 0, y: 0 });
-    
+
     // Generate random obstacles for this game
     generateRandomObstacles();
-    
+
     // Spawn initial enemies
     spawnEnemy();
     spawnEnemy();
@@ -165,7 +199,7 @@ const Shooter: React.FC = () => {
   const spawnEnemy = useCallback(() => {
     let attempts = 0;
     let enemyPos: Vec2;
-    
+
     do {
       // Spawn enemies at map edges
       const side = Math.floor(Math.random() * 4);
@@ -174,55 +208,69 @@ const Shooter: React.FC = () => {
           enemyPos = { x: Math.random() * GAME_WIDTH, y: -ENEMY_RADIUS };
           break;
         case 1: // Right
-          enemyPos = { x: GAME_WIDTH + ENEMY_RADIUS, y: Math.random() * GAME_HEIGHT };
+          enemyPos = {
+            x: GAME_WIDTH + ENEMY_RADIUS,
+            y: Math.random() * GAME_HEIGHT,
+          };
           break;
         case 2: // Bottom
-          enemyPos = { x: Math.random() * GAME_WIDTH, y: GAME_HEIGHT + ENEMY_RADIUS };
+          enemyPos = {
+            x: Math.random() * GAME_WIDTH,
+            y: GAME_HEIGHT + ENEMY_RADIUS,
+          };
           break;
         default: // Left
           enemyPos = { x: -ENEMY_RADIUS, y: Math.random() * GAME_HEIGHT };
       }
       attempts++;
     } while (
-      attempts < 20 && 
-      (checkObstacleCollision(enemyPos, ENEMY_RADIUS) || 
-       distance(enemyPos, player.pos) < 150)
+      attempts < 20 &&
+      (checkObstacleCollision(enemyPos, ENEMY_RADIUS) ||
+        distance(enemyPos, player.pos) < 150)
     );
-    
+
     if (attempts < 20) {
       // Scale enemy health with difficulty
       const scaledHealth = ENEMY_MAX_HEALTH + (difficultyLevel - 1) * 10;
-      
-      setEnemies(prev => [...prev, {
-        pos: enemyPos,
-        health: scaledHealth,
-        maxHealth: scaledHealth,
-        alive: true,
-        cooldown: 0,
-        id: nextEnemyId.current++
-      }]);
+
+      setEnemies((prev) => [
+        ...prev,
+        {
+          pos: enemyPos,
+          health: scaledHealth,
+          maxHealth: scaledHealth,
+          alive: true,
+          cooldown: 0,
+          id: nextEnemyId.current++,
+        },
+      ]);
     }
   }, [player.pos, checkObstacleCollision, difficultyLevel]);
 
   // Spawn pickup
-  const spawnPickup = useCallback((pos: Vec2, type: 'ammo' | 'health') => {
+  const spawnPickup = useCallback((pos: Vec2, type: "ammo" | "health") => {
     const now = Date.now();
-    const lastSpawn = type === 'ammo' ? lastAmmoSpawn.current : lastHealthSpawn.current;
-    const spawnDelay = type === 'ammo' ? AMMO_SPAWN_DELAY : HEALTH_SPAWN_DELAY;
-    
+    const lastSpawn =
+      type === "ammo" ? lastAmmoSpawn.current : lastHealthSpawn.current;
+    const spawnDelay = type === "ammo" ? AMMO_SPAWN_DELAY : HEALTH_SPAWN_DELAY;
+
     if (now - lastSpawn < spawnDelay) return;
-    
-    const spawnChance = type === 'ammo' ? AMMO_SPAWN_CHANCE : HEALTH_SPAWN_CHANCE;
-    
+
+    const spawnChance =
+      type === "ammo" ? AMMO_SPAWN_CHANCE : HEALTH_SPAWN_CHANCE;
+
     if (Math.random() < spawnChance) {
-      setPickups(prev => [...prev, {
-        pos: { x: pos.x, y: pos.y },
-        type,
-        alive: true,
-        id: nextPickupId.current++
-      }]);
-      
-      if (type === 'ammo') {
+      setPickups((prev) => [
+        ...prev,
+        {
+          pos: { x: pos.x, y: pos.y },
+          type,
+          alive: true,
+          id: nextPickupId.current++,
+        },
+      ]);
+
+      if (type === "ammo") {
         lastAmmoSpawn.current = now;
       } else {
         lastHealthSpawn.current = now;
@@ -234,11 +282,11 @@ const Shooter: React.FC = () => {
   useEffect(() => {
     const down = (e: KeyboardEvent) => (keys.current[e.code] = true);
     const up = (e: KeyboardEvent) => (keys.current[e.code] = false);
-    window.addEventListener('keydown', down);
-    window.addEventListener('keyup', up);
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
     return () => {
-      window.removeEventListener('keydown', down);
-      window.removeEventListener('keyup', up);
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
     };
   }, []);
 
@@ -250,13 +298,13 @@ const Shooter: React.FC = () => {
       mouse.current.x = e.clientX - rect.left + cameraOffset.x;
       mouse.current.y = e.clientY - rect.top + cameraOffset.y;
     };
-    window.addEventListener('mousemove', move);
-    return () => window.removeEventListener('mousemove', move);
+    window.addEventListener("mousemove", move);
+    return () => window.removeEventListener("mousemove", move);
   }, [cameraOffset]);
 
   // Game loop
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== "playing") return;
     let animId: number;
     const loop = (t: number) => {
       if (!lastTime.current) lastTime.current = t;
@@ -268,11 +316,21 @@ const Shooter: React.FC = () => {
     };
     animId = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animId);
-  }, [gameState, player, bullets, enemies, obstacles, pickups, challenge, cameraOffset, difficultyLevel]);
+  }, [
+    gameState,
+    player,
+    bullets,
+    enemies,
+    obstacles,
+    pickups,
+    challenge,
+    cameraOffset,
+    difficultyLevel,
+  ]);
 
   // Timer for challenges
   useEffect(() => {
-    if (gameState !== 'playing') return;
+    if (gameState !== "playing") return;
     if (challenge === 1) {
       const interval = setInterval(() => {
         setTimer(Math.floor((Date.now() - surviveStart.current) / 1000));
@@ -284,7 +342,7 @@ const Shooter: React.FC = () => {
   // Shooting
   const shoot = () => {
     if (player.reloading || player.ammo <= 0) return;
-    setBullets(bullets => [
+    setBullets((bullets) => [
       ...bullets,
       {
         pos: { x: player.pos.x, y: player.pos.y },
@@ -296,17 +354,17 @@ const Shooter: React.FC = () => {
         alive: true,
       },
     ]);
-    setPlayer(p => ({ ...p, ammo: p.ammo - 1 }));
+    setPlayer((p) => ({ ...p, ammo: p.ammo - 1 }));
     if (challenge === 2) noReloadUsed.current = false;
   };
 
   // Reload
   const reload = () => {
     if (player.reloading || player.ammo === MAX_AMMO) return;
-    setPlayer(p => ({ ...p, reloading: true }));
+    setPlayer((p) => ({ ...p, reloading: true }));
     setReloadMsg(true);
     reloadTimeout.current = setTimeout(() => {
-      setPlayer(p => ({ ...p, ammo: MAX_AMMO, reloading: false }));
+      setPlayer((p) => ({ ...p, ammo: MAX_AMMO, reloading: false }));
       setReloadMsg(false);
     }, RELOAD_TIME);
   };
@@ -314,294 +372,365 @@ const Shooter: React.FC = () => {
   // Handle controls
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         e.preventDefault();
         shoot();
       }
-      if (e.code === 'KeyR') {
+      if (e.code === "KeyR") {
         e.preventDefault();
         reload();
       }
     };
-    window.addEventListener('keydown', onDown);
-    return () => window.removeEventListener('keydown', onDown);
+    window.addEventListener("keydown", onDown);
+    return () => window.removeEventListener("keydown", onDown);
   }, [player]);
 
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
-      if (gameState === 'playing') {
+      if (gameState === "playing") {
         e.preventDefault();
         shoot();
       }
     };
-    window.addEventListener('mousedown', onClick);
-    return () => window.removeEventListener('mousedown', onClick);
+    window.addEventListener("mousedown", onClick);
+    return () => window.removeEventListener("mousedown", onClick);
   }, [gameState, player]);
 
+  // Coin earning system
+  useGameCoins({
+    gameId: "shooter",
+    trigger: gameState === "win" || gameState === "lose",
+    score: score,
+    duration:
+      gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0,
+  });
+
   // Game update logic
-  const updateGame = useCallback((dt: number) => {
-    if (gameState !== 'playing') return;
+  const updateGame = useCallback(
+    (dt: number) => {
+      if (gameState !== "playing") return;
 
-    // Update difficulty based on kills
-    const newDifficultyLevel = Math.floor(enemiesKilled / DIFFICULTY_INCREASE_INTERVAL) + 1;
-    if (newDifficultyLevel !== difficultyLevel) {
-      setDifficultyLevel(newDifficultyLevel);
-      setMessage(`Difficulty increased! Level ${newDifficultyLevel}`);
-      setTimeout(() => setMessage(null), 2000);
-    }
+      // Update difficulty based on kills
+      const newDifficultyLevel =
+        Math.floor(enemiesKilled / DIFFICULTY_INCREASE_INTERVAL) + 1;
+      if (newDifficultyLevel !== difficultyLevel) {
+        setDifficultyLevel(newDifficultyLevel);
+        setMessage(`Difficulty increased! Level ${newDifficultyLevel}`);
+        setTimeout(() => setMessage(null), 2000);
+      }
 
-    // Update player angle (aiming)
-    const dx = mouse.current.x - player.pos.x;
-    const dy = mouse.current.y - player.pos.y;
-    const newAngle = Math.atan2(dy, dx);
-    setPlayer(p => ({ ...p, angle: newAngle }));
+      // Update player angle (aiming)
+      const dx = mouse.current.x - player.pos.x;
+      const dy = mouse.current.y - player.pos.y;
+      const newAngle = Math.atan2(dy, dx);
+      setPlayer((p) => ({ ...p, angle: newAngle }));
 
-    // Player movement with obstacle collision
-    const newPos = { ...player.pos };
-    const moveSpeed = PLAYER_SPEED * dt;
-    
-    if (keys.current['KeyW'] || keys.current['ArrowUp']) {
-      const testPos = { x: newPos.x, y: newPos.y - moveSpeed };
-      if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
-        newPos.y = testPos.y;
-      }
-    }
-    if (keys.current['KeyS'] || keys.current['ArrowDown']) {
-      const testPos = { x: newPos.x, y: newPos.y + moveSpeed };
-      if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
-        newPos.y = testPos.y;
-      }
-    }
-    if (keys.current['KeyA'] || keys.current['ArrowLeft']) {
-      const testPos = { x: newPos.x - moveSpeed, y: newPos.y };
-      if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
-        newPos.x = testPos.x;
-      }
-    }
-    if (keys.current['KeyD'] || keys.current['ArrowRight']) {
-      const testPos = { x: newPos.x + moveSpeed, y: newPos.y };
-      if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
-        newPos.x = testPos.x;
-      }
-    }
-    
-    // Clamp to map bounds
-    newPos.x = clamp(newPos.x, PLAYER_RADIUS, GAME_WIDTH - PLAYER_RADIUS);
-    newPos.y = clamp(newPos.y, PLAYER_RADIUS, GAME_HEIGHT - PLAYER_RADIUS);
-    setPlayer(p => ({ ...p, pos: newPos }));
+      // Player movement with obstacle collision
+      const newPos = { ...player.pos };
+      const moveSpeed = PLAYER_SPEED * dt;
 
-    // Update camera to follow player
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const viewWidth = canvas.width;
-      const viewHeight = canvas.height;
-      
-      setCameraOffset({
-        x: clamp(newPos.x - viewWidth / 2, 0, GAME_WIDTH - viewWidth),
-        y: clamp(newPos.y - viewHeight / 2, 0, GAME_HEIGHT - viewHeight)
-      });
-    }
-
-    // Update bullets
-    setBullets(bullets => bullets.map(bullet => {
-      if (!bullet.alive) return bullet;
-      const newBulletPos = {
-        x: bullet.pos.x + bullet.vel.x * dt,
-        y: bullet.pos.y + bullet.vel.y * dt,
-      };
-      
-      // Check if bullet hits obstacles
-      if (checkObstacleCollision(newBulletPos, 2)) {
-        return { ...bullet, alive: false };
+      if (keys.current["KeyW"] || keys.current["ArrowUp"]) {
+        const testPos = { x: newPos.x, y: newPos.y - moveSpeed };
+        if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
+          newPos.y = testPos.y;
+        }
       }
-      
-      // Check if bullet is off map
-      if (newBulletPos.x < 0 || newBulletPos.x > GAME_WIDTH || 
-          newBulletPos.y < 0 || newBulletPos.y > GAME_HEIGHT) {
-        return { ...bullet, alive: false };
+      if (keys.current["KeyS"] || keys.current["ArrowDown"]) {
+        const testPos = { x: newPos.x, y: newPos.y + moveSpeed };
+        if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
+          newPos.y = testPos.y;
+        }
       }
-      return { ...bullet, pos: newBulletPos };
-    }).filter(b => b.alive));
+      if (keys.current["KeyA"] || keys.current["ArrowLeft"]) {
+        const testPos = { x: newPos.x - moveSpeed, y: newPos.y };
+        if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
+          newPos.x = testPos.x;
+        }
+      }
+      if (keys.current["KeyD"] || keys.current["ArrowRight"]) {
+        const testPos = { x: newPos.x + moveSpeed, y: newPos.y };
+        if (!checkObstacleCollision(testPos, PLAYER_RADIUS)) {
+          newPos.x = testPos.x;
+        }
+      }
 
-    // Update enemies with obstacle collision and scaled speed
-    setEnemies(enemies => enemies.map(enemy => {
-      if (!enemy.alive) return enemy;
-      
-      // Scale enemy speed with difficulty
-      const scaledSpeed = ENEMY_SPEED * (1 + (difficultyLevel - 1) * 0.2);
-      
-      // Simple AI: move towards player while avoiding obstacles
-      const dx = player.pos.x - enemy.pos.x;
-      const dy = player.pos.y - enemy.pos.y;
-      const dist = Math.hypot(dx, dy);
-      
-      if (dist > 0) {
-        const moveX = (dx / dist) * scaledSpeed * dt;
-        const moveY = (dy / dist) * scaledSpeed * dt;
-        
-        const testPos = {
-          x: enemy.pos.x + moveX,
-          y: enemy.pos.y + moveY
-        };
-        
-        // Only move if not colliding with obstacles
-        let newPos = enemy.pos;
-        if (!checkObstacleCollision(testPos, ENEMY_RADIUS)) {
-          newPos = testPos;
-        } else {
-          // Try moving only in X direction
-          const testPosX = { x: enemy.pos.x + moveX, y: enemy.pos.y };
-          if (!checkObstacleCollision(testPosX, ENEMY_RADIUS)) {
-            newPos = testPosX;
-          } else {
-            // Try moving only in Y direction
-            const testPosY = { x: enemy.pos.x, y: enemy.pos.y + moveY };
-            if (!checkObstacleCollision(testPosY, ENEMY_RADIUS)) {
-              newPos = testPosY;
+      // Clamp to map bounds
+      newPos.x = clamp(newPos.x, PLAYER_RADIUS, GAME_WIDTH - PLAYER_RADIUS);
+      newPos.y = clamp(newPos.y, PLAYER_RADIUS, GAME_HEIGHT - PLAYER_RADIUS);
+      setPlayer((p) => ({ ...p, pos: newPos }));
+
+      // Update camera to follow player
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const viewWidth = canvas.width;
+        const viewHeight = canvas.height;
+
+        setCameraOffset({
+          x: clamp(newPos.x - viewWidth / 2, 0, GAME_WIDTH - viewWidth),
+          y: clamp(newPos.y - viewHeight / 2, 0, GAME_HEIGHT - viewHeight),
+        });
+      }
+
+      // Update bullets
+      setBullets((bullets) =>
+        bullets
+          .map((bullet) => {
+            if (!bullet.alive) return bullet;
+            const newBulletPos = {
+              x: bullet.pos.x + bullet.vel.x * dt,
+              y: bullet.pos.y + bullet.vel.y * dt,
+            };
+
+            // Check if bullet hits obstacles
+            if (checkObstacleCollision(newBulletPos, 2)) {
+              return { ...bullet, alive: false };
             }
-          }
-        }
-        
-        // Clamp to map bounds
-        newPos.x = clamp(newPos.x, ENEMY_RADIUS, GAME_WIDTH - ENEMY_RADIUS);
-        newPos.y = clamp(newPos.y, ENEMY_RADIUS, GAME_HEIGHT - ENEMY_RADIUS);
-        
-        // Enemy shooting with scaled rate
-        let newCooldown = enemy.cooldown - dt;
-        const shootingRate = Math.max(30, 60 - (difficultyLevel - 1) * 5); // Faster shooting at higher difficulty
-        
-        if (newCooldown <= 0 && dist < 200) {
-          // Shoot at player
-          const angle = Math.atan2(dy, dx);
-          setBullets(bullets => [...bullets, {
-            pos: { x: enemy.pos.x, y: enemy.pos.y },
-            vel: { x: Math.cos(angle) * BULLET_SPEED * 0.8, y: Math.sin(angle) * BULLET_SPEED * 0.8 },
-            fromPlayer: false,
-            alive: true,
-          }]);
-          newCooldown = shootingRate; // Reset cooldown
-        }
-        
-        return { ...enemy, pos: newPos, cooldown: newCooldown };
-      }
-      return enemy;
-    }));
 
-    // Check bullet collisions
-    setBullets(bullets => bullets.map(bullet => {
-      if (!bullet.alive) return bullet;
-      
-      // Check bullet-enemy collisions (player bullets only)
-      if (bullet.fromPlayer) {
-        for (const enemy of enemies) {
-          if (enemy.alive && distance(bullet.pos, enemy.pos) < ENEMY_RADIUS) {
-            // Damage enemy
-            setEnemies(enemies => enemies.map(e => 
-              e.id === enemy.id ? { ...e, health: e.health - BULLET_DAMAGE } : e
-            ));
-            
-            // Check if enemy died
-            if (enemy.health <= BULLET_DAMAGE) {
-              setEnemies(enemies => enemies.map(e => 
-                e.id === enemy.id ? { ...e, alive: false } : e
-              ));
-              setScore(s => s + 10);
-              setEnemiesKilled(k => k + 1);
-              
-              // Chance to spawn pickups
-              spawnPickup(enemy.pos, 'ammo');
-              spawnPickup(enemy.pos, 'health');
-              
-              // Spawn new enemy after delay (more enemies at higher difficulty)
-              const spawnCount = Math.min(3, Math.floor(difficultyLevel / 2) + 1);
-              for (let i = 0; i < spawnCount; i++) {
-                setTimeout(() => {
-                  if (gameState === 'playing') {
-                    spawnEnemy();
-                  }
-                }, ENEMY_SPAWN_DELAY + i * 500);
+            // Check if bullet is off map
+            if (
+              newBulletPos.x < 0 ||
+              newBulletPos.x > GAME_WIDTH ||
+              newBulletPos.y < 0 ||
+              newBulletPos.y > GAME_HEIGHT
+            ) {
+              return { ...bullet, alive: false };
+            }
+            return { ...bullet, pos: newBulletPos };
+          })
+          .filter((b) => b.alive)
+      );
+
+      // Update enemies with obstacle collision and scaled speed
+      setEnemies((enemies) =>
+        enemies.map((enemy) => {
+          if (!enemy.alive) return enemy;
+
+          // Scale enemy speed with difficulty
+          const scaledSpeed = ENEMY_SPEED * (1 + (difficultyLevel - 1) * 0.2);
+
+          // Simple AI: move towards player while avoiding obstacles
+          const dx = player.pos.x - enemy.pos.x;
+          const dy = player.pos.y - enemy.pos.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist > 0) {
+            const moveX = (dx / dist) * scaledSpeed * dt;
+            const moveY = (dy / dist) * scaledSpeed * dt;
+
+            const testPos = {
+              x: enemy.pos.x + moveX,
+              y: enemy.pos.y + moveY,
+            };
+
+            // Only move if not colliding with obstacles
+            let newPos = enemy.pos;
+            if (!checkObstacleCollision(testPos, ENEMY_RADIUS)) {
+              newPos = testPos;
+            } else {
+              // Try moving only in X direction
+              const testPosX = { x: enemy.pos.x + moveX, y: enemy.pos.y };
+              if (!checkObstacleCollision(testPosX, ENEMY_RADIUS)) {
+                newPos = testPosX;
+              } else {
+                // Try moving only in Y direction
+                const testPosY = { x: enemy.pos.x, y: enemy.pos.y + moveY };
+                if (!checkObstacleCollision(testPosY, ENEMY_RADIUS)) {
+                  newPos = testPosY;
+                }
               }
             }
-            
-            return { ...bullet, alive: false };
+
+            // Clamp to map bounds
+            newPos.x = clamp(newPos.x, ENEMY_RADIUS, GAME_WIDTH - ENEMY_RADIUS);
+            newPos.y = clamp(
+              newPos.y,
+              ENEMY_RADIUS,
+              GAME_HEIGHT - ENEMY_RADIUS
+            );
+
+            // Enemy shooting with scaled rate
+            let newCooldown = enemy.cooldown - dt;
+            const shootingRate = Math.max(30, 60 - (difficultyLevel - 1) * 5); // Faster shooting at higher difficulty
+
+            if (newCooldown <= 0 && dist < 200) {
+              // Shoot at player
+              const angle = Math.atan2(dy, dx);
+              setBullets((bullets) => [
+                ...bullets,
+                {
+                  pos: { x: enemy.pos.x, y: enemy.pos.y },
+                  vel: {
+                    x: Math.cos(angle) * BULLET_SPEED * 0.8,
+                    y: Math.sin(angle) * BULLET_SPEED * 0.8,
+                  },
+                  fromPlayer: false,
+                  alive: true,
+                },
+              ]);
+              newCooldown = shootingRate; // Reset cooldown
+            }
+
+            return { ...enemy, pos: newPos, cooldown: newCooldown };
           }
-        }
-      } else {
-        // Check bullet-player collisions (enemy bullets)
-        if (distance(bullet.pos, player.pos) < PLAYER_RADIUS) {
-          setPlayer(p => ({ ...p, health: p.health - 15 }));
-          return { ...bullet, alive: false };
-        }
-      }
-      
-      return bullet;
-    }));
+          return enemy;
+        })
+      );
 
-    // Check pickup collection
-    setPickups(pickups => pickups.filter(pickup => {
-      if (!pickup.alive) return false;
-      
-      if (distance(pickup.pos, player.pos) < PLAYER_RADIUS + 15) {
-        if (pickup.type === 'ammo') {
-          setPlayer(p => ({ ...p, ammo: Math.min(p.ammo + 4, MAX_AMMO) }));
-          setMessage('Ammo collected!');
-        } else if (pickup.type === 'health') {
-          setPlayer(p => ({ ...p, health: Math.min(p.health + 30, PLAYER_MAX_HEALTH) }));
-          setMessage('Health restored!');
-        }
-        setTimeout(() => setMessage(null), 1500);
-        return false; // Remove pickup
-      }
-      return true;
-    }));
+      // Check bullet collisions
+      setBullets((bullets) =>
+        bullets.map((bullet) => {
+          if (!bullet.alive) return bullet;
 
-    // Check win/lose conditions
-    const aliveEnemies = enemies.filter(e => e.alive);
-    const playerDead = player.health <= 0;
-    
-    if (playerDead) {
-      setGameState('lose');
-      return;
-    }
-    
-    if (challenge === 0 && aliveEnemies.length === 0 && enemiesKilled >= 10) {
-      setGameState('win');
-      return;
-    }
-    
-    if (challenge === 1 && timer >= 60) {
-      setGameState('win');
-      return;
-    }
-    
-    if (challenge === 2 && aliveEnemies.length === 0 && enemiesKilled >= 5 && noReloadUsed.current) {
-      setGameState('win');
-      return;
-    }
-  }, [gameState, player, enemies, challenge, timer, enemiesKilled, checkObstacleCollision, spawnPickup, spawnEnemy, difficultyLevel]);
+          // Check bullet-enemy collisions (player bullets only)
+          if (bullet.fromPlayer) {
+            for (const enemy of enemies) {
+              if (
+                enemy.alive &&
+                distance(bullet.pos, enemy.pos) < ENEMY_RADIUS
+              ) {
+                // Damage enemy
+                setEnemies((enemies) =>
+                  enemies.map((e) =>
+                    e.id === enemy.id
+                      ? { ...e, health: e.health - BULLET_DAMAGE }
+                      : e
+                  )
+                );
+
+                // Check if enemy died
+                if (enemy.health <= BULLET_DAMAGE) {
+                  setEnemies((enemies) =>
+                    enemies.map((e) =>
+                      e.id === enemy.id ? { ...e, alive: false } : e
+                    )
+                  );
+                  setScore((s) => s + 10);
+                  setEnemiesKilled((k) => k + 1);
+
+                  // Chance to spawn pickups
+                  spawnPickup(enemy.pos, "ammo");
+                  spawnPickup(enemy.pos, "health");
+
+                  // Spawn new enemy after delay (more enemies at higher difficulty)
+                  const spawnCount = Math.min(
+                    3,
+                    Math.floor(difficultyLevel / 2) + 1
+                  );
+                  for (let i = 0; i < spawnCount; i++) {
+                    setTimeout(() => {
+                      if (gameState === "playing") {
+                        spawnEnemy();
+                      }
+                    }, ENEMY_SPAWN_DELAY + i * 500);
+                  }
+                }
+
+                return { ...bullet, alive: false };
+              }
+            }
+          } else {
+            // Check bullet-player collisions (enemy bullets)
+            if (distance(bullet.pos, player.pos) < PLAYER_RADIUS) {
+              setPlayer((p) => ({ ...p, health: p.health - 15 }));
+              return { ...bullet, alive: false };
+            }
+          }
+
+          return bullet;
+        })
+      );
+
+      // Check pickup collection
+      setPickups((pickups) =>
+        pickups.filter((pickup) => {
+          if (!pickup.alive) return false;
+
+          if (distance(pickup.pos, player.pos) < PLAYER_RADIUS + 15) {
+            if (pickup.type === "ammo") {
+              setPlayer((p) => ({
+                ...p,
+                ammo: Math.min(p.ammo + 4, MAX_AMMO),
+              }));
+              setMessage("Ammo collected!");
+            } else if (pickup.type === "health") {
+              setPlayer((p) => ({
+                ...p,
+                health: Math.min(p.health + 30, PLAYER_MAX_HEALTH),
+              }));
+              setMessage("Health restored!");
+            }
+            setTimeout(() => setMessage(null), 1500);
+            return false; // Remove pickup
+          }
+          return true;
+        })
+      );
+
+      // Check win/lose conditions
+      const aliveEnemies = enemies.filter((e) => e.alive);
+      const playerDead = player.health <= 0;
+
+      if (playerDead) {
+        setGameState("lose");
+        return;
+      }
+
+      if (challenge === 0 && aliveEnemies.length === 0 && enemiesKilled >= 10) {
+        setGameState("win");
+        return;
+      }
+
+      if (challenge === 1 && timer >= 60) {
+        setGameState("win");
+        return;
+      }
+
+      if (
+        challenge === 2 &&
+        aliveEnemies.length === 0 &&
+        enemiesKilled >= 5 &&
+        noReloadUsed.current
+      ) {
+        setGameState("win");
+        return;
+      }
+    },
+    [
+      gameState,
+      player,
+      enemies,
+      challenge,
+      timer,
+      enemiesKilled,
+      checkObstacleCollision,
+      spawnPickup,
+      spawnEnemy,
+      difficultyLevel,
+    ]
+  );
 
   // Drawing function
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Save context for camera transform
     ctx.save();
     ctx.translate(-cameraOffset.x, -cameraOffset.y);
-    
+
     // Draw background
     const gradient = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
-    gradient.addColorStop(0, '#1a1a1a');
-    gradient.addColorStop(1, '#444');
+    gradient.addColorStop(0, "#1a1a1a");
+    gradient.addColorStop(1, "#444");
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
-    
+
     // Draw grid pattern
-    ctx.strokeStyle = '#333';
+    ctx.strokeStyle = "#333";
     ctx.lineWidth = 1;
     for (let x = 0; x < GAME_WIDTH; x += 50) {
       ctx.beginPath();
@@ -615,94 +744,99 @@ const Shooter: React.FC = () => {
       ctx.lineTo(GAME_WIDTH, y);
       ctx.stroke();
     }
-    
+
     // Draw obstacles
     ctx.fillStyle = OBSTACLE_COLOR;
-    ctx.strokeStyle = '#666';
+    ctx.strokeStyle = "#666";
     ctx.lineWidth = 2;
-    obstacles.forEach(obs => {
+    obstacles.forEach((obs) => {
       ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
       ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
     });
-    
+
     // Draw pickups
-    pickups.forEach(pickup => {
+    pickups.forEach((pickup) => {
       if (!pickup.alive) return;
-      
+
       ctx.save();
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
-      
-      if (pickup.type === 'ammo') {
-        ctx.fillStyle = '#00ff00';
+
+      if (pickup.type === "ammo") {
+        ctx.fillStyle = "#00ff00";
         ctx.beginPath();
         ctx.arc(pickup.pos.x, pickup.pos.y, 12, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        
+
         // Draw ammo symbol
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 12px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('A', pickup.pos.x, pickup.pos.y + 4);
-      } else if (pickup.type === 'health') {
-        ctx.fillStyle = '#ff0000';
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 12px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("A", pickup.pos.x, pickup.pos.y + 4);
+      } else if (pickup.type === "health") {
+        ctx.fillStyle = "#ff0000";
         ctx.beginPath();
         ctx.arc(pickup.pos.x, pickup.pos.y, 12, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
-        
+
         // Draw health cross
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = "#ffffff";
         ctx.fillRect(pickup.pos.x - 6, pickup.pos.y - 2, 12, 4);
         ctx.fillRect(pickup.pos.x - 2, pickup.pos.y - 6, 4, 12);
       }
-      
+
       ctx.restore();
     });
-    
+
     // Draw bullets
-    bullets.forEach(bullet => {
+    bullets.forEach((bullet) => {
       if (!bullet.alive) return;
       ctx.beginPath();
       ctx.arc(bullet.pos.x, bullet.pos.y, 3, 0, Math.PI * 2);
-      ctx.fillStyle = bullet.fromPlayer ? '#00ff00' : '#ff0000';
+      ctx.fillStyle = bullet.fromPlayer ? "#00ff00" : "#ff0000";
       ctx.fill();
     });
-    
+
     // Draw enemies with health bars
-    enemies.forEach(enemy => {
+    enemies.forEach((enemy) => {
       if (!enemy.alive || enemy.health <= 0) return;
-      
+
       // Enemy body
       ctx.beginPath();
       ctx.arc(enemy.pos.x, enemy.pos.y, ENEMY_RADIUS, 0, Math.PI * 2);
-      ctx.fillStyle = '#ff4444';
+      ctx.fillStyle = "#ff4444";
       ctx.fill();
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = "#fff";
       ctx.lineWidth = 2;
       ctx.stroke();
-      
+
       // Health bar
       const healthPercent = enemy.health / enemy.maxHealth;
-      ctx.fillStyle = '#333';
+      ctx.fillStyle = "#333";
       ctx.fillRect(enemy.pos.x - 20, enemy.pos.y - 35, 40, 6);
-      ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+      ctx.fillStyle =
+        healthPercent > 0.5
+          ? "#00ff00"
+          : healthPercent > 0.25
+          ? "#ffff00"
+          : "#ff0000";
       ctx.fillRect(enemy.pos.x - 20, enemy.pos.y - 35, 40 * healthPercent, 6);
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = "#fff";
       ctx.lineWidth = 1;
       ctx.strokeRect(enemy.pos.x - 20, enemy.pos.y - 35, 40, 6);
     });
-    
+
     // Draw player
     ctx.beginPath();
     ctx.arc(player.pos.x, player.pos.y, PLAYER_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = '#4444ff';
+    ctx.fillStyle = "#4444ff";
     ctx.fill();
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = "#fff";
     ctx.lineWidth = 2;
     ctx.stroke();
-    
+
     // Player direction indicator
     ctx.beginPath();
     ctx.moveTo(player.pos.x, player.pos.y);
@@ -710,99 +844,146 @@ const Shooter: React.FC = () => {
       player.pos.x + Math.cos(player.angle) * 30,
       player.pos.y + Math.sin(player.angle) * 30
     );
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = "#fff";
     ctx.lineWidth = 3;
     ctx.stroke();
-    
+
     // Player health bar
     const healthPercent = player.health / PLAYER_MAX_HEALTH;
-    ctx.fillStyle = '#333';
+    ctx.fillStyle = "#333";
     ctx.fillRect(player.pos.x - 25, player.pos.y - 40, 50, 8);
-    ctx.fillStyle = healthPercent > 0.5 ? '#00ff00' : healthPercent > 0.25 ? '#ffff00' : '#ff0000';
+    ctx.fillStyle =
+      healthPercent > 0.5
+        ? "#00ff00"
+        : healthPercent > 0.25
+        ? "#ffff00"
+        : "#ff0000";
     ctx.fillRect(player.pos.x - 25, player.pos.y - 40, 50 * healthPercent, 8);
-    ctx.strokeStyle = '#fff';
+    ctx.strokeStyle = "#fff";
     ctx.lineWidth = 1;
     ctx.strokeRect(player.pos.x - 25, player.pos.y - 40, 50, 8);
-    
+
     // Restore context
     ctx.restore();
-    
+
     // UI (fixed position)
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 20px Arial';
-    ctx.textAlign = 'left';
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 20px Arial";
+    ctx.textAlign = "left";
     ctx.fillText(`Health: ${Math.max(0, player.health)}`, 10, 30);
     ctx.fillText(`Ammo: ${player.ammo}/${MAX_AMMO}`, 10, 55);
     ctx.fillText(`Score: ${score}`, 10, 80);
     ctx.fillText(`Enemies Killed: ${enemiesKilled}`, 10, 105);
     ctx.fillText(`Difficulty: ${difficultyLevel}`, 10, 130);
-    
+
     if (challenge === 1) {
       ctx.fillText(`Time: ${60 - timer}s`, 10, 155);
     }
-    
+
     if (reloadMsg) {
-      ctx.fillStyle = '#ffff00';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('RELOADING...', canvas.width / 2, canvas.height / 2);
+      ctx.fillStyle = "#ffff00";
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("RELOADING...", canvas.width / 2, canvas.height / 2);
     }
-    
+
     if (message) {
-      ctx.fillStyle = '#ffff00';
-      ctx.font = 'bold 24px Arial';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = "#ffff00";
+      ctx.font = "bold 24px Arial";
+      ctx.textAlign = "center";
       ctx.fillText(message, canvas.width / 2, canvas.height / 2 + 30);
     }
-  }, [player, bullets, enemies, obstacles, pickups, score, enemiesKilled, timer, reloadMsg, message, challenge, cameraOffset, difficultyLevel]);
+  }, [
+    player,
+    bullets,
+    enemies,
+    obstacles,
+    pickups,
+    score,
+    enemiesKilled,
+    timer,
+    reloadMsg,
+    message,
+    challenge,
+    cameraOffset,
+    difficultyLevel,
+  ]);
 
   // Start game
   const startGame = () => {
     setupLevel();
-    setGameState('playing');
+    setGameStartTime(Date.now());
+    setGameState("playing");
   };
-
-
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 600,
+        }}
+      >
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={{
+            padding: "16px 40px",
+            fontSize: 24,
+            borderRadius: 8,
+            background: "#00ff00",
+            color: "#222",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
         >
           Click to Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>Enhanced PUBG 2D with larger map, smarter enemies, and optimized ammo system!</div>
+        <div style={{ color: "#fff", fontSize: 16 }}>
+          Enhanced PUBG 2D with larger map, smarter enemies, and optimized ammo
+          system!
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 font-inter p-4">
-      <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">PUBG 2D Enhanced</h1>
-      <div className="relative bg-white rounded-xl shadow-2xl overflow-hidden border-4 border-gray-700 flex flex-col items-center p-2 md:p-4 lg:p-6" style={{ width: 900, height: 600 }}>
+      <h1 className="text-4xl font-bold text-white mb-6 drop-shadow-lg">
+        PUBG 2D Enhanced
+      </h1>
+      <div
+        className="relative bg-white rounded-xl shadow-2xl overflow-hidden border-4 border-gray-700 flex flex-col items-center p-2 md:p-4 lg:p-6"
+        style={{ width: 900, height: 600 }}
+      >
         <canvas
           ref={canvasRef}
           width={900}
           height={600}
           className="bg-gray-900 rounded-lg border-2 border-gray-300"
         ></canvas>
-        
+
         {/* Start Screen */}
-        {gameState === 'start' && (
+        {gameState === "start" && (
           <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center rounded-lg">
-            <h2 className="text-white text-5xl font-extrabold mb-6 animate-pulse">PUBG 2D Enhanced</h2>
+            <h2 className="text-white text-5xl font-extrabold mb-6 animate-pulse">
+              PUBG 2D Enhanced
+            </h2>
             <div className="bg-gray-800 rounded-xl p-6 mb-6 max-w-md">
-              <h3 className="text-amber-400 text-xl font-bold mb-4">Select Challenge:</h3>
+              <h3 className="text-amber-400 text-xl font-bold mb-4">
+                Select Challenge:
+              </h3>
               {CHALLENGES.map((ch, index) => (
                 <button
                   key={index}
                   onClick={() => setChallenge(index)}
                   className={`w-full text-left p-3 rounded-lg mb-2 transition-colors ${
-                    challenge === index 
-                      ? 'bg-amber-500 text-gray-900' 
-                      : 'bg-gray-700 text-white hover:bg-gray-600'
+                    challenge === index
+                      ? "bg-amber-500 text-gray-900"
+                      : "bg-gray-700 text-white hover:bg-gray-600"
                   }`}
                 >
                   <div className="font-bold">{ch.name}</div>
@@ -818,34 +999,50 @@ const Shooter: React.FC = () => {
             </button>
           </div>
         )}
-        
+
         {/* Win Screen */}
-        {gameState === 'win' && (
+        {gameState === "win" && (
           <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center rounded-lg">
-            <h2 className="text-green-400 text-6xl font-extrabold mb-4 animate-bounce">MISSION COMPLETE!</h2>
+            <h2 className="text-green-400 text-6xl font-extrabold mb-4 animate-bounce">
+              MISSION COMPLETE!
+            </h2>
             <p className="text-white text-2xl mb-2">Score: {score}</p>
-            <p className="text-white text-xl mb-2">Enemies Killed: {enemiesKilled}</p>
-            <p className="text-white text-xl mb-2">Difficulty Reached: {difficultyLevel}</p>
-            <p className="text-white text-xl mb-8">Challenge completed successfully!</p>
+            <p className="text-white text-xl mb-2">
+              Enemies Killed: {enemiesKilled}
+            </p>
+            <p className="text-white text-xl mb-2">
+              Difficulty Reached: {difficultyLevel}
+            </p>
+            <p className="text-white text-xl mb-8">
+              Challenge completed successfully!
+            </p>
             <button
-              onClick={() => setGameState('start')}
+              onClick={() => setGameState("start")}
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
             >
               Play Again
             </button>
           </div>
         )}
-        
+
         {/* Lose Screen */}
-        {gameState === 'lose' && (
+        {gameState === "lose" && (
           <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center rounded-lg">
-            <h2 className="text-red-500 text-6xl font-extrabold mb-4 animate-shake">MISSION FAILED!</h2>
+            <h2 className="text-red-500 text-6xl font-extrabold mb-4 animate-shake">
+              MISSION FAILED!
+            </h2>
             <p className="text-white text-2xl mb-2">Score: {score}</p>
-            <p className="text-white text-xl mb-2">Enemies Killed: {enemiesKilled}</p>
-            <p className="text-white text-xl mb-2">Difficulty Reached: {difficultyLevel}</p>
-            <p className="text-white text-xl mb-8">Try again to complete the challenge!</p>
+            <p className="text-white text-xl mb-2">
+              Enemies Killed: {enemiesKilled}
+            </p>
+            <p className="text-white text-xl mb-2">
+              Difficulty Reached: {difficultyLevel}
+            </p>
+            <p className="text-white text-xl mb-8">
+              Try again to complete the challenge!
+            </p>
             <button
-              onClick={() => setGameState('start')}
+              onClick={() => setGameState("start")}
               className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105"
             >
               Try Again
@@ -855,10 +1052,21 @@ const Shooter: React.FC = () => {
       </div>
       <div className="mt-8 text-center text-white">
         <p className="text-lg">Enhanced Features:</p>
-        <p className="text-md">• Enemies take 2 hits to kill • Health and ammo pickups</p>
-        <p className="text-md">• Progressive difficulty every 20 kills • Enhanced enemy AI</p>
-        <p className="text-md">• Improved collision detection • Better visual feedback</p>
-        <p className="text-md">Move: <span className="text-yellow-300">WASD</span> • Aim: <span className="text-yellow-300">Mouse</span> • Shoot: <span className="text-yellow-300">Click/Space</span> • Reload: <span className="text-yellow-300">R</span></p>
+        <p className="text-md">
+          • Enemies take 2 hits to kill • Health and ammo pickups
+        </p>
+        <p className="text-md">
+          • Progressive difficulty every 20 kills • Enhanced enemy AI
+        </p>
+        <p className="text-md">
+          • Improved collision detection • Better visual feedback
+        </p>
+        <p className="text-md">
+          Move: <span className="text-yellow-300">WASD</span> • Aim:{" "}
+          <span className="text-yellow-300">Mouse</span> • Shoot:{" "}
+          <span className="text-yellow-300">Click/Space</span> • Reload:{" "}
+          <span className="text-yellow-300">R</span>
+        </p>
       </div>
     </div>
   );

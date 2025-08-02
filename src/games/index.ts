@@ -27,6 +27,16 @@ import GameMonetizeC34ZURVG from './GameMonetizeC34ZURVG';
 import GameMonetizeWKOKJ30H from './GameMonetizeWKOKJ30H';
 import GameMonetizeD393RQDF from './GameMonetizeD393RQDF';
 import GameMonetizeWR4S1BKZ from './GameMonetizeWR4S1BKZ';
+import FunnyShooter2 from './FunnyShooter2';
+import SlopeRacing3D from './SlopeRacing3D';
+import InjectionInvasion from './InjectionInvasion';
+import BloxdIO from './BloxdIO';
+import WormsZone from './WormsZone';
+import BasketballStars from './BasketballStars';
+import UltimateFlyingCar from './UltimateFlyingCar';
+import WW2CallOfSniper from './WW2CallOfSniper';
+import StickmanHookOnline from './StickmanHookOnline';
+import MotocrossRacing from './MotocrossRacing';
 // Game component mapping
 export const gameComponents: Record<string, React.ComponentType> = {
   'freefire': FreeFireGame,
@@ -56,6 +66,16 @@ export const gameComponents: Record<string, React.ComponentType> = {
   'wkokj30h': GameMonetizeWKOKJ30H,
   'd393rqdf': GameMonetizeD393RQDF,
   'wr4s1bkz': GameMonetizeWR4S1BKZ,
+  'funnyshooter2': FunnyShooter2,
+  'sloperacing3d': SlopeRacing3D,
+  'injectioninvasion': InjectionInvasion,
+  'bloxdio': BloxdIO,
+  'wormszone': WormsZone,
+  'basketballstars': BasketballStars,
+  'ultimateflyingcar': UltimateFlyingCar,
+  'ww2callofsniper': WW2CallOfSniper,
+  'stickmanhookonline': StickmanHookOnline,
+  'motocrossracing': MotocrossRacing,
 };
 
-export { Fighter, Shooter, Football, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno, GameMonetizeC34ZURVG, GameMonetizeWKOKJ30H, GameMonetizeD393RQDF, GameMonetizeWR4S1BKZ }; 
+export { Fighter, Shooter, Football, SnakeGame, PongGame, TetrisGame, BreakoutGame, MemoryGame, RPGGame, KathmanduGame, TempleGame, AllOfUsAreDead, TowerStackGame, Uno, GameMonetizeC34ZURVG, GameMonetizeWKOKJ30H, GameMonetizeD393RQDF, GameMonetizeWR4S1BKZ, FunnyShooter2, SlopeRacing3D, InjectionInvasion, BloxdIO, WormsZone, BasketballStars, UltimateFlyingCar, WW2CallOfSniper, StickmanHookOnline, MotocrossRacing }; 

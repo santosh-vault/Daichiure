@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useGameCoins } from "../hooks/useGameCoins";
 
-const GameMonetize9PTV2PBY: React.FC = () => {
+const GachaLifeGame: React.FC = () => {
   const [gameStartTime] = useState(Date.now());
   const [gameEnded, setGameEnded] = useState(false);
 
   useGameCoins({
-    gameId: "GameMonetize9PTV2PBY",
+    gameId: "GachaLifeGame",
     trigger: gameEnded,
     score: Math.floor((Date.now() - gameStartTime) / 1000 / 30) * 10, // 10 coins per 30 seconds
     duration: Date.now() - gameStartTime,
@@ -31,12 +31,12 @@ const GameMonetize9PTV2PBY: React.FC = () => {
       }}
     >
       <iframe
-        src="https://html5.gamemonetize.co/9ptv2pbyrhiv9e9jlcj91vj9cwdwd3mw/"
-        width="1280"
-        height="720"
+        src="https://gd.games/abcia2/life-in-gacha-life"
+        width="800"
+        height="600"
         scrolling="no"
         frameBorder="0"
-        title="GameMonetize Embedded Game 7"
+        title="Life in Gacha Life Game"
         style={{
           maxWidth: "100%",
           borderRadius: 12,
@@ -48,4 +48,4 @@ const GameMonetize9PTV2PBY: React.FC = () => {
   );
 };
 
-export default GameMonetize9PTV2PBY;
+export default GachaLifeGame;

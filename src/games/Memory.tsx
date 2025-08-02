@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { RotateCw, Clock, Star } from 'lucide-react';
-
+import React, { useState, useEffect, useCallback } from "react";
+import { RotateCw, Clock, Star } from "lucide-react";
+import { useGameCoins } from "../hooks/useGameCoins";
 
 interface Card {
   id: number;
@@ -9,7 +9,20 @@ interface Card {
   isMatched: boolean;
 }
 
-const CARD_VALUES = ['🎮', '🎲', '🎯', '🎪', '🎨', '🎭', '🎪', '🎯', '🎲', '🎮', '🎨', '🎭'];
+const CARD_VALUES = [
+  "🎮",
+  "🎲",
+  "🎯",
+  "🎪",
+  "🎨",
+  "🎭",
+  "🎪",
+  "🎯",
+  "🎲",
+  "🎮",
+  "🎨",
+  "🎭",
+];
 
 export const MemoryGame: React.FC = () => {
   const [cards, setCards] = useState<Card[]>([]);
@@ -21,6 +34,7 @@ export const MemoryGame: React.FC = () => {
   const [bestTime, setBestTime] = useState<number | null>(null);
   const [bestMoves, setBestMoves] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(0);
 
   const initializeGame = useCallback(() => {
     const shuffledValues = [...CARD_VALUES].sort(() => Math.random() - 0.5);
@@ -28,9 +42,9 @@ export const MemoryGame: React.FC = () => {
       id: index,
       value,
       isFlipped: false,
-      isMatched: false
+      isMatched: false,
     }));
-    
+
     setCards(newCards);
     setFlippedCards([]);
     setMoves(0);
@@ -39,54 +53,67 @@ export const MemoryGame: React.FC = () => {
     setGameWon(false);
   }, []);
 
-  const handleCardClick = useCallback((cardId: number) => {
-    if (!gameStarted) {
-      setGameStarted(true);
-    }
-
-    const card = cards.find(c => c.id === cardId);
-    if (!card || card.isFlipped || card.isMatched || flippedCards.length >= 2) {
-      return;
-    }
-
-    const newFlippedCards = [...flippedCards, cardId];
-    setFlippedCards(newFlippedCards);
-
-    if (newFlippedCards.length === 2) {
-      setMoves(prev => prev + 1);
-      
-      const [firstId, secondId] = newFlippedCards;
-      const firstCard = cards.find(c => c.id === firstId);
-      const secondCard = cards.find(c => c.id === secondId);
-
-      if (firstCard && secondCard && firstCard.value === secondCard.value) {
-        // Match found
-        setCards(prev => prev.map(card => 
-          card.id === firstId || card.id === secondId 
-            ? { ...card, isMatched: true }
-            : card
-        ));
-        setFlippedCards([]);
-      } else {
-        // No match, flip back after delay
-        setTimeout(() => {
-          setCards(prev => prev.map(card => 
-            card.id === firstId || card.id === secondId 
-              ? { ...card, isFlipped: false }
-              : card
-          ));
-          setFlippedCards([]);
-        }, 1000);
+  const handleCardClick = useCallback(
+    (cardId: number) => {
+      if (!gameStarted) {
+        setGameStarted(true);
+        setGameStartTime(Date.now());
       }
-    }
 
-    // Flip the clicked card
-    setCards(prev => prev.map(card => 
-      card.id === cardId 
-        ? { ...card, isFlipped: true }
-        : card
-    ));
-  }, [cards, flippedCards, gameStarted]);
+      const card = cards.find((c) => c.id === cardId);
+      if (
+        !card ||
+        card.isFlipped ||
+        card.isMatched ||
+        flippedCards.length >= 2
+      ) {
+        return;
+      }
+
+      const newFlippedCards = [...flippedCards, cardId];
+      setFlippedCards(newFlippedCards);
+
+      if (newFlippedCards.length === 2) {
+        setMoves((prev) => prev + 1);
+
+        const [firstId, secondId] = newFlippedCards;
+        const firstCard = cards.find((c) => c.id === firstId);
+        const secondCard = cards.find((c) => c.id === secondId);
+
+        if (firstCard && secondCard && firstCard.value === secondCard.value) {
+          // Match found
+          setCards((prev) =>
+            prev.map((card) =>
+              card.id === firstId || card.id === secondId
+                ? { ...card, isMatched: true }
+                : card
+            )
+          );
+          setFlippedCards([]);
+        } else {
+          // No match, flip back after delay
+          setTimeout(() => {
+            setCards((prev) =>
+              prev.map((card) =>
+                card.id === firstId || card.id === secondId
+                  ? { ...card, isFlipped: false }
+                  : card
+              )
+            );
+            setFlippedCards([]);
+          }, 1000);
+        }
+      }
+
+      // Flip the clicked card
+      setCards((prev) =>
+        prev.map((card) =>
+          card.id === cardId ? { ...card, isFlipped: true } : card
+        )
+      );
+    },
+    [cards, flippedCards, gameStarted]
+  );
 
   useEffect(() => {
     initializeGame();
@@ -96,33 +123,33 @@ export const MemoryGame: React.FC = () => {
     let interval: NodeJS.Timeout;
     if (gameStarted && !gameWon) {
       interval = setInterval(() => {
-        setTime(prev => prev + 1);
+        setTime((prev) => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
   }, [gameStarted, gameWon]);
 
   useEffect(() => {
-    if (cards.length > 0 && cards.every(card => card.isMatched)) {
+    if (cards.length > 0 && cards.every((card) => card.isMatched)) {
       setGameWon(true);
-      
+
       // Update best scores
       if (!bestTime || time < bestTime) {
         setBestTime(time);
-        localStorage.setItem('memoryBestTime', time.toString());
+        localStorage.setItem("memoryBestTime", time.toString());
       }
       if (!bestMoves || moves < bestMoves) {
         setBestMoves(moves);
-        localStorage.setItem('memoryBestMoves', moves.toString());
+        localStorage.setItem("memoryBestMoves", moves.toString());
       }
     }
   }, [cards, time, moves, bestTime, bestMoves]);
 
   useEffect(() => {
     // Load best scores from localStorage
-    const savedBestTime = localStorage.getItem('memoryBestTime');
-    const savedBestMoves = localStorage.getItem('memoryBestMoves');
-    
+    const savedBestTime = localStorage.getItem("memoryBestTime");
+    const savedBestMoves = localStorage.getItem("memoryBestMoves");
+
     if (savedBestTime) setBestTime(parseInt(savedBestTime));
     if (savedBestMoves) setBestMoves(parseInt(savedBestMoves));
   }, []);
@@ -132,19 +159,28 @@ export const MemoryGame: React.FC = () => {
       // Update best scores
       if (!bestTime || time < bestTime) {
         setBestTime(time);
-        localStorage.setItem('memoryBestTime', time.toString());
+        localStorage.setItem("memoryBestTime", time.toString());
       }
       if (!bestMoves || moves < bestMoves) {
         setBestMoves(moves);
-        localStorage.setItem('memoryBestMoves', moves.toString());
+        localStorage.setItem("memoryBestMoves", moves.toString());
       }
     }
   }, [gameWon, time, moves, bestTime, bestMoves]);
 
+  // Coin earning system
+  useGameCoins({
+    gameId: "memory",
+    trigger: gameWon,
+    score: gameWon ? Math.max(1000 - moves * 10 - time, 100) : 0, // Score based on efficiency
+    duration:
+      gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0,
+  });
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const getStarRating = (moves: number) => {
@@ -155,14 +191,34 @@ export const MemoryGame: React.FC = () => {
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 600,
+        }}
+      >
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={{
+            padding: "16px 40px",
+            fontSize: 24,
+            borderRadius: 8,
+            background: "#00ff00",
+            color: "#222",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
         >
           Click to Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>Test your memory by matching pairs of cards. Find all matches to win! Click cards to flip them.</div>
+        <div style={{ color: "#fff", fontSize: 16 }}>
+          Test your memory by matching pairs of cards. Find all matches to win!
+          Click cards to flip them.
+        </div>
       </div>
     );
   }
@@ -171,8 +227,10 @@ export const MemoryGame: React.FC = () => {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700 max-w-4xl w-full">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-amber-400 mb-2">Memory Match</h1>
-          
+          <h1 className="text-3xl font-bold text-amber-400 mb-2">
+            Memory Match
+          </h1>
+
           <div className="flex justify-center space-x-8 text-gray-300 mb-4">
             <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-amber-400" />
@@ -203,13 +261,16 @@ export const MemoryGame: React.FC = () => {
               onClick={() => handleCardClick(card.id)}
               className={`
                 aspect-square rounded-xl cursor-pointer transition-all duration-300 transform hover:scale-105
-                ${card.isFlipped || card.isMatched
-                  ? 'bg-amber-500 text-gray-900 shadow-lg'
-                  : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                ${
+                  card.isFlipped || card.isMatched
+                    ? "bg-amber-500 text-gray-900 shadow-lg"
+                    : "bg-gray-700 text-gray-400 hover:bg-gray-600"
                 }
-                ${card.isMatched ? 'opacity-75' : ''}
+                ${card.isMatched ? "opacity-75" : ""}
                 flex items-center justify-center text-4xl font-bold
-                border-2 ${card.isMatched ? 'border-amber-400' : 'border-gray-600'}
+                border-2 ${
+                  card.isMatched ? "border-amber-400" : "border-gray-600"
+                }
               `}
             >
               {(card.isFlipped || card.isMatched) && card.value}
@@ -230,7 +291,9 @@ export const MemoryGame: React.FC = () => {
                   <Star
                     key={i}
                     className={`h-6 w-6 ${
-                      i < getStarRating(moves) ? 'text-yellow-400 fill-current' : 'text-gray-600'
+                      i < getStarRating(moves)
+                        ? "text-yellow-400 fill-current"
+                        : "text-gray-600"
                     }`}
                   />
                 ))}
@@ -261,11 +324,11 @@ export const MemoryGame: React.FC = () => {
             <strong>How to Play:</strong>
           </div>
           <div className="text-xs">
-            Click cards to flip them and find matching pairs. 
-            Try to complete the game with the fewest moves and fastest time!
+            Click cards to flip them and find matching pairs. Try to complete
+            the game with the fewest moves and fastest time!
           </div>
         </div>
       </div>
     </div>
   );
-}; 
+};

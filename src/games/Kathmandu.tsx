@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { useGameCoins } from "../hooks/useGameCoins";
 
 interface Player {
   x: number;
@@ -11,14 +12,14 @@ interface Temple {
   x: number;
   y: number;
   visited: boolean;
-  type: 'pashupatinath' | 'swyambhunath' | 'boudhanath';
+  type: "pashupatinath" | "swyambhunath" | "boudhanath";
 }
 
 interface Treasure {
   x: number;
   y: number;
   collected: boolean;
-  type: 'mandala' | 'prayer_flag' | 'singing_bowl';
+  type: "mandala" | "prayer_flag" | "singing_bowl";
 }
 
 const CANVAS_WIDTH = 800;
@@ -29,18 +30,29 @@ const MAZE_HEIGHT = Math.floor(CANVAS_HEIGHT / CELL_SIZE);
 
 export const KathmanduGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [gameState, setGameState] = useState<'playing' | 'paused' | 'gameOver' | 'won'>('playing');
+  const [gameState, setGameState] = useState<
+    "playing" | "paused" | "gameOver" | "won"
+  >("playing");
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [health, setHealth] = useState(100);
   const [treasures, setTreasures] = useState(0);
   const [started, setStarted] = useState(false);
+  const [gameStartTime] = useState(Date.now());
+
+  // Coin earning system
+  useGameCoins({
+    gameId: "Kathmandu",
+    trigger: gameState === "won",
+    score: score + treasures * 20, // Score + treasure bonus
+    duration: Math.floor((Date.now() - gameStartTime) / 1000),
+  });
 
   const [player, setPlayer] = useState<Player>({
     x: 1,
     y: MAZE_HEIGHT - 2,
     health: 100,
-    treasures: 0
+    treasures: 0,
   });
 
   const [maze, setMaze] = useState<boolean[][]>([]);
@@ -48,13 +60,15 @@ export const KathmanduGame: React.FC = () => {
   const [treasureItems, setTreasureItems] = useState<Treasure[]>([]);
 
   const generateMaze = useCallback(() => {
-    const newMaze = Array(MAZE_HEIGHT).fill(null).map(() => Array(MAZE_WIDTH).fill(true));
-    
+    const newMaze = Array(MAZE_HEIGHT)
+      .fill(null)
+      .map(() => Array(MAZE_WIDTH).fill(true));
+
     // Generate maze using simple algorithm
     for (let y = 1; y < MAZE_HEIGHT - 1; y += 2) {
       for (let x = 1; x < MAZE_WIDTH - 1; x += 2) {
         newMaze[y][x] = false;
-        
+
         // Randomly create paths
         if (y + 2 < MAZE_HEIGHT - 1 && Math.random() > 0.3) {
           newMaze[y + 1][x] = false;
@@ -64,158 +78,184 @@ export const KathmanduGame: React.FC = () => {
         }
       }
     }
-    
+
     // Ensure start and end are accessible
     newMaze[MAZE_HEIGHT - 2][1] = false;
     newMaze[1][MAZE_WIDTH - 2] = false;
-    
+
     setMaze(newMaze);
   }, []);
 
   const generateTemples = useCallback(() => {
-    const templeTypes: ('pashupatinath' | 'swyambhunath' | 'boudhanath')[] = ['pashupatinath', 'swyambhunath', 'boudhanath'];
+    const templeTypes: ("pashupatinath" | "swyambhunath" | "boudhanath")[] = [
+      "pashupatinath",
+      "swyambhunath",
+      "boudhanath",
+    ];
     const newTemples: Temple[] = [];
-    
+
     for (let i = 0; i < 3; i++) {
       let x, y;
       do {
         x = Math.floor(Math.random() * (MAZE_WIDTH - 2)) + 1;
         y = Math.floor(Math.random() * (MAZE_HEIGHT - 2)) + 1;
-      } while (maze[y]?.[x] || newTemples.some(t => t.x === x && t.y === y));
-      
+      } while (maze[y]?.[x] || newTemples.some((t) => t.x === x && t.y === y));
+
       newTemples.push({
         x,
         y,
         visited: false,
-        type: templeTypes[i]
+        type: templeTypes[i],
       });
     }
-    
+
     setTemples(newTemples);
   }, [maze]);
 
   const generateTreasures = useCallback(() => {
-    const treasureTypes: ('mandala' | 'prayer_flag' | 'singing_bowl')[] = ['mandala', 'prayer_flag', 'singing_bowl'];
+    const treasureTypes: ("mandala" | "prayer_flag" | "singing_bowl")[] = [
+      "mandala",
+      "prayer_flag",
+      "singing_bowl",
+    ];
     const newTreasures: Treasure[] = [];
-    
+
     for (let i = 0; i < 5; i++) {
       let x, y;
       do {
         x = Math.floor(Math.random() * (MAZE_WIDTH - 2)) + 1;
         y = Math.floor(Math.random() * (MAZE_HEIGHT - 2)) + 1;
-      } while (maze[y]?.[x] || newTreasures.some(t => t.x === x && t.y === y));
-      
+      } while (
+        maze[y]?.[x] ||
+        newTreasures.some((t) => t.x === x && t.y === y)
+      );
+
       newTreasures.push({
         x,
         y,
         collected: false,
-        type: treasureTypes[Math.floor(Math.random() * treasureTypes.length)]
+        type: treasureTypes[Math.floor(Math.random() * treasureTypes.length)],
       });
     }
-    
+
     setTreasureItems(newTreasures);
   }, [maze]);
 
-  const movePlayer = useCallback((dx: number, dy: number) => {
-    if (gameState !== 'playing') return;
+  const movePlayer = useCallback(
+    (dx: number, dy: number) => {
+      if (gameState !== "playing") return;
 
-    const newX = player.x + dx;
-    const newY = player.y + dy;
+      const newX = player.x + dx;
+      const newY = player.y + dy;
 
-    // Check wall collision
-    if (newX < 0 || newX >= MAZE_WIDTH || newY < 0 || newY >= MAZE_HEIGHT || maze[newY]?.[newX]) {
-      setHealth(prev => Math.max(0, prev - 5));
-      return;
-    }
+      // Check wall collision
+      if (
+        newX < 0 ||
+        newX >= MAZE_WIDTH ||
+        newY < 0 ||
+        newY >= MAZE_HEIGHT ||
+        maze[newY]?.[newX]
+      ) {
+        setHealth((prev) => Math.max(0, prev - 5));
+        return;
+      }
 
-    // Check temple visit
-    const templeIndex = temples.findIndex(temple => 
-      !temple.visited &&
-      newX === temple.x &&
-      newY === temple.y
-    );
+      // Check temple visit
+      const templeIndex = temples.findIndex(
+        (temple) => !temple.visited && newX === temple.x && newY === temple.y
+      );
 
-    if (templeIndex !== -1) {
-      setTemples(prev => prev.map((temple, index) => 
-        index === templeIndex ? { ...temple, visited: true } : temple
-      ));
-      setScore(prev => prev + 100);
-      setHealth(prev => Math.min(100, prev + 20));
-    }
+      if (templeIndex !== -1) {
+        setTemples((prev) =>
+          prev.map((temple, index) =>
+            index === templeIndex ? { ...temple, visited: true } : temple
+          )
+        );
+        setScore((prev) => prev + 100);
+        setHealth((prev) => Math.min(100, prev + 20));
+      }
 
-    // Check treasure collection
-    const treasureIndex = treasureItems.findIndex(treasure => 
-      !treasure.collected &&
-      newX === treasure.x &&
-      newY === treasure.y
-    );
+      // Check treasure collection
+      const treasureIndex = treasureItems.findIndex(
+        (treasure) =>
+          !treasure.collected && newX === treasure.x && newY === treasure.y
+      );
 
-    if (treasureIndex !== -1) {
-      setTreasureItems(prev => prev.map((treasure, index) => 
-        index === treasureIndex ? { ...treasure, collected: true } : treasure
-      ));
-      setTreasures(prev => prev + 1);
-      setScore(prev => prev + 50);
-    }
+      if (treasureIndex !== -1) {
+        setTreasureItems((prev) =>
+          prev.map((treasure, index) =>
+            index === treasureIndex
+              ? { ...treasure, collected: true }
+              : treasure
+          )
+        );
+        setTreasures((prev) => prev + 1);
+        setScore((prev) => prev + 50);
+      }
 
-    // Check if reached exit
-    if (newX === MAZE_WIDTH - 2 && newY === 1) {
-      setGameState('won');
-    }
+      // Check if reached exit
+      if (newX === MAZE_WIDTH - 2 && newY === 1) {
+        setGameState("won");
+      }
 
-    setPlayer(prev => ({
-      ...prev,
-      x: newX,
-      y: newY
-    }));
-  }, [player, gameState, maze, temples, treasureItems]);
+      setPlayer((prev) => ({
+        ...prev,
+        x: newX,
+        y: newY,
+      }));
+    },
+    [player, gameState, maze, temples, treasureItems]
+  );
 
-  const handleKeyPress = useCallback((e: KeyboardEvent) => {
-    if (gameState === 'gameOver') return;
+  const handleKeyPress = useCallback(
+    (e: KeyboardEvent) => {
+      if (gameState === "gameOver") return;
 
-    const moveSpeed = 1;
-    
-    switch (e.code) {
-      case 'ArrowUp':
-      case 'KeyW':
-        e.preventDefault();
-        movePlayer(0, -moveSpeed);
-        break;
-      case 'ArrowDown':
-      case 'KeyS':
-        e.preventDefault();
-        movePlayer(0, moveSpeed);
-        break;
-      case 'ArrowLeft':
-      case 'KeyA':
-        e.preventDefault();
-        movePlayer(-moveSpeed, 0);
-        break;
-      case 'ArrowRight':
-      case 'KeyD':
-        e.preventDefault();
-        movePlayer(moveSpeed, 0);
-        break;
-      case 'KeyP':
-        e.preventDefault();
-        setGameState(prev => prev === 'playing' ? 'paused' : 'playing');
-        break;
-    }
-  }, [gameState, movePlayer]);
+      const moveSpeed = 1;
+
+      switch (e.code) {
+        case "ArrowUp":
+        case "KeyW":
+          e.preventDefault();
+          movePlayer(0, -moveSpeed);
+          break;
+        case "ArrowDown":
+        case "KeyS":
+          e.preventDefault();
+          movePlayer(0, moveSpeed);
+          break;
+        case "ArrowLeft":
+        case "KeyA":
+          e.preventDefault();
+          movePlayer(-moveSpeed, 0);
+          break;
+        case "ArrowRight":
+        case "KeyD":
+          e.preventDefault();
+          movePlayer(moveSpeed, 0);
+          break;
+        case "KeyP":
+          e.preventDefault();
+          setGameState((prev) => (prev === "playing" ? "paused" : "playing"));
+          break;
+      }
+    },
+    [gameState, movePlayer]
+  );
 
   const drawGame = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     // Clear canvas with warm background
-    ctx.fillStyle = '#F5DEB3';
+    ctx.fillStyle = "#F5DEB3";
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
     // Draw maze walls
-    ctx.fillStyle = '#8B4513';
+    ctx.fillStyle = "#8B4513";
     for (let y = 0; y < MAZE_HEIGHT; y++) {
       for (let x = 0; x < MAZE_WIDTH; x++) {
         if (maze[y]?.[x]) {
@@ -225,113 +265,171 @@ export const KathmanduGame: React.FC = () => {
     }
 
     // Draw temples
-    temples.forEach(temple => {
+    temples.forEach((temple) => {
       if (!temple.visited) {
-        ctx.fillStyle = '#FFD700';
-        ctx.fillRect(temple.x * CELL_SIZE + 5, temple.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-        ctx.fillStyle = '#8B4513';
-        ctx.font = '12px Arial';
-        ctx.fillText('🏛️', temple.x * CELL_SIZE + 8, temple.y * CELL_SIZE + 25);
+        ctx.fillStyle = "#FFD700";
+        ctx.fillRect(
+          temple.x * CELL_SIZE + 5,
+          temple.y * CELL_SIZE + 5,
+          CELL_SIZE - 10,
+          CELL_SIZE - 10
+        );
+        ctx.fillStyle = "#8B4513";
+        ctx.font = "12px Arial";
+        ctx.fillText("🏛️", temple.x * CELL_SIZE + 8, temple.y * CELL_SIZE + 25);
       } else {
-        ctx.fillStyle = '#90EE90';
-        ctx.fillRect(temple.x * CELL_SIZE + 5, temple.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-        ctx.fillStyle = '#006400';
-        ctx.font = '12px Arial';
-        ctx.fillText('✅', temple.x * CELL_SIZE + 8, temple.y * CELL_SIZE + 25);
+        ctx.fillStyle = "#90EE90";
+        ctx.fillRect(
+          temple.x * CELL_SIZE + 5,
+          temple.y * CELL_SIZE + 5,
+          CELL_SIZE - 10,
+          CELL_SIZE - 10
+        );
+        ctx.fillStyle = "#006400";
+        ctx.font = "12px Arial";
+        ctx.fillText("✅", temple.x * CELL_SIZE + 8, temple.y * CELL_SIZE + 25);
       }
     });
 
     // Draw treasures
-    treasureItems.forEach(treasure => {
+    treasureItems.forEach((treasure) => {
       if (!treasure.collected) {
-        ctx.fillStyle = '#FFD700';
-        ctx.fillRect(treasure.x * CELL_SIZE + 8, treasure.y * CELL_SIZE + 8, CELL_SIZE - 16, CELL_SIZE - 16);
-        ctx.fillStyle = '#000000';
-        ctx.font = '16px Arial';
-        let symbol = '💎';
+        ctx.fillStyle = "#FFD700";
+        ctx.fillRect(
+          treasure.x * CELL_SIZE + 8,
+          treasure.y * CELL_SIZE + 8,
+          CELL_SIZE - 16,
+          CELL_SIZE - 16
+        );
+        ctx.fillStyle = "#000000";
+        ctx.font = "16px Arial";
+        let symbol = "💎";
         switch (treasure.type) {
-          case 'mandala':
-            symbol = '🌀';
+          case "mandala":
+            symbol = "🌀";
             break;
-          case 'prayer_flag':
-            symbol = '🏳️';
+          case "prayer_flag":
+            symbol = "🏳️";
             break;
-          case 'singing_bowl':
-            symbol = '🔔';
+          case "singing_bowl":
+            symbol = "🔔";
             break;
         }
-        ctx.fillText(symbol, treasure.x * CELL_SIZE + 12, treasure.y * CELL_SIZE + 25);
+        ctx.fillText(
+          symbol,
+          treasure.x * CELL_SIZE + 12,
+          treasure.y * CELL_SIZE + 25
+        );
       }
     });
 
     // Draw player
-    ctx.fillStyle = '#FF6B6B';
-    ctx.fillRect(player.x * CELL_SIZE + 5, player.y * CELL_SIZE + 5, CELL_SIZE - 10, CELL_SIZE - 10);
-    ctx.fillStyle = '#000000';
-    ctx.font = '16px Arial';
-    ctx.fillText('🧘', player.x * CELL_SIZE + 8, player.y * CELL_SIZE + 25);
+    ctx.fillStyle = "#FF6B6B";
+    ctx.fillRect(
+      player.x * CELL_SIZE + 5,
+      player.y * CELL_SIZE + 5,
+      CELL_SIZE - 10,
+      CELL_SIZE - 10
+    );
+    ctx.fillStyle = "#000000";
+    ctx.font = "16px Arial";
+    ctx.fillText("🧘", player.x * CELL_SIZE + 8, player.y * CELL_SIZE + 25);
 
     // Draw UI
-    ctx.fillStyle = '#000000';
-    ctx.font = '20px Arial';
+    ctx.fillStyle = "#000000";
+    ctx.font = "20px Arial";
     ctx.fillText(`Score: ${score}`, 10, 30);
     ctx.fillText(`Level: ${level}`, 10, 60);
     ctx.fillText(`Treasures: ${treasures}/5`, 10, 90);
 
     // Draw health bar
-    ctx.fillStyle = '#FF0000';
+    ctx.fillStyle = "#FF0000";
     ctx.fillRect(10, 110, health * 2, 20);
-    ctx.strokeStyle = '#000000';
+    ctx.strokeStyle = "#000000";
     ctx.strokeRect(10, 110, 200, 20);
-    ctx.fillStyle = '#000000';
-    ctx.font = '16px Arial';
+    ctx.fillStyle = "#000000";
+    ctx.font = "16px Arial";
     ctx.fillText(`Health: ${health}%`, 220, 125);
 
     // Draw instructions
-    ctx.fillStyle = '#000000';
-    ctx.font = '14px Arial';
-    ctx.fillText('🏛️ = Temple (visit for health)', 10, 160);
-    ctx.fillText('💎 = Treasure (collect for points)', 10, 180);
-    ctx.fillText('🚪 = Exit (reach to win)', 10, 200);
+    ctx.fillStyle = "#000000";
+    ctx.font = "14px Arial";
+    ctx.fillText("🏛️ = Temple (visit for health)", 10, 160);
+    ctx.fillText("💎 = Treasure (collect for points)", 10, 180);
+    ctx.fillText("🚪 = Exit (reach to win)", 10, 200);
 
-    if (gameState === 'paused') {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    if (gameState === "paused") {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '48px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('PAUSED', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-      ctx.font = '24px Arial';
-      ctx.fillText('Press P to resume', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 50);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "48px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("PAUSED", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      ctx.font = "24px Arial";
+      ctx.fillText(
+        "Press P to resume",
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 50
+      );
     }
 
-    if (gameState === 'gameOver') {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    if (gameState === "gameOver") {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.fillStyle = '#FF0000';
-      ctx.font = '48px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('GAME OVER', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '24px Arial';
-      ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 50);
-      ctx.fillText(`Treasures Found: ${treasures}/5`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 80);
+      ctx.fillStyle = "#FF0000";
+      ctx.font = "48px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("GAME OVER", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "24px Arial";
+      ctx.fillText(
+        `Final Score: ${score}`,
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 50
+      );
+      ctx.fillText(
+        `Treasures Found: ${treasures}/5`,
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 80
+      );
     }
 
-    if (gameState === 'won') {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    if (gameState === "won") {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      ctx.fillStyle = '#00FF00';
-      ctx.font = '48px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText('MAZE COMPLETED!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
-      ctx.fillStyle = '#FFFFFF';
-      ctx.font = '24px Arial';
-      ctx.fillText(`Congratulations! You explored Kathmandu!`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 50);
-      ctx.fillText(`Final Score: ${score}`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 80);
-      ctx.fillText(`Treasures Found: ${treasures}/5`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 110);
+      ctx.fillStyle = "#00FF00";
+      ctx.font = "48px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("MAZE COMPLETED!", CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "24px Arial";
+      ctx.fillText(
+        `Congratulations! You explored Kathmandu!`,
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 50
+      );
+      ctx.fillText(
+        `Final Score: ${score}`,
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 80
+      );
+      ctx.fillText(
+        `Treasures Found: ${treasures}/5`,
+        CANVAS_WIDTH / 2,
+        CANVAS_HEIGHT / 2 + 110
+      );
     }
-  }, [player, maze, temples, treasureItems, score, level, treasures, health, gameState]);
+  }, [
+    player,
+    maze,
+    temples,
+    treasureItems,
+    score,
+    level,
+    treasures,
+    health,
+    gameState,
+  ]);
 
   useEffect(() => {
     generateMaze();
@@ -345,16 +443,16 @@ export const KathmanduGame: React.FC = () => {
   }, [maze, generateTemples, generateTreasures]);
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
-    return () => document.removeEventListener('keydown', handleKeyPress);
+    document.addEventListener("keydown", handleKeyPress);
+    return () => document.removeEventListener("keydown", handleKeyPress);
   }, [handleKeyPress]);
 
   useEffect(() => {
     const gameLoop = setInterval(() => {
-      if (gameState === 'playing') {
+      if (gameState === "playing") {
         // Check if health is depleted
         if (health <= 0) {
-          setGameState('gameOver');
+          setGameState("gameOver");
         }
       }
       drawGame();
@@ -364,7 +462,7 @@ export const KathmanduGame: React.FC = () => {
   }, [gameState, health, drawGame]);
 
   const resetGame = () => {
-    setGameState('playing');
+    setGameState("playing");
     setScore(0);
     setLevel(1);
     setHealth(100);
@@ -373,21 +471,41 @@ export const KathmanduGame: React.FC = () => {
       x: 1,
       y: MAZE_HEIGHT - 2,
       health: 100,
-      treasures: 0
+      treasures: 0,
     });
     generateMaze();
   };
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 600,
+        }}
+      >
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={{
+            padding: "16px 40px",
+            fontSize: 24,
+            borderRadius: 8,
+            background: "#00ff00",
+            color: "#222",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
         >
           Click to Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>Navigate through the ancient streets of Kathmandu. Find hidden temples and avoid obstacles in this cultural maze adventure.</div>
+        <div style={{ color: "#fff", fontSize: 16 }}>
+          Navigate through the ancient streets of Kathmandu. Find hidden temples
+          and avoid obstacles in this cultural maze adventure.
+        </div>
       </div>
     );
   }
@@ -396,8 +514,12 @@ export const KathmanduGame: React.FC = () => {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="bg-gray-900 rounded-2xl p-8 shadow-2xl border border-gray-700">
         <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-amber-400 mb-2">Kathmandu Maze</h1>
-          <p className="text-gray-300">Explore the ancient streets of Kathmandu!</p>
+          <h1 className="text-3xl font-bold text-amber-400 mb-2">
+            Kathmandu Maze
+          </h1>
+          <p className="text-gray-300">
+            Explore the ancient streets of Kathmandu!
+          </p>
         </div>
 
         <div className="flex justify-center mb-6">
@@ -409,7 +531,7 @@ export const KathmanduGame: React.FC = () => {
           />
         </div>
 
-        {(gameState === 'gameOver' || gameState === 'won') && (
+        {(gameState === "gameOver" || gameState === "won") && (
           <div className="text-center mb-6">
             <button
               onClick={resetGame}
@@ -438,4 +560,4 @@ export const KathmanduGame: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

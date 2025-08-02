@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-
+import React, { useEffect, useRef, useState } from "react";
+import { useGameCoins } from "../hooks/useGameCoins";
 
 export const PongGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -7,26 +7,30 @@ export const PongGame: React.FC = () => {
   const [gameOver, setGameOver] = useState(false);
   const [paused, setPaused] = useState(false);
   const [started, setStarted] = useState(false);
+  const [gameStartTime, setGameStartTime] = useState(0);
 
   useEffect(() => {
     if (!started) return;
-    
+
+    // Set game start time when game starts
+    setGameStartTime(Date.now());
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const canvasWidth = 600;
     const canvasHeight = 400;
-    
+
     // Game objects
     const ball = {
       x: canvasWidth / 2,
       y: canvasHeight / 2,
       dx: 4,
       dy: 3,
-      radius: 8
+      radius: 8,
     };
 
     const playerPaddle = {
@@ -34,7 +38,7 @@ export const PongGame: React.FC = () => {
       y: canvasHeight / 2 - 40,
       width: 10,
       height: 80,
-      dy: 0
+      dy: 0,
     };
 
     const computerPaddle = {
@@ -42,7 +46,7 @@ export const PongGame: React.FC = () => {
       y: canvasHeight / 2 - 40,
       width: 10,
       height: 80,
-      dy: 0
+      dy: 0,
     };
 
     let currentPlayerScore = 0;
@@ -50,11 +54,11 @@ export const PongGame: React.FC = () => {
 
     const draw = () => {
       // Clear canvas
-      ctx.fillStyle = '#1a1a1a';
+      ctx.fillStyle = "#1a1a1a";
       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
       // Draw center line
-      ctx.strokeStyle = '#ffffff';
+      ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 2;
       ctx.setLineDash([10, 5]);
       ctx.beginPath();
@@ -64,19 +68,29 @@ export const PongGame: React.FC = () => {
       ctx.setLineDash([]);
 
       // Draw paddles
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
-      ctx.fillRect(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(
+        playerPaddle.x,
+        playerPaddle.y,
+        playerPaddle.width,
+        playerPaddle.height
+      );
+      ctx.fillRect(
+        computerPaddle.x,
+        computerPaddle.y,
+        computerPaddle.width,
+        computerPaddle.height
+      );
 
       // Draw ball
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       ctx.fill();
 
       // Draw scores
-      ctx.font = '32px Arial';
-      ctx.textAlign = 'center';
+      ctx.font = "32px Arial";
+      ctx.textAlign = "center";
       ctx.fillText(currentPlayerScore.toString(), canvasWidth / 4, 50);
       ctx.fillText(currentComputerScore.toString(), (3 * canvasWidth) / 4, 50);
     };
@@ -94,7 +108,7 @@ export const PongGame: React.FC = () => {
       // AI for computer paddle
       const ballCenter = ball.y;
       const paddleCenter = computerPaddle.y + computerPaddle.height / 2;
-      
+
       if (paddleCenter < ballCenter - 35) {
         computerPaddle.y += 3;
       } else if (paddleCenter > ballCenter + 35) {
@@ -159,31 +173,36 @@ export const PongGame: React.FC = () => {
     };
 
     const keys: { [key: string]: boolean } = {};
-    
+
     const handleKeyDown = (e: KeyboardEvent) => {
       keys[e.code] = true;
-      
-      if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+
+      if (e.code === "ArrowUp" || e.code === "KeyW") {
         playerPaddle.dy = -5;
       }
-      if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+      if (e.code === "ArrowDown" || e.code === "KeyS") {
         playerPaddle.dy = 5;
       }
-      if (e.code === 'KeyP') {
-        setPaused(prev => !prev);
+      if (e.code === "KeyP") {
+        setPaused((prev) => !prev);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       keys[e.code] = false;
-      
-      if (e.code === 'ArrowUp' || e.code === 'ArrowDown' || e.code === 'KeyW' || e.code === 'KeyS') {
+
+      if (
+        e.code === "ArrowUp" ||
+        e.code === "ArrowDown" ||
+        e.code === "KeyW" ||
+        e.code === "KeyS"
+      ) {
         playerPaddle.dy = 0;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
 
     const gameLoop = setInterval(() => {
       update();
@@ -194,13 +213,20 @@ export const PongGame: React.FC = () => {
     draw();
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keyup", handleKeyUp);
       clearInterval(gameLoop);
     };
   }, [paused, gameOver, started]);
 
-
+  // Coin earning system
+  useGameCoins({
+    gameId: "pong",
+    trigger: gameOver,
+    score: score.player * 10, // Score based on player points
+    duration:
+      gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0,
+  });
 
   const resetGame = () => {
     setScore({ player: 0, computer: 0 });
@@ -210,14 +236,34 @@ export const PongGame: React.FC = () => {
 
   if (!started) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          height: 600,
+        }}
+      >
         <button
           onClick={() => setStarted(true)}
-          style={{ padding: '16px 40px', fontSize: 24, borderRadius: 8, background: '#00ff00', color: '#222', border: 'none', cursor: 'pointer', marginBottom: 24 }}
+          style={{
+            padding: "16px 40px",
+            fontSize: 24,
+            borderRadius: 8,
+            background: "#00ff00",
+            color: "#222",
+            border: "none",
+            cursor: "pointer",
+            marginBottom: 24,
+          }}
         >
           Click to Start
         </button>
-        <div style={{ color: '#fff', fontSize: 16 }}>Classic Pong game. Play against the computer. Use arrow keys or W/S to control your paddle.</div>
+        <div style={{ color: "#fff", fontSize: 16 }}>
+          Classic Pong game. Play against the computer. Use arrow keys or W/S to
+          control your paddle.
+        </div>
       </div>
     );
   }
@@ -242,18 +288,18 @@ export const PongGame: React.FC = () => {
           )}
           {gameOver && (
             <div className="text-red-400 font-semibold mb-2">
-              {score.player >= 5 ? 'YOU WIN!' : 'COMPUTER WINS!'}
+              {score.player >= 5 ? "YOU WIN!" : "COMPUTER WINS!"}
             </div>
           )}
         </div>
-        
+
         <canvas
           ref={canvasRef}
           width={600}
           height={400}
           className="border-2 border-gray-600 rounded-lg mb-4"
         />
-        
+
         <div className="text-center">
           <div className="text-sm text-gray-300 mb-4">
             Use W/S or Arrow Keys to move • P to pause • First to 5 wins

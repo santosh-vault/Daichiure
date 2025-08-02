@@ -3,12 +3,15 @@ import { Link, useLocation } from "react-router-dom";
 
 const categories = [
   { name: "Arcade", slug: "arcade", icon: "🎮" },
-  { name: "Puzzle", slug: "puzzle", icon: "🧩" },
   { name: "Action", slug: "action", icon: "⚔️" },
   { name: "Adventure", slug: "adventure", icon: "🗺️" },
+  { name: "Puzzle", slug: "puzzle", icon: "🧩" },
   { name: "Sports", slug: "sports", icon: "🏆" },
-  { name: "Building", slug: "building", icon: "🏗️" },
+  { name: "Racing", slug: "racing", icon: "�️" },
   { name: "Card", slug: "card", icon: "🃏" },
+  { name: "Strategy", slug: "strategy", icon: "🧠" },
+  { name: "Tower Defense", slug: "tower-defense", icon: "🏰" },
+  { name: "Multiplayer", slug: "multiplayer", icon: "👥" },
 ];
 
 export const Sidebar: React.FC = () => {

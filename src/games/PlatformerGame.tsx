@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useGameCoins } from "../hooks/useGameCoins";
 
-const GameMonetize9PTV2PBY: React.FC = () => {
+const PlatformerGame: React.FC = () => {
   const [gameStartTime] = useState(Date.now());
   const [gameEnded, setGameEnded] = useState(false);
 
   useGameCoins({
-    gameId: "GameMonetize9PTV2PBY",
+    gameId: "PlatformerGame",
     trigger: gameEnded,
     score: Math.floor((Date.now() - gameStartTime) / 1000 / 30) * 10, // 10 coins per 30 seconds
     duration: Date.now() - gameStartTime,
@@ -21,31 +21,19 @@ const GameMonetize9PTV2PBY: React.FC = () => {
   }, []);
 
   return (
-    <div
-      style={{
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: 400,
-      }}
-    >
+    <div className="game-container w-full flex justify-center">
       <iframe
-        src="https://html5.gamemonetize.co/9ptv2pbyrhiv9e9jlcj91vj9cwdwd3mw/"
-        width="1280"
-        height="720"
-        scrolling="no"
+        style={{ width: "100%", maxWidth: "900px", height: "600px" }}
+        src="https://play.gamepix.com/platformer/embed?sid=322U0"
+        width="900"
+        height="600"
         frameBorder="0"
-        title="GameMonetize Embedded Game 7"
-        style={{
-          maxWidth: "100%",
-          borderRadius: 12,
-          boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
-        }}
-        allowFullScreen
+        scrolling="no"
+        title="Platformer Game"
+        className="rounded-lg shadow-lg"
       />
     </div>
   );
 };
 
-export default GameMonetize9PTV2PBY;
+export default PlatformerGame;
